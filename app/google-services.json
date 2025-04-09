@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "652421525788",
+    "project_id": "experimentofi",
+    "storage_bucket": "experimentofi.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:652421525788:android:4cc1baa0a8450cd4068ad9",
+        "android_client_info": {
+          "package_name": "com.example.experimentofirebase"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBKFHeWzCxi75I4lvsy5icqZBsYMs0EMdw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
