@@ -72,7 +72,7 @@ fun MainScreen(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // ??
+            // Foto de perfil
             Icon(
                 imageVector = Icons.Filled.AccountCircle,
                 contentDescription = "Perfil",
@@ -80,7 +80,7 @@ fun MainScreen(
                 tint = MaterialTheme.colorScheme.primary
             )
             Spacer(modifier = Modifier.height(24.dp))
-            // Tela Principal ??
+            // Tela logado, mostrando o email
             Text(
                 text = "Bem-vindo, $userName!",
                 fontSize = 24.sp,
@@ -88,7 +88,7 @@ fun MainScreen(
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
-            // Subtitulo ??
+            // Sub-titulo abaixo
             Text(
                 text = "Você está logado no Firebase App",
                 fontSize = 16.sp,

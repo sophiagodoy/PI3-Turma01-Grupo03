@@ -62,5 +62,4 @@ dependencies {
     implementation(libs.firebase.analytics)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.material.icons.extended)
-
 }
