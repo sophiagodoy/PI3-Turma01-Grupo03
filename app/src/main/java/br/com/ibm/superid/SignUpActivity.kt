@@ -2,6 +2,7 @@
 package br.com.ibm.superid
 
 // Importações necessárias para a Activity, Jetpack Compose, Firebase e demais componentes
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -28,6 +29,8 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
+
 
 // SignUpActivity: Activity responsável pela tela de cadastro de usuário
 class SignUpActivity : ComponentActivity() {
@@ -117,6 +120,8 @@ fun saveUserToFirestore(name: String, email: String, uid: String) {
  */
 @Composable
 fun SignUp(modifier: Modifier = Modifier) {
+    //criar variável para poder trocar de tela
+    val context = LocalContext.current
     // Variáveis de estado para armazenar os valores digitados pelo usuário
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -173,9 +178,12 @@ fun SignUp(modifier: Modifier = Modifier) {
 
         // Botão para criar a conta utilizando os dados informados
         Button(
+            //se ambas as senhas forem iguais os dados são mandados para o firebase e o usuário é mandado para a tela principal do app
             onClick = {
                 if (password == confirmPassword) {
                     saveUserToAuth(email, password, name)
+                    val intent = Intent(context, MainActivity::class.java)
+                    context.startActivity(intent)
                 } else {
                     Log.i("SIGN UP", "As senhas não coincidem.")
                 }
