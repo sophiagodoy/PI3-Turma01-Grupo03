@@ -24,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import br.com.ibm.superid.ui.theme.SuperIDTheme
@@ -80,6 +81,7 @@ fun signInWithFirebase(email: String, password: String) {
  * Função composable que define a interface de login.
  * @param modifier Modificador para personalizar o layout do composable.
  */
+@Preview
 @Composable
 fun SignIn(modifier: Modifier = Modifier) {
     //criar variável para poder trocar de tela

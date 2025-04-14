@@ -30,6 +30,7 @@ import com.google.firebase.ktx.Firebase
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 
 
 // SignUpActivity: Activity responsável pela tela de cadastro de usuário
@@ -118,6 +119,7 @@ fun saveUserToFirestore(name: String, email: String, uid: String) {
  *
  * @param modifier Modificador para personalizar o layout do componente.
  */
+@Preview
 @Composable
 fun SignUp(modifier: Modifier = Modifier) {
     //criar variável para poder trocar de tela
