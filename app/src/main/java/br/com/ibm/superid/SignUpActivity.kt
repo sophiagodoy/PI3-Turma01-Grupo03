@@ -178,11 +178,12 @@ fun SignUp(modifier: Modifier = Modifier) {
 
         // Botão para criar a conta utilizando os dados informados
         Button(
-            //se ambas as senhas forem iguais os dados são mandados para o firebase e o usuário é mandado para a tela principal do app
+            //se ambas as senhas forem iguais os dados são mandados para o firebase
+            //e o usuário é mandado para a tela de login do app
             onClick = {
                 if (password == confirmPassword) {
                     saveUserToAuth(email, password, name)
-                    val intent = Intent(context, MainActivity::class.java)
+                    val intent = Intent(context, SignInActivity::class.java)
                     context.startActivity(intent)
                 } else {
                     Log.i("SIGN UP", "As senhas não coincidem.")

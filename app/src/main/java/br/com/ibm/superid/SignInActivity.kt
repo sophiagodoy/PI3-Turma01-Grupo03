@@ -2,6 +2,7 @@
 package br.com.ibm.superid
 
 // Importações necessárias para Android, Jetpack Compose e Firebase
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -21,6 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -80,6 +82,8 @@ fun signInWithFirebase(email: String, password: String) {
  */
 @Composable
 fun SignIn(modifier: Modifier = Modifier) {
+    //criar variável para poder trocar de tela
+    val context = LocalContext.current
     // Estados para armazenar os valores digitados nos campos de email e senha
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -116,7 +120,10 @@ fun SignIn(modifier: Modifier = Modifier) {
         Button(
             onClick = {
                 // Ao clicar, chama a função de autenticação passando email e senha
+                //leva para a tela principal
                 signInWithFirebase(email, password)
+                val intent = Intent(context, MainActivity::class.java)
+                context.startActivity(intent)
             }
         ) {
             // Texto exibido dentro do botão
