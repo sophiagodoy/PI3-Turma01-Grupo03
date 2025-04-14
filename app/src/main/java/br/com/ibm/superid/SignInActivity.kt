@@ -33,11 +33,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import br.com.ibm.superid.ui.theme.SuperIDTheme
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.platform.LocalContext
+import br.com.ibm.superid.ui.theme.ui.theme.SuperIDTheme
+import kotlin.jvm.java
 
 /**
  * Activity responsável pela tela de login (SignIn).
@@ -46,11 +48,13 @@ import androidx.compose.material3.MaterialTheme
 class SignInActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Habilita o uso total da tela, inclusive áreas atrás das barras do sistema
         enableEdgeToEdge()
+        // Define o conteúdo da Activity utilizando Jetpack Compose
         setContent {
-            SuperIDTheme {
+            // Aplica o tema customizado da aplicação
+            SuperIDTheme{
                 SignInScreen(
-                    onBackPressed = { finish() },
                     onSignInComplete = {
                         startActivity(Intent(this, MainActivity::class.java))
                         finish()
@@ -65,9 +69,32 @@ class SignInActivity : ComponentActivity() {
 }
 
 /**
+ * Realiza a autenticação do usuário no Firebase Auth utilizando email e senha.
+ * @param email    Endereço de e-mail informado pelo usuário.
+ * @param password Senha informada pelo usuário.
+ */
+fun signInWithFirebase(
+    email: String,
+    password: String,
+    onSuccess: () -> Unit
+) {
+    val auth = Firebase.auth
+
+    auth.signInWithEmailAndPassword(email, password)
+        .addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val user = task.result?.user
+                Log.i("AUTH", "Login realizado com sucesso. UID: ${user?.uid}")
+                onSuccess()
+            } else {
+                Log.e("AUTH", "Falha ao fazer login.", task.exception)
+            }
+        }
+}
+
+/**
  * Função composable que define a interface de login com TopAppBar.
  * @param modifier Modificador para personalizar o layout do composable.
- * @param onBackPressed Callback para ação de voltar
  * @param onSignInComplete Callback para quando o login é concluído com sucesso
  */
 
@@ -75,12 +102,13 @@ class SignInActivity : ComponentActivity() {
 @Composable
 fun SignInScreen(
     modifier: Modifier = Modifier,
-    onBackPressed: () -> Unit = {},
     onSignInComplete: () -> Unit,
     onForgotPassword: () -> Unit = {}
 ) {
+    val context = LocalContext.current
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+
 
     // Seta pra voltar para WelcomeActivity
     Scaffold(
@@ -89,8 +117,12 @@ fun SignInScreen(
             TopAppBar(
                 title = { Text("Voltar") },
                 navigationIcon = {
-                    IconButton(onClick = onBackPressed) {
-                        // Icone de uma setar de voltar utilizada para a tela anterior
+                    IconButton(
+                        onClick = {
+                            val intent = Intent(context, WelcomeActivity::class.java)
+                            context.startActivity(intent)
+                        }
+                    ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Voltar"
@@ -147,18 +179,16 @@ fun SignInScreen(
             Button(
                 onClick = {
                     if (email.isNotBlank() && password.isNotBlank()) {
-                        // Ve se os campos de email e senha não estão em branco
                         Log.i("Login", "Tentando login com email: $email")
-                        // Faz a conexao com o firebase
-                        Firebase.auth.signInWithEmailAndPassword(email, password)
-                            .addOnCompleteListener { task ->
-                                if (task.isSuccessful) {
-                                    Log.i("Login", "Login bem-sucedido")
-                                    onSignInComplete()
-                                } else {
-                                    Log.i("Login", "Falha no login: ${task.exception?.message}")
-                                }
+                        signInWithFirebase(
+                            email = email,
+                            password = password,
+                            onSuccess = {
+                                val intent = Intent(context, MainActivity::class.java)
+                                context.startActivity(intent)
+                                onSignInComplete()
                             }
+                        )
                     } else {
                         Log.i("Login", "Campos de email ou senha estão em branco")
                     }
