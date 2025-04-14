@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">SuperID</string>
+    <string name="title_activity_sign_in">SignInActivity</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="title_activity_welcome">WelcomeActivity</string>
+    <string name="title_activity_access_option">AccessOptionActivity</string>
+</resources>
