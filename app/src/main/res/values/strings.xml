@@ -4,4 +4,5 @@
     <string name="title_activity_main">MainActivity</string>
     <string name="title_activity_welcome">WelcomeActivity</string>
     <string name="title_activity_access_option">AccessOptionActivity</string>
+    <string name="title_activity_forgot_password">ForgotPasswordActivity</string>
 </resources>
