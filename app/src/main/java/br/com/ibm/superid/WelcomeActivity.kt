@@ -22,7 +22,7 @@ class WelcomeActivity : ComponentActivity() {
             SuperIDTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Greeting3(
-                        name = "Android",
+                        name = "TesteWelcomeActivity",
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
@@ -43,6 +43,6 @@ fun Greeting3(name: String, modifier: Modifier = Modifier) {
 @Composable
 fun GreetingPreview3() {
     SuperIDTheme {
-        Greeting2("Android")
+        Greeting2("TesteWelcomeActivity")
     }
 }

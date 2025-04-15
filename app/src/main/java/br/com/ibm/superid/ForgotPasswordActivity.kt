@@ -32,6 +32,6 @@ fun Greeting2(name: String, modifier: Modifier = Modifier) {
 @Composable
 fun GreetingPreview2() {
     SuperIDTheme {
-        Greeting2("Android")
+        Greeting2("testeForgotPassoword")
     }
 }
