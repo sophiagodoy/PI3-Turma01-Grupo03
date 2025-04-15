@@ -36,8 +36,10 @@ import androidx.compose.ui.unit.sp
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.KeyboardType
 import br.com.ibm.superid.ui.theme.ui.theme.SuperIDTheme
 import kotlin.jvm.java
 
@@ -162,7 +164,10 @@ fun SignInScreen(
                 value = password,
                 onValueChange = { password = it },
                 label = { Text("Senha") },
-                visualTransformation = PasswordVisualTransformation()
+
+                // Esconde a senha
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
             )
 
             // Campo para a recuperação de senha
