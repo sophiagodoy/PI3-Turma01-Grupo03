@@ -1,7 +1,7 @@
-// Definição do pacote da aplicação
+// Definição do pacote do aplicativo
 package br.com.ibm.superid
 
-// Importações necessárias para a Activity, Jetpack Compose, Firebase e demais componentes
+// Importações necessárias para Android, Jetpack Compose, Firebase entre outras
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -11,7 +11,14 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -30,38 +37,80 @@ import com.google.firebase.ktx.Firebase
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 
-
-// SignUpActivity: Activity responsável pela tela de cadastro de usuário
+/**
+ * Esta classe representa a tela de Cadastro (SignUp).
+ * Ela herda de ComponentActivity, que é uma tela tradicional do Android.
+ */
 class SignUpActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Habilita o uso total da tela, inclusive áreas atrás das barras do sistema
         enableEdgeToEdge()
-        // Define o conteúdo da Activity utilizando Jetpack Compose
+
+        // Define o conteúdo da tela usando Jetpack Compose
         setContent {
-            // Aplica o tema customizado da aplicação
+            // Aplica o tema visual da aplicação
             SuperIDTheme {
-                // Scaffold provê a estrutura básica da tela, garantindo consistência de layout
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    // Chama a função composable SignUp e aplica o padding interno do Scaffold
-                    SignUp(
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                // Recupera o contexto atual
+                val context = LocalContext.current
+
+                // Mostra a tela com a seta de voltar e o formulário de cadastro.
+                // Quando o usuário clica na seta de voltar, ele retorna para a tela anterior.
+                // Chamamos o composable TopBarNavigationExample, passando a função lambda que faz o Intent
+                TopBarNavigationExample(
+                    navigateBack = {
+                        // Ao clicar na seta, volta para a tela anterior (AccessOptionActivity)
+                        val intent = Intent(context, AccessOptionActivity::class.java)
+                        context.startActivity(intent)
+                    }
+                )
             }
         }
     }
 }
 
 /**
- * Função para criar uma conta de usuário utilizando o Firebase Auth.
- * Após a criação bem-sucedida, os dados do usuário são salvos no Firestore.
+ * Este Composable representa a estrutura visual da tela de cadastro:
+ * - Uma barra no topo (TopAppBar)
+ * - O formulário de cadastro abaixo
  *
- * @param email O endereço de e-mail do usuário.
- * @param password A senha escolhida pelo usuário.
- * @param name O nome do usuário.
+ * A função navigateBack é chamada quando o usuário clica na seta de voltar.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TopBarNavigationExample(
+    navigateBack: () -> Unit,
+) {
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = {
+                    // Título que aparece no centro da barra superior
+                    Text("Cadastro")
+                },
+                navigationIcon = {
+                    // Ícone de voltar (seta), que chama a função navigateBack ao ser clicado
+                    IconButton(onClick = navigateBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Voltar" // Descrição para leitores de tela
+                        )
+                    }
+                },
+            )
+        }
+    ) { innerPadding ->
+        // Aqui mostramos o formulário de cadastro, com padding ajustado pela barra superior
+        SignUp(modifier = Modifier.padding(innerPadding))
+    }
+}
+
+
+/**
+ * Essa função cria uma nova conta no Firebase Authentication.
+ * Se a conta for criada com sucesso, ela salva os dados do usuário no banco de dados.
  */
 fun saveUserToAuth(email: String, password: String, name: String) {
     // Obtemos a instância do Firebase Auth
@@ -70,8 +119,8 @@ fun saveUserToAuth(email: String, password: String, name: String) {
     // Cria um novo usuário com e-mail e senha
     auth.createUserWithEmailAndPassword(email, password)
         .addOnCompleteListener { task ->
+            // Se a criação da conta for bem-sucedida, obtemos o usuário e seu UID
             if (task.isSuccessful) {
-                // Se a criação da conta for bem-sucedida, obtemos o usuário e seu UID
                 val user = task.result.user
                 val uid = user!!.uid
                 Log.i("AUTH", "Conta criada com sucesso. UID: $uid")
@@ -86,11 +135,8 @@ fun saveUserToAuth(email: String, password: String, name: String) {
 }
 
 /**
- * Função para salvar os dados do usuário no Firestore.
- *
- * @param name O nome do usuário.
- * @param email O endereço de e-mail do usuário.
- * @param uid O identificador único do usuário obtido no Firebase Auth.
+ * Esta função salva os dados do usuário (nome, e-mail e UID) no banco Firestore.
+ * Os dados são gravados na coleção chamada "users".
  */
 fun saveUserToFirestore(name: String, email: String, uid: String) {
     // Obtemos a instância do Firestore
@@ -106,7 +152,7 @@ fun saveUserToFirestore(name: String, email: String, uid: String) {
     // Adiciona os dados na coleção "users"
     db.collection("users").add(userData)
         .addOnSuccessListener { documentReference ->
-            Log.i("Firestore", "Dados do usuário salvos com sucesso. ID do documento: ${documentReference.id}")
+            Log.i("Firestore", "Dados do usuário salvos com sucesso. ID: ${documentReference.id}")
         }
         .addOnFailureListener { e ->
             Log.e("Firestore", "Erro ao adicionar documento", e)
@@ -114,23 +160,21 @@ fun saveUserToFirestore(name: String, email: String, uid: String) {
 }
 
 /**
- * Função composable SignUp responsável por exibir a tela de cadastro.
- * Possui campos de entrada para o nome, e-mail e senha, além de um botão para criar a conta.
- *
- * @param modifier Modificador para personalizar o layout do componente.
+ * Tela de formulário onde o usuário preenche os dados de cadastro.
+ * Campos: Nome, E-mail, Senha, Confirmar Senha
  */
-@Preview
 @Composable
 fun SignUp(modifier: Modifier = Modifier) {
-    //criar variável para poder trocar de tela
+    // Cria variável para poder trocar de tela
     val context = LocalContext.current
-    // Variáveis de estado para armazenar os valores digitados pelo usuário
+
+    // Variáveis que guardam o valor digitado nos campos do formulário
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
 
-    // Organiza os componentes verticalmente em uma Column
+    // Layout em coluna, centralizado na tela
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -138,15 +182,14 @@ fun SignUp(modifier: Modifier = Modifier) {
         verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
-        // Título da tela de cadastro
+        // Título da tela
         Text(
             text = "Cadastro",
             fontSize = 30.sp,
             fontWeight = FontWeight.Bold
         )
 
-        // Campo para entrada do nome do usuário
+        // Campo de texto para o nome
         OutlinedTextField(
             modifier = Modifier.padding(10.dp),
             value = name,
@@ -154,7 +197,7 @@ fun SignUp(modifier: Modifier = Modifier) {
             label = { Text(text = "Nome") }
         )
 
-        // Campo para entrada do e-mail do usuário
+        // Campo de texto para o e-mail
         OutlinedTextField(
             modifier = Modifier.padding(10.dp),
             value = email,
@@ -162,28 +205,36 @@ fun SignUp(modifier: Modifier = Modifier) {
             label = { Text(text = "Email") }
         )
 
-        // Campo para entrada da senha do usuário
+        // Campo de texto para a senha
         OutlinedTextField(
             modifier = Modifier.padding(10.dp),
             value = password,
             onValueChange = { password = it },
-            label = { Text(text = "Senha") }
+            label = { Text(text = "Senha") },
+
+            // Esconde a senha
+            visualTransformation = PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
         )
 
-        // Campo para entrada de confirmação de senha do usuário
+        // Campo de texto para confirmação da senha
         OutlinedTextField(
             modifier = Modifier.padding(10.dp),
             value = confirmPassword,
             onValueChange = { confirmPassword = it },
-            label = { Text(text = "Confirmar Senha") }
+            label = { Text(text = "Confirmar Senha") },
+
+            // Esconde a senha
+            visualTransformation = PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
         )
 
-        // Botão para criar a conta utilizando os dados informados
+        // Botão para enviar o formulário
         Button(
-            //se ambas as senhas forem iguais os dados são mandados para o firebase
-            //e o usuário é mandado para a tela de login do app
             onClick = {
+                // Só envia se a senha e a confirmação forem iguais
                 if (password == confirmPassword) {
+                    // Cria a conta no Firebase e redireciona para a tela de login
                     saveUserToAuth(email, password, name)
                     val intent = Intent(context, SignInActivity::class.java)
                     context.startActivity(intent)

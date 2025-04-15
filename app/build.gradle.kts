@@ -67,4 +67,7 @@ dependencies {
 
     //Auth
     implementation("com.google.firebase:firebase-auth-ktx")
+
+    // Dependência de material icons extended para usar autoMirrored
+    implementation("androidx.compose.material:material-icons-extended:1.4.3")
 }
