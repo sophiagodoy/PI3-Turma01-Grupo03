@@ -2,6 +2,7 @@
 package br.com.ibm.superid
 
 // Importações necessárias para Android, Jetpack Compose e Firebase
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -57,10 +58,6 @@ class SignInActivity : ComponentActivity() {
             // Aplica o tema customizado da aplicação
             SuperIDTheme{
                 SignInScreen(
-                    onSignInComplete = {
-                        startActivity(Intent(this, MainActivity::class.java))
-                        finish()
-                    },
                     onForgotPassword = {
                         startActivity(Intent(this, ForgotPasswordActivity::class.java))
                     }
@@ -78,7 +75,7 @@ class SignInActivity : ComponentActivity() {
 fun signInWithFirebase(
     email: String,
     password: String,
-    onSuccess: () -> Unit
+    context: Context
 ) {
     val auth = Firebase.auth
 
@@ -87,7 +84,10 @@ fun signInWithFirebase(
             if (task.isSuccessful) {
                 val user = task.result?.user
                 Log.i("AUTH", "Login realizado com sucesso. UID: ${user?.uid}")
-                onSuccess()
+
+                // Redireciona direto para MainActivity
+                val intent = Intent(context, MainActivity::class.java)
+                context.startActivity(intent)
             } else {
                 Log.e("AUTH", "Falha ao fazer login.", task.exception)
             }
@@ -104,7 +104,6 @@ fun signInWithFirebase(
 @Composable
 fun SignInScreen(
     modifier: Modifier = Modifier,
-    onSignInComplete: () -> Unit,
     onForgotPassword: () -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -185,15 +184,7 @@ fun SignInScreen(
                 onClick = {
                     if (email.isNotBlank() && password.isNotBlank()) {
                         Log.i("Login", "Tentando login com email: $email")
-                        signInWithFirebase(
-                            email = email,
-                            password = password,
-                            onSuccess = {
-                                val intent = Intent(context, MainActivity::class.java)
-                                context.startActivity(intent)
-                                onSignInComplete()
-                            }
-                        )
+                        signInWithFirebase(email, password, context)
                     } else {
                         Log.i("Login", "Campos de email ou senha estão em branco")
                     }
@@ -204,3 +195,4 @@ fun SignInScreen(
         }
     }
 }
+

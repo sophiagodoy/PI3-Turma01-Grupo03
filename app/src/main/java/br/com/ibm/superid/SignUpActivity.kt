@@ -2,6 +2,7 @@
 package br.com.ibm.superid
 
 // Importações necessárias para Android, Jetpack Compose, Firebase entre outras
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -112,7 +113,7 @@ fun TopBarNavigationExample(
  * Essa função cria uma nova conta no Firebase Authentication.
  * Se a conta for criada com sucesso, ela salva os dados do usuário no banco de dados.
  */
-fun saveUserToAuth(email: String, password: String, name: String) {
+fun saveUserToAuth(email: String, password: String, name: String, context: Context) {
     // Obtemos a instância do Firebase Auth
     val auth = Firebase.auth
 
@@ -126,7 +127,7 @@ fun saveUserToAuth(email: String, password: String, name: String) {
                 Log.i("AUTH", "Conta criada com sucesso. UID: $uid")
 
                 // Chama a função para salvar os dados do usuário no Firestore
-                saveUserToFirestore(name, email, uid)
+                saveUserToFirestore(name, email, uid, context)
             } else {
                 // Em caso de falha, registra o erro
                 Log.i("AUTH", "Falha ao criar conta.", task.exception)
@@ -138,7 +139,7 @@ fun saveUserToAuth(email: String, password: String, name: String) {
  * Esta função salva os dados do usuário (nome, e-mail e UID) no banco Firestore.
  * Os dados são gravados na coleção chamada "users".
  */
-fun saveUserToFirestore(name: String, email: String, uid: String) {
+fun saveUserToFirestore(name: String, email: String, uid: String, context: Context) {
     // Obtemos a instância do Firestore
     val db = Firebase.firestore
 
@@ -153,6 +154,10 @@ fun saveUserToFirestore(name: String, email: String, uid: String) {
     db.collection("users").add(userData)
         .addOnSuccessListener { documentReference ->
             Log.i("Firestore", "Dados do usuário salvos com sucesso. ID: ${documentReference.id}")
+
+            // Vai para a tela de Login
+            val intent = Intent(context, SignInActivity::class.java)
+            context.startActivity(intent)
         }
         .addOnFailureListener { e ->
             Log.e("Firestore", "Erro ao adicionar documento", e)
@@ -234,10 +239,8 @@ fun SignUp(modifier: Modifier = Modifier) {
             onClick = {
                 // Só envia se a senha e a confirmação forem iguais
                 if (password == confirmPassword) {
-                    // Cria a conta no Firebase e redireciona para a tela de login
-                    saveUserToAuth(email, password, name)
-                    val intent = Intent(context, SignInActivity::class.java)
-                    context.startActivity(intent)
+                    // Cria a conta no Firebase
+                    saveUserToAuth(email, password, name, context)
                 } else {
                     Log.i("SIGN UP", "As senhas não coincidem.")
                 }
