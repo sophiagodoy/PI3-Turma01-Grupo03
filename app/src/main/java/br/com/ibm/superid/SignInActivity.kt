@@ -164,7 +164,9 @@ fun SignInScreen(
                 onValueChange = { password = it },
                 label = { Text("Senha") },
 
-                // Esconde a senha
+                // Esconder a senha que está sendo digitada pelo usuário
+                // Implementado com base na seção "Texto e tipografia > Processar entrada do usuário"
+                // da documentação oficial do Jetpack Compose
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
             )

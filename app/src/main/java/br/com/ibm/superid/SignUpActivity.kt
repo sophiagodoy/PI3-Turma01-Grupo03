@@ -13,13 +13,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -45,69 +39,27 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
  * Esta classe representa a tela de Cadastro (SignUp).
  * Ela herda de ComponentActivity, que é uma tela tradicional do Android.
  */
+// SignUpActivity: Activity responsável pela tela de cadastro de usuário
 class SignUpActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Habilita o uso total da tela, inclusive áreas atrás das barras do sistema
         enableEdgeToEdge()
-
-        // Define o conteúdo da tela usando Jetpack Compose
+        // Define o conteúdo da Activity utilizando Jetpack Compose
         setContent {
-            // Aplica o tema visual da aplicação
+            // Aplica o tema customizado da aplicação
             SuperIDTheme {
-                // Recupera o contexto atual
-                val context = LocalContext.current
-
-                // Mostra a tela com a seta de voltar e o formulário de cadastro.
-                // Quando o usuário clica na seta de voltar, ele retorna para a tela anterior.
-                // Chamamos o composable TopBarNavigationExample, passando a função lambda que faz o Intent
-                TopBarNavigationExample(
-                    navigateBack = {
-                        // Ao clicar na seta, volta para a tela anterior (AccessOptionActivity)
-                        val intent = Intent(context, AccessOptionActivity::class.java)
-                        context.startActivity(intent)
-                    }
-                )
+                // Scaffold provê a estrutura básica da tela, garantindo consistência de layout
+                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                    // Chama a função composable SignUp e aplica o padding interno do Scaffold
+                    SignUp(
+                        modifier = Modifier.padding(innerPadding)
+                    )
+                }
             }
         }
     }
 }
-
-/**
- * Este Composable representa a estrutura visual da tela de cadastro:
- * - Uma barra no topo (TopAppBar)
- * - O formulário de cadastro abaixo
- *
- * A função navigateBack é chamada quando o usuário clica na seta de voltar.
- */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun TopBarNavigationExample(
-    navigateBack: () -> Unit,
-) {
-    Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    // Título que aparece no centro da barra superior
-                    Text("Cadastro")
-                },
-                navigationIcon = {
-                    // Ícone de voltar (seta), que chama a função navigateBack ao ser clicado
-                    IconButton(onClick = navigateBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Voltar" // Descrição para leitores de tela
-                        )
-                    }
-                },
-            )
-        }
-    ) { innerPadding ->
-        // Aqui mostramos o formulário de cadastro, com padding ajustado pela barra superior
-        SignUp(modifier = Modifier.padding(innerPadding))
-    }
-}
-
 
 /**
  * Essa função cria uma nova conta no Firebase Authentication.
@@ -217,7 +169,9 @@ fun SignUp(modifier: Modifier = Modifier) {
             onValueChange = { password = it },
             label = { Text(text = "Senha") },
 
-            // Esconde a senha
+            // Esconder a senha que está sendo digitada pelo usuário
+            // Implementado com base na seção "Texto e tipografia > Processar entrada do usuário"
+            // da documentação oficial do Jetpack Compose
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
         )
@@ -229,7 +183,9 @@ fun SignUp(modifier: Modifier = Modifier) {
             onValueChange = { confirmPassword = it },
             label = { Text(text = "Confirmar Senha") },
 
-            // Esconde a senha
+            // Esconder a senha que está sendo digitada pelo usuário
+            // Implementado com base na seção "Texto e tipografia > Processar entrada do usuário"
+            // da documentação oficial do Jetpack Compose
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
         )
