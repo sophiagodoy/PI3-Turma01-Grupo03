@@ -165,8 +165,8 @@ fun SignInScreen(
                 label = { Text("Senha") },
 
                 // Esconder a senha que está sendo digitada pelo usuário
-                // Implementado com base na seção "Texto e tipografia > Processar entrada do usuário"
-                // da documentação oficial do Jetpack Compose
+                // Implementado com base na seção "Texto e tipografia > Processar entrada do usuário" da documentação oficial do Jetpack Compose
+                // Fonte: https://developer.android.com/develop/ui/compose/text/user-input?hl=pt-br
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
             )

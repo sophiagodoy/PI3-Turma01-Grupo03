@@ -13,43 +13,54 @@
         android:theme="@style/Theme.SuperID"
         tools:targetApi="31">
 
-        <activity
-            android:name=".AccessOptionActivity"
-            android:exported="true"
-            android:label="@string/title_activity_access_option"
-            android:theme="@style/Theme.SuperID">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+        <!-- Tela de boas-vindas (tela inicial) -->
         <activity
             android:name=".WelcomeActivity"
             android:exported="true"
             android:label="@string/title_activity_welcome"
             android:theme="@style/Theme.SuperID"
             tools:ignore="MissingClass">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
+
+        <!-- Opções de acesso (Login/Cadastro) -->
+        <activity
+            android:name=".AccessOptionActivity"
+            android:exported="true"
+            android:label="@string/title_activity_access_option"
+            android:theme="@style/Theme.SuperID" />
+
+        <!-- Tela principal pós login -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/title_activity_main"
             android:theme="@style/Theme.SuperID" />
+
+        <!-- Tela de login -->
         <activity
             android:name=".SignInActivity"
             android:exported="true"
             android:label="@string/title_activity_sign_in"
             android:theme="@style/Theme.SuperID" />
+
+        <!-- Tela de cadastro -->
         <activity
             android:name=".SignUpActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.SuperID" />
+
+        <!-- Tela de recuperação de senha -->
         <activity
             android:name=".ForgotPasswordActivity"
             android:exported="true"
             android:label="@string/title_activity_forgot_password"
             android:theme="@style/Theme.SuperID" />
+
     </application>
 
 </manifest>
