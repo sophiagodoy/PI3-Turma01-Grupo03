@@ -70,7 +70,7 @@ fun saveUserToAuth(email: String, password: String, name: String, context: Conte
     // Obtemos a instância do Firebase Auth
     val auth = Firebase.auth
 
-    // Cria um novo usuário com e-mail e senha
+    // Criar um novo usuário com e-mail e senha
     auth.createUserWithEmailAndPassword(email, password)
         .addOnCompleteListener { task ->
             // Se a criação da conta for bem-sucedida, obtemos o usuário e seu UID
@@ -85,11 +85,14 @@ fun saveUserToAuth(email: String, password: String, name: String, context: Conte
                 //Enviar email para confirmar a conta
                 user.sendEmailVerification()
                     .addOnCompleteListener { verifyTask ->
-                        if (verifyTask.isSuccessful){
+                        if (verifyTask.isSuccessful) {
                             Log.i("AUTH", "E-mail de verificação enviado com sucesso.")
-                        }
-                        else{
-                            Log.e("AUTH", "Erro ao enviar e-mail de verificação.", verifyTask.exception)
+                        } else {
+                            Log.e(
+                                "AUTH",
+                                "Erro ao enviar e-mail de verificação.",
+                                verifyTask.exception
+                            )
                         }
                     }
 
