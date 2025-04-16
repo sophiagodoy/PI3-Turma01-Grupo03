@@ -83,27 +83,26 @@ fun saveUserToAuth(email: String, password: String, name: String, context: Conte
 
                 // Implementado com base na seção "Gerenciar usuários > Enviar e-mail de verificação" da documentação oficial do Firebase Authentication
                 // Fonte: https://firebase.google.com/docs/auth/web/manage-users?hl=pt-br#web_12
+
                 //Enviar email para confirmar a conta
                 user.sendEmailVerification()
                     .addOnCompleteListener { verifyTask ->
                         if (verifyTask.isSuccessful) {
                             Log.i("AUTH", "E-mail de verificação enviado com sucesso.")
+
+                            // Exibe uma mensagem Toast para confirmar envio da verificação
+                            // Baseado na documentação oficial do Android: https://developer.android.com/guide/topics/ui/notifiers/toasts?hl=pt-br
                             Toast.makeText(context, "E-mail de verificação enviado!", Toast.LENGTH_LONG).show()
                         } else {
-                            Log.e(
-                                "AUTH",
-                                "Erro ao enviar e-mail de verificação.",
-                                verifyTask.exception
-                            )
+                            Log.e("AUTH", "Erro ao enviar e-mail de verificação.", verifyTask.exception)
                         }
                     }
-
 
                 // Chama a função para salvar os dados do usuário no Firestore
                 saveUserToFirestore(name, email, uid, context)
             } else {
                 // Em caso de falha, registra o erro
-                Log.i("AUTH", "Falha ao criar conta.", task.exception)
+                Log.e("AUTH", "Falha ao criar conta.", task.exception)
             }
         }
 }
@@ -218,6 +217,9 @@ fun SignUp(modifier: Modifier = Modifier) {
                 // Baseado na documentação oficial do Kotlin: https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.text/is-blank.html
                 if (name.isBlank() || email.isBlank() || password.isBlank() || confirmPassword.isBlank()) {
                     Log.i("SIGN UP", "Preencha todos os campos!")
+
+                    // Exibe uma mensagem Toast para informar o usuário sobre o erro
+                    // Baseado na documentação oficial do Android: https://developer.android.com/guide/topics/ui/notifiers/toasts?hl=pt-br
                     Toast.makeText(context, "Preencha todos os campos!", Toast.LENGTH_LONG).show()
 
                 }
@@ -225,6 +227,9 @@ fun SignUp(modifier: Modifier = Modifier) {
                 // Se "@" não estiver contido "!in" no email
                 if ("@" !in email) {
                     Log.i("SIGN UP", "Você digitou um email que não é válido!")
+
+                    // Exibe uma mensagem Toast para informar o usuário sobre o erro
+                    // Baseado na documentação oficial do Android: https://developer.android.com/guide/topics/ui/notifiers/toasts?hl=pt-br
                     Toast.makeText(context, "Email inválido!", Toast.LENGTH_LONG).show()
 
                 }
@@ -236,6 +241,9 @@ fun SignUp(modifier: Modifier = Modifier) {
                 } else {
                     // Se forem senhas diferentes
                     Log.i("SIGN UP", "As senhas não coincidem.")
+
+                    // Exibe uma mensagem Toast para informar o usuário sobre o erro
+                    // Baseado na documentação oficial do Android: https://developer.android.com/guide/topics/ui/notifiers/toasts?hl=pt-br
                     Toast.makeText(context, "As senhas não coincidem!", Toast.LENGTH_LONG).show()
                 }
             }
