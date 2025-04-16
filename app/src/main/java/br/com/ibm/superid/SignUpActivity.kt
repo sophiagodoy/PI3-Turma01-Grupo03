@@ -70,7 +70,7 @@ fun saveUserToAuth(email: String, password: String, name: String, context: Conte
     // Obtemos a instância do Firebase Auth
     val auth = Firebase.auth
 
-    // Criar um novo usuário com e-mail e senha
+    // Cria um novo usuário com e-mail e senha
     auth.createUserWithEmailAndPassword(email, password)
         .addOnCompleteListener { task ->
             // Se a criação da conta for bem-sucedida, obtemos o usuário e seu UID
