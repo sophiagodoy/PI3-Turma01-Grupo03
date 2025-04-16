@@ -35,6 +35,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 
+
 /**
  * Esta classe representa a tela de Cadastro (SignUp).
  * Ela herda de ComponentActivity, que é uma tela tradicional do Android.
@@ -77,6 +78,21 @@ fun saveUserToAuth(email: String, password: String, name: String, context: Conte
                 val user = task.result.user
                 val uid = user!!.uid
                 Log.i("AUTH", "Conta criada com sucesso. UID: $uid")
+
+
+                // Implementado com base na seção "Gerenciar usuários > Enviar e-mail de verificação" da documentação oficial do Firebase Authentication
+                // Fonte: https://firebase.google.com/docs/auth/web/manage-users?hl=pt-br#web_12
+                //Enviar email para confirmar a conta
+                user.sendEmailVerification()
+                    .addOnCompleteListener { verifyTask ->
+                        if (verifyTask.isSuccessful){
+                            Log.i("AUTH", "E-mail de verificação enviado com sucesso.")
+                        }
+                        else{
+                            Log.e("AUTH", "Erro ao enviar e-mail de verificação.", verifyTask.exception)
+                        }
+                    }
+
 
                 // Chama a função para salvar os dados do usuário no Firestore
                 saveUserToFirestore(name, email, uid, context)
@@ -170,8 +186,8 @@ fun SignUp(modifier: Modifier = Modifier) {
             label = { Text(text = "Senha") },
 
             // Esconder a senha que está sendo digitada pelo usuário
-            // Implementado com base na seção "Texto e tipografia > Processar entrada do usuário"
-            // da documentação oficial do Jetpack Compose
+            // Implementado com base na seção "Texto e tipografia > Processar entrada do usuário" da documentação oficial do Jetpack Compose
+            // Fonte: https://developer.android.com/develop/ui/compose/text/user-input?hl=pt-br
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
         )
@@ -184,8 +200,8 @@ fun SignUp(modifier: Modifier = Modifier) {
             label = { Text(text = "Confirmar Senha") },
 
             // Esconder a senha que está sendo digitada pelo usuário
-            // Implementado com base na seção "Texto e tipografia > Processar entrada do usuário"
-            // da documentação oficial do Jetpack Compose
+            // Implementado com base na seção "Texto e tipografia > Processar entrada do usuário" da documentação oficial do Jetpack Compose
+            // Fonte: https://developer.android.com/develop/ui/compose/text/user-input?hl=pt-br
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
         )
@@ -193,11 +209,23 @@ fun SignUp(modifier: Modifier = Modifier) {
         // Botão para enviar o formulário
         Button(
             onClick = {
-                // Só envia se a senha e a confirmação forem iguais
-                if (password == confirmPassword) {
+                // Verifica se algum campo está em branco (se está vazio ou apenas com espaços)
+                // Baseado na documentação oficial do Kotlin: https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.text/is-blank.html
+                if (name.isBlank() || email.isBlank() || password.isBlank() || confirmPassword.isBlank()) {
+                    Log.i("SIGN UP", "Preencha todos os campos!")
+                }
+
+                // Se "@" não estiver contido "!in" no email
+                if ("@" !in email) {
+                    Log.i("SIGN UP", "Você digitou um email que não é válido!")
+                }
+
+                // Se as senhas forem iguais
+                else if (password == confirmPassword) {
                     // Cria a conta no Firebase
                     saveUserToAuth(email, password, name, context)
                 } else {
+                    // Se forem senhas diferentes
                     Log.i("SIGN UP", "As senhas não coincidem.")
                 }
             }
