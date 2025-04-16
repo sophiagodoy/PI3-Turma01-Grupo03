@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -87,6 +88,7 @@ fun saveUserToAuth(email: String, password: String, name: String, context: Conte
                     .addOnCompleteListener { verifyTask ->
                         if (verifyTask.isSuccessful) {
                             Log.i("AUTH", "E-mail de verificação enviado com sucesso.")
+                            Toast.makeText(context, "E-mail de verificação enviado!", Toast.LENGTH_LONG).show()
                         } else {
                             Log.e(
                                 "AUTH",
@@ -216,11 +218,15 @@ fun SignUp(modifier: Modifier = Modifier) {
                 // Baseado na documentação oficial do Kotlin: https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.text/is-blank.html
                 if (name.isBlank() || email.isBlank() || password.isBlank() || confirmPassword.isBlank()) {
                     Log.i("SIGN UP", "Preencha todos os campos!")
+                    Toast.makeText(context, "Preencha todos os campos!", Toast.LENGTH_LONG).show()
+
                 }
 
                 // Se "@" não estiver contido "!in" no email
                 if ("@" !in email) {
                     Log.i("SIGN UP", "Você digitou um email que não é válido!")
+                    Toast.makeText(context, "Email inválido!", Toast.LENGTH_LONG).show()
+
                 }
 
                 // Se as senhas forem iguais
@@ -230,6 +236,7 @@ fun SignUp(modifier: Modifier = Modifier) {
                 } else {
                     // Se forem senhas diferentes
                     Log.i("SIGN UP", "As senhas não coincidem.")
+                    Toast.makeText(context, "As senhas não coincidem!", Toast.LENGTH_LONG).show()
                 }
             }
         ) {
