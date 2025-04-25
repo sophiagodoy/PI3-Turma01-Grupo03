@@ -1,7 +1,7 @@
 // Definição do pacote do aplicativo
 package br.com.ibm.superid
 
-// Importações necessárias para Android, Jetpack Compose, Firebase entre outras
+// Importações necessárias
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -36,22 +36,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 
-
-/**
- * Esta classe representa a tela de Cadastro (SignUp).
- * Ela herda de ComponentActivity, que é uma tela tradicional do Android.
- */
 // SignUpActivity: Activity responsável pela tela de cadastro de usuário
 class SignUpActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Habilita o uso total da tela, inclusive áreas atrás das barras do sistema
         enableEdgeToEdge()
-        // Define o conteúdo da Activity utilizando Jetpack Compose
         setContent {
-            // Aplica o tema customizado da aplicação
             SuperIDTheme {
-                // Scaffold provê a estrutura básica da tela, garantindo consistência de layout
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     // Chama a função composable SignUp e aplica o padding interno do Scaffold
                     SignUp(
@@ -63,11 +54,9 @@ class SignUpActivity : ComponentActivity() {
     }
 }
 
-/**
- * Essa função cria uma nova conta no Firebase Authentication.
- * Se a conta for criada com sucesso, ela salva os dados do usuário no banco de dados.
- */
+// Essa função cria uma nova conta no Firebase Authentication
 fun saveUserToAuth(email: String, password: String, name: String, context: Context) {
+
     // Obtemos a instância do Firebase Auth
     val auth = Firebase.auth
 
@@ -80,11 +69,9 @@ fun saveUserToAuth(email: String, password: String, name: String, context: Conte
                 val uid = user!!.uid
                 Log.i("AUTH", "Conta criada com sucesso. UID: $uid")
 
-
+                // Enviar email para confirmar a conta
                 // Implementado com base na seção "Gerenciar usuários > Enviar e-mail de verificação" da documentação oficial do Firebase Authentication
                 // Fonte: https://firebase.google.com/docs/auth/web/manage-users?hl=pt-br#web_12
-
-                //Enviar email para confirmar a conta
                 user.sendEmailVerification()
                     .addOnCompleteListener { verifyTask ->
                         if (verifyTask.isSuccessful) {
@@ -94,7 +81,7 @@ fun saveUserToAuth(email: String, password: String, name: String, context: Conte
                             // Baseado na documentação oficial do Android: https://developer.android.com/guide/topics/ui/notifiers/toasts?hl=pt-br
                             Toast.makeText(context, "E-mail de verificação enviado!", Toast.LENGTH_LONG).show()
                         } else {
-                            Log.e("AUTH", "Erro ao enviar e-mail de verificação.", verifyTask.exception)
+                            Log.i("AUTH", "Erro ao enviar e-mail de verificação.", verifyTask.exception)
                         }
                     }
 
@@ -102,16 +89,15 @@ fun saveUserToAuth(email: String, password: String, name: String, context: Conte
                 saveUserToFirestore(name, email, uid, context)
             } else {
                 // Em caso de falha, registra o erro
-                Log.e("AUTH", "Falha ao criar conta.", task.exception)
+                Log.i("AUTH", "Falha ao criar conta.", task.exception)
             }
         }
 }
 
-/**
- * Esta função salva os dados do usuário (nome, e-mail e UID) no banco Firestore.
- * Os dados são gravados na coleção chamada "users".
- */
+// Esta função salva os dados do usuário (nome, e-mail e UID) no banco Firestore
+// Os dados são gravados na coleção chamada "users"
 fun saveUserToFirestore(name: String, email: String, uid: String, context: Context) {
+
     // Obtemos a instância do Firestore
     val db = Firebase.firestore
 
@@ -125,6 +111,7 @@ fun saveUserToFirestore(name: String, email: String, uid: String, context: Conte
     // Adiciona os dados na coleção "users"
     db.collection("users").add(userData)
         .addOnSuccessListener { documentReference ->
+            // Se der tudo certo
             Log.i("Firestore", "Dados do usuário salvos com sucesso. ID: ${documentReference.id}")
 
             // Vai para a tela de Login
@@ -136,10 +123,7 @@ fun saveUserToFirestore(name: String, email: String, uid: String, context: Conte
         }
 }
 
-/**
- * Tela de formulário onde o usuário preenche os dados de cadastro.
- * Campos: Nome, E-mail, Senha, Confirmar Senha
- */
+// Tela de formulário onde o usuário preenche os dados de cadastro (Nome, E-mail, Senha, Confirmar Senha)
 @Composable
 fun SignUp(modifier: Modifier = Modifier) {
     // Cria variável para poder trocar de tela
