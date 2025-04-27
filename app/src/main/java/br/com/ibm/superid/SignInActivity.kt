@@ -5,6 +5,7 @@ package br.com.ibm.superid
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -84,6 +85,9 @@ fun signInWithFirebaseAuth(
             } else {
                 // Se falhou será mostrado no LogCat
                 Log.i("AUTH", "Falha ao fazer login.", task.exception)
+                // Exibe uma mensagem Toast
+                // Baseado na documentação oficial do Android: https://developer.android.com/guide/topics/ui/notifiers/toasts?hl=pt-br
+                Toast.makeText(context, "Falha ao fazer login!", Toast.LENGTH_LONG).show()
             }
         }
 }
@@ -178,10 +182,16 @@ fun SignIn(modifier: Modifier = Modifier) {
             // Botão para acionar o login
             Button(
                 onClick = {
+
                     // Verifica se algum campo está em branco (se está vazio ou apenas com espaços)
                     // Baseado na documentação oficial do Kotlin: https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.text/is-blank.html
-                    if (email.isBlank() && password.isBlank()) {
+                    if (email.isBlank() || password.isBlank()) {
                         Log.i("SIGN IN", "Preencha todos os campos")
+
+                        // Exibe uma mensagem Toast
+                        // Baseado na documentação oficial do Android: https://developer.android.com/guide/topics/ui/notifiers/toasts?hl=pt-br
+                        Toast.makeText(context, "Preencha todos os campos!", Toast.LENGTH_LONG).show()
+
                     } else {
                         // Se não, salva no Firebase Auth
                         signInWithFirebaseAuth(email, password, context)
