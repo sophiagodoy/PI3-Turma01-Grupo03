@@ -1,4 +1,6 @@
-// Define o pacote da aplicação
+// TELA PARA O USUÁRIO REALIZAR O LOGIN
+
+// Definição do pacote aplicativo
 package br.com.ibm.superid
 
 // Importações necessárias
@@ -45,7 +47,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import br.com.ibm.superid.ui.theme.ui.theme.SuperIDTheme
 import kotlin.jvm.java
 
-// SignIpActivity: Activity responsável pela tela de login do usuário
+// Declarando a Activity (signInActivity)
 class SignInActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -92,10 +94,11 @@ fun signInWithFirebaseAuth(
         }
 }
 
-// Tela de formulário onde o usuário preenche os dados de login (E-mail, Senha)
+// Função Composable que apresenta o formulário de login do usuário
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignIn(modifier: Modifier = Modifier) {
+
     // Cria variável para poder trocar de tela
     val context = LocalContext.current
 
@@ -134,14 +137,14 @@ fun SignIn(modifier: Modifier = Modifier) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            // Título da tela
+            // Define o título da tela em negrito e tamanho 30sp
             Text(
                 text = "Login",
                 fontSize = 30.sp,
                 fontWeight = FontWeight.Bold
             )
 
-            // Campo de entrada para o email do usuário
+            // Campo de texto para digitar o email do usuário
             OutlinedTextField(
                 modifier = Modifier.padding(10.dp),
                 value = email,
@@ -149,16 +152,14 @@ fun SignIn(modifier: Modifier = Modifier) {
                 label = { Text("Email") }
             )
 
-            // Campo de entrada para a senha do usuário
+            // Campo de texto para digitar a senha do usuário
             OutlinedTextField(
                 modifier = Modifier.padding(10.dp),
                 value = password,
                 onValueChange = { password = it },
                 label = { Text("Senha") },
 
-                // Esconder a senha que está sendo digitada pelo usuário
-                // Implementado com base na seção "Texto e tipografia > Processar entrada do usuário" da documentação oficial do Jetpack Compose
-                // Fonte: https://developer.android.com/develop/ui/compose/text/user-input?hl=pt-br
+                // Esconde os caracteres da senha
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
             )
@@ -179,26 +180,24 @@ fun SignIn(modifier: Modifier = Modifier) {
                     }
             )
 
-            // Botão para acionar o login
+            // Botão que quando clicado salva no FirebaseAuth
             Button(
                 onClick = {
-
                     // Verifica se algum campo está em branco (se está vazio ou apenas com espaços)
-                    // Baseado na documentação oficial do Kotlin: https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.text/is-blank.html
                     if (email.isBlank() || password.isBlank()) {
                         Log.i("SIGN IN", "Preencha todos os campos")
 
-                        // Exibe uma mensagem Toast
-                        // Baseado na documentação oficial do Android: https://developer.android.com/guide/topics/ui/notifiers/toasts?hl=pt-br
+                        // Toast para avisar que precisa preencher todos os dados
                         Toast.makeText(context, "Preencha todos os campos!", Toast.LENGTH_LONG).show()
 
                     } else {
-                        // Se não, salva no Firebase Auth
+                        // Salva no Firebase Auth
                         signInWithFirebaseAuth(email, password, context)
                         Log.i("SIGN IN", "Usuário logado com sucesso")
                     }
                 }
             ) {
+                // Define o texto que está dentro do botão
                 Text("Entrar")
             }
         }

@@ -1,4 +1,6 @@
-// Definição do pacote do aplicativo
+// TELA PARA O USUÁRIO REALIZAR O CADASTRO
+
+// Definição do pacote aplicativo
 package br.com.ibm.superid
 
 // Importações necessárias
@@ -36,7 +38,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 
-// SignUpActivity: Activity responsável pela tela de cadastro de usuário
+// Declarando a Activity (signUpActivity)
 class SignUpActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -94,38 +96,36 @@ fun saveUserToAuth(email: String, password: String, name: String, context: Conte
         }
 }
 
-// Esta função salva os dados do usuário (nome, e-mail e UID) no banco Firestore
-// Os dados são gravados na coleção chamada "users"
+// Função para salvar os dados necessários durante o cadastro no Firestore
 fun saveUserToFirestore(name: String, email: String, uid: String, context: Context) {
-
-    // Obtemos a instância do Firestore
+    // Obtendo a instância do banco de dados Firestore
     val db = Firebase.firestore
 
-    // Prepara os dados do usuário em um HashMap
-    val userData = hashMapOf(
-        "uid" to uid,
-        "name" to name,
+    // Criando uma mapa mutável (hashMap) com informações do cadastro
+    val dados_cadastro = hashMapOf(
+        "uid"   to uid,
+        "name"  to name,
         "email" to email
     )
 
-    // Adiciona os dados na coleção "users"
-    db.collection("users").add(userData)
-        .addOnSuccessListener { documentReference ->
-            // Se der tudo certo
-            Log.i("Firestore", "Dados do usuário salvos com sucesso. ID: ${documentReference.id}")
-
-            // Vai para a tela de Login
-            val intent = Intent(context, SignInActivity::class.java)
-            context.startActivity(intent)
+    db.collection("users")
+        .document(uid)
+        .set(dados_cadastro)
+        .addOnSuccessListener {
+            Log.i("Firestore", "Usuário salvo em users/$uid")
+            context.startActivity(Intent(context, SignInActivity::class.java))
         }
         .addOnFailureListener { e ->
-            Log.e("Firestore", "Erro ao adicionar documento", e)
+            Log.e("Firestore", "Erro ao salvar usuário", e)
+            Toast.makeText(context, "Erro ao criar usuário", Toast.LENGTH_LONG).show()
         }
 }
 
-// Tela de formulário onde o usuário preenche os dados de cadastro (Nome, E-mail, Senha, Confirmar Senha)
+
+// Função Composable que apresenta o formulário de cadastro do usuário
 @Composable
 fun SignUp(modifier: Modifier = Modifier) {
+
     // Cria variável para poder trocar de tela
     val context = LocalContext.current
 
@@ -135,7 +135,7 @@ fun SignUp(modifier: Modifier = Modifier) {
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
 
-    // Layout em coluna, centralizado na tela
+    // Layout em coluna que ocupa toda a tela e aplica padding de 16dp
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -143,14 +143,15 @@ fun SignUp(modifier: Modifier = Modifier) {
         verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Título da tela
+
+        // Define o título da tela em negrito e tamanho 30sp
         Text(
             text = "Cadastro",
             fontSize = 30.sp,
             fontWeight = FontWeight.Bold
         )
 
-        // Campo de texto para o nome
+        // Campo de texto para digitar o nome do usuário
         OutlinedTextField(
             modifier = Modifier.padding(10.dp),
             value = name,
@@ -158,7 +159,7 @@ fun SignUp(modifier: Modifier = Modifier) {
             label = { Text(text = "Nome") }
         )
 
-        // Campo de texto para o e-mail
+        // Campo de texto para digitar o email do usuário
         OutlinedTextField(
             modifier = Modifier.padding(10.dp),
             value = email,
@@ -166,56 +167,50 @@ fun SignUp(modifier: Modifier = Modifier) {
             label = { Text(text = "Email") }
         )
 
-        // Campo de texto para a senha
+        // Campo de texto para digitar a senha do usuário
         OutlinedTextField(
             modifier = Modifier.padding(10.dp),
             value = password,
             onValueChange = { password = it },
             label = { Text(text = "Senha") },
 
-            // Esconder a senha que está sendo digitada pelo usuário
-            // Implementado com base na seção "Texto e tipografia > Processar entrada do usuário" da documentação oficial do Jetpack Compose
-            // Fonte: https://developer.android.com/develop/ui/compose/text/user-input?hl=pt-br
+            // Esconde os caracteres da senha
+            // Baseado na documentação: https://developer.android.com/develop/ui/compose/text/user-input?hl=pt-br
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
         )
 
-        // Campo de texto para confirmação da senha
+        // Campo de texto para confirmar a senha do usuário
         OutlinedTextField(
             modifier = Modifier.padding(10.dp),
             value = confirmPassword,
             onValueChange = { confirmPassword = it },
             label = { Text(text = "Confirmar Senha") },
 
-            // Esconder a senha que está sendo digitada pelo usuário
-            // Implementado com base na seção "Texto e tipografia > Processar entrada do usuário" da documentação oficial do Jetpack Compose
-            // Fonte: https://developer.android.com/develop/ui/compose/text/user-input?hl=pt-br
+            // Esconde os caracteres da senha
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
         )
 
-        // Botão para enviar o formulário
+        // Botão que quando clicado salva informações do cadastro no banco Firestore
         Button(
             onClick = {
                 // Verifica se algum campo está em branco (se está vazio ou apenas com espaços)
-                // Baseado na documentação oficial do Kotlin: https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.text/is-blank.html
+                // Baseado na documentação: https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.text/is-blank.html
                 if (name.isBlank() || email.isBlank() || password.isBlank() || confirmPassword.isBlank()) {
                     Log.i("SIGN UP", "Preencha todos os campos!")
 
-                    // Exibe uma mensagem Toast para informar o usuário sobre o erro
-                    // Baseado na documentação oficial do Android: https://developer.android.com/guide/topics/ui/notifiers/toasts?hl=pt-br
+                    // Toast para avisar que precisa preencher todos os dados
+                    // Baseado na documentação: https://developer.android.com/guide/topics/ui/notifiers/toasts?hl=pt-br
                     Toast.makeText(context, "Preencha todos os campos!", Toast.LENGTH_LONG).show()
-
                 }
 
                 // Se "@" não estiver contido "!in" no email
                 if ("@" !in email) {
                     Log.i("SIGN UP", "Você digitou um email que não é válido!")
 
-                    // Exibe uma mensagem Toast para informar o usuário sobre o erro
-                    // Baseado na documentação oficial do Android: https://developer.android.com/guide/topics/ui/notifiers/toasts?hl=pt-br
+                    // Toast para avisar que o email é invalido
                     Toast.makeText(context, "Email inválido!", Toast.LENGTH_LONG).show()
-
                 }
 
                 // Se as senhas forem iguais
@@ -226,12 +221,12 @@ fun SignUp(modifier: Modifier = Modifier) {
                     // Se forem senhas diferentes
                     Log.i("SIGN UP", "As senhas não coincidem.")
 
-                    // Exibe uma mensagem Toast para informar o usuário sobre o erro
-                    // Baseado na documentação oficial do Android: https://developer.android.com/guide/topics/ui/notifiers/toasts?hl=pt-br
+                    // Toast para avisar que as senhas estão diferentes
                     Toast.makeText(context, "As senhas não coincidem!", Toast.LENGTH_LONG).show()
                 }
             }
         ) {
+            // Define o texto que está dentro do botão
             Text(text = "Cadastrar")
         }
     }
