@@ -7,4 +7,5 @@
     <string name="title_activity_forgot_password">ForgotPasswordActivity</string>
     <string name="title_activity_add_password">AddPasswordActivity</string>
     <string name="title_activity_edit_password">EditPasswordActivity</string>
+    <string name="title_activity_change_password">ChangePasswordActivity</string>
 </resources>
