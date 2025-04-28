@@ -144,6 +144,7 @@ fun SignUp(modifier: Modifier = Modifier) {
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
 
+    // Seta que volta para AccessOptionActivity
     Scaffold(
         // Define que a tela terá uma barra superior, onde vamos colocar o TopAppBar
         topBar = {
