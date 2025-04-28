@@ -11,7 +11,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CheckboxDefaults.colors
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,7 +27,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import android.widget.Toast
 
 
-class AddCategory : ComponentActivity() {
+class AddCategoryActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -87,17 +86,17 @@ fun AddCat() {
             label = { Text(text = "Nome da Categoria") }
         )
 
-            Button(
-                onClick = {
-                    addNewCategory(context, categoryName.value)
-                    categoryName.value = "" // Limpa o campo após a tentativa
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF9DA783)
-                )
-            ) {
-                Text(text = "Salvar")
-            }
+        Button(
+            onClick = {
+                addNewCategory(context, categoryName.value)
+                categoryName.value = "" // Limpa o campo após a tentativa
+            },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF9DA783)
+            )
+        ) {
+            Text(text = "Salvar")
+        }
     }
 }
 
