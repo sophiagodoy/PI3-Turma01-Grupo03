@@ -1,5 +1,8 @@
 package br.com.ibm.superid
 
+import android.content.Context
+import androidx.compose.ui.platform.LocalContext
+
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -21,6 +24,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.firebase.firestore.FirebaseFirestore
+import android.widget.Toast
+
 
 class AddCategory : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,10 +38,33 @@ class AddCategory : ComponentActivity() {
     }
 }
 
+fun addNewCategory(context: Context, nomeCategoria: String) {
+    if (nomeCategoria.isBlank()) {
+        Toast.makeText(context, "Preencha o nome da categoria!", Toast.LENGTH_SHORT).show()
+        return
+    }
+
+    val db = FirebaseFirestore.getInstance()
+
+    val categoria = hashMapOf(
+        "nome" to nomeCategoria
+    )
+
+    db.collection("categorias")
+        .add(categoria)
+        .addOnSuccessListener {
+            Toast.makeText(context, "Categoria cadastrada com sucesso!", Toast.LENGTH_SHORT).show()
+        }
+        .addOnFailureListener { e ->
+            Toast.makeText(context, "Erro ao cadastrar: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+}
+
+
 @Composable
 fun AddCat() {
+    val context = LocalContext.current
     val categoryName = remember { mutableStateOf("") }
-
 
     Column(
         modifier = Modifier
@@ -59,9 +88,12 @@ fun AddCat() {
         )
 
             Button(
-                onClick = {},
+                onClick = {
+                    addNewCategory(context, categoryName.value)
+                    categoryName.value = "" // Limpa o campo após a tentativa
+                },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF9DA783) 
+                    containerColor = Color(0xFF9DA783)
                 )
             ) {
                 Text(text = "Salvar")
