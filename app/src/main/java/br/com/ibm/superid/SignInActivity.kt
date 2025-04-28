@@ -66,11 +66,7 @@ class SignInActivity : ComponentActivity() {
 }
 
 // Validando as credenciais do usuário
-fun signInWithFirebaseAuth(
-    email: String,
-    password: String,
-    context: Context
-) {
+fun signInWithFirebaseAuth(email: String, password: String, context: Context) {
     // Obtemos a instância do Firestore Auth
     val auth = Firebase.auth
 
@@ -106,28 +102,36 @@ fun SignIn(modifier: Modifier = Modifier) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
-    // Seta pra voltar para WelcomeActivity
+    // Seta que volta para AccessOptionActivity
+    // Baseado em: https://developer.android.com/develop/ui/compose/components/app-bars?hl=pt-br#top-app-bar
+    // Estrutura básica da tela utilizando Scaffold para organizar a barra superior e o conteúdo principal
     Scaffold(
+        // Define que a tela terá uma barra superior, onde vamos colocar o TopAppBar
         topBar = {
-            // "Função" para que tenha um elemento no topo da tela que possa ser clicado
+            // Começa a criação da barra de app superior (TopAppBar)
             TopAppBar(
-                title = { Text("Voltar") },
+                title = { }, // Indica que não terá texto no meio da barra
+                // Define o ícone de navegação da TopAppBar
                 navigationIcon = {
+                    //  Cria um botão que será clicável, o botão envolverá o ícone de voltar
                     IconButton(
                         onClick = {
-                            val intent = Intent(context, WelcomeActivity::class.java)
+                            val intent = Intent(context, AccessOptionActivity::class.java)
                             context.startActivity(intent)
                         }
                     ) {
+                        // Cria o ícone da seta de voltar
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Voltar"
+                            contentDescription = "Voltar" // Usado para acessibilidade (leitores de tela vão anunciar "Voltar" para deficientes visuais)
                         )
                     }
                 }
             )
         }
-    ) { innerPadding ->
+    ) { innerPadding -> // Fecha o Scaffold e começa a definir o conteúdo principal da tela
+
+        // Layout em coluna que ocupa toda a tela e aplica padding de 16dp
         Column(
             modifier = modifier
                 .fillMaxSize()
