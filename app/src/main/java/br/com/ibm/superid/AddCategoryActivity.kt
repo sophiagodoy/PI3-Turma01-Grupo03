@@ -25,6 +25,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.firebase.firestore.FirebaseFirestore
 import android.widget.Toast
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
+import com.google.firebase.firestore.firestore
 
 
 class AddCategoryActivity : ComponentActivity() {
@@ -37,25 +40,32 @@ class AddCategoryActivity : ComponentActivity() {
     }
 }
 
-fun addNewCategory(context: Context, nomeCategoria: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+fun addNewCategory(context: Context, nomeCategoria: String) {
+    val user = Firebase.auth.currentUser
+
+    if (user == null) {
+        Toast.makeText(context, "Usuário não autenticado!", Toast.LENGTH_SHORT).show()
+        return
+    }
+
     if (nomeCategoria.isBlank()) {
         Toast.makeText(context, "Preencha o nome da categoria!", Toast.LENGTH_SHORT).show()
         return
     }
 
-    val db = FirebaseFirestore.getInstance()
+    val db = Firebase.firestore
 
-    val categoria = hashMapOf(
-        "nome" to nomeCategoria
-    )
+    val novaCategoria = hashMapOf("nome" to nomeCategoria)
 
-    db.collection("categorias")
-        .add(categoria)
+    db.collection("users")
+        .document(user.uid)
+        .collection("categorias")
+        .add(novaCategoria)
         .addOnSuccessListener {
-            onSuccess()
+            Toast.makeText(context, "Categoria adicionada com sucesso!", Toast.LENGTH_SHORT).show()
         }
         .addOnFailureListener { e ->
-            onFailure(e)
+            Toast.makeText(context, "Erro ao adicionar categoria: ${e.message}", Toast.LENGTH_SHORT).show()
         }
 }
 
@@ -89,18 +99,10 @@ fun AddCat() {
 
         Button(
             onClick = {
-                addNewCategory(
-                    context,
-                    categoryName.value,
-                    onSuccess = {
-                        Toast.makeText(context, "Categoria cadastrada com sucesso!", Toast.LENGTH_SHORT).show()
-                        categoryName.value = ""
-                    },
-                    onFailure = { e ->
-                        Toast.makeText(context, "Erro ao cadastrar: ${e.message}", Toast.LENGTH_SHORT).show()
-                    }
-                )
+                addNewCategory(context, categoryName.value)
+                categoryName.value = "" 
             },
+
                     colors = ButtonDefaults.buttonColors(
                 containerColor = Color(0xFF9DA783)
             )
