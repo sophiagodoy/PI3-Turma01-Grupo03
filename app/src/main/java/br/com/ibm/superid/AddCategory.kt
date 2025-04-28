@@ -61,7 +61,7 @@ fun AddCat() {
             Button(
                 onClick = {},
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF9DA783) // Esse é um tom aproximado do verde da sua imagem
+                    containerColor = Color(0xFF9DA783) 
                 )
             ) {
                 Text(text = "Salvar")
