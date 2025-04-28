@@ -104,6 +104,7 @@ fun SignIn(modifier: Modifier = Modifier) {
 
     // Seta que volta para AccessOptionActivity
     // Baseado em: https://developer.android.com/develop/ui/compose/components/app-bars?hl=pt-br#top-app-bar
+    // Baseado em: https://alexzh.com/visual-guide-to-topappbar-variants-in-jetpack-compose/?utm_source=chatgpt.com
     // Estrutura básica da tela utilizando Scaffold para organizar a barra superior e o conteúdo principal
     Scaffold(
         // Define que a tela terá uma barra superior, onde vamos colocar o TopAppBar

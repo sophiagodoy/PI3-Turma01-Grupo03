@@ -16,10 +16,18 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -123,6 +131,7 @@ fun saveUserToFirestore(name: String, email: String, uid: String, context: Conte
 
 
 // Função Composable que apresenta o formulário de cadastro do usuário
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignUp(modifier: Modifier = Modifier) {
 
@@ -135,99 +144,129 @@ fun SignUp(modifier: Modifier = Modifier) {
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
 
-    // Layout em coluna que ocupa toda a tela e aplica padding de 16dp
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-
-        // Define o título da tela em negrito e tamanho 30sp
-        Text(
-            text = "Cadastro",
-            fontSize = 30.sp,
-            fontWeight = FontWeight.Bold
-        )
-
-        // Campo de texto para digitar o nome do usuário
-        OutlinedTextField(
-            modifier = Modifier.padding(10.dp),
-            value = name,
-            onValueChange = { name = it },
-            label = { Text(text = "Nome") }
-        )
-
-        // Campo de texto para digitar o email do usuário
-        OutlinedTextField(
-            modifier = Modifier.padding(10.dp),
-            value = email,
-            onValueChange = { email = it },
-            label = { Text(text = "Email") }
-        )
-
-        // Campo de texto para digitar a senha do usuário
-        OutlinedTextField(
-            modifier = Modifier.padding(10.dp),
-            value = password,
-            onValueChange = { password = it },
-            label = { Text(text = "Senha") },
-
-            // Esconde os caracteres da senha
-            // Baseado na documentação: https://developer.android.com/develop/ui/compose/text/user-input?hl=pt-br
-            visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
-        )
-
-        // Campo de texto para confirmar a senha do usuário
-        OutlinedTextField(
-            modifier = Modifier.padding(10.dp),
-            value = confirmPassword,
-            onValueChange = { confirmPassword = it },
-            label = { Text(text = "Confirmar Senha") },
-
-            // Esconde os caracteres da senha
-            visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
-        )
-
-        // Botão que quando clicado salva informações do cadastro no banco Firestore
-        Button(
-            onClick = {
-                // Verifica se algum campo está em branco (se está vazio ou apenas com espaços)
-                // Baseado na documentação: https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.text/is-blank.html
-                if (name.isBlank() || email.isBlank() || password.isBlank() || confirmPassword.isBlank()) {
-                    Log.i("SIGN UP", "Preencha todos os campos!")
-
-                    // Toast para avisar que precisa preencher todos os dados
-                    // Baseado na documentação: https://developer.android.com/guide/topics/ui/notifiers/toasts?hl=pt-br
-                    Toast.makeText(context, "Preencha todos os campos!", Toast.LENGTH_LONG).show()
+    Scaffold(
+        // Define que a tela terá uma barra superior, onde vamos colocar o TopAppBar
+        topBar = {
+            // Começa a criação da barra de app superior (TopAppBar)
+            TopAppBar(
+                title = { }, // Indica que não terá texto no meio da barra
+                // Define o ícone de navegação da TopAppBar
+                navigationIcon = {
+                    //  Cria um botão que será clicável, o botão envolverá o ícone de voltar
+                    IconButton(
+                        onClick = {
+                            val intent = Intent(context, AccessOptionActivity::class.java)
+                            context.startActivity(intent)
+                        }
+                    ) {
+                        // Cria o ícone da seta de voltar
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Voltar" // Usado para acessibilidade (leitores de tela vão anunciar "Voltar" para deficientes visuais)
+                        )
+                    }
                 }
+            )
+        }
+    ) { innerPadding -> // Fecha o Scaffold e começa a definir o conteúdo principal da tela
 
-                // Se "@" não estiver contido "!in" no email
-                if ("@" !in email) {
-                    Log.i("SIGN UP", "Você digitou um email que não é válido!")
-
-                    // Toast para avisar que o email é invalido
-                    Toast.makeText(context, "Email inválido!", Toast.LENGTH_LONG).show()
-                }
-
-                // Se as senhas forem iguais
-                else if (password == confirmPassword) {
-                    // Cria a conta no Firebase
-                    saveUserToAuth(email, password, name, context)
-                } else {
-                    // Se forem senhas diferentes
-                    Log.i("SIGN UP", "As senhas não coincidem.")
-
-                    // Toast para avisar que as senhas estão diferentes
-                    Toast.makeText(context, "As senhas não coincidem!", Toast.LENGTH_LONG).show()
-                }
-            }
+        // Layout em coluna que ocupa toda a tela e aplica padding de 16dp
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(16.dp),
+            verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Define o texto que está dentro do botão
-            Text(text = "Cadastrar")
+
+            // Define o título da tela em negrito e tamanho 30sp
+            Text(
+                text = "Cadastro",
+                fontSize = 30.sp,
+                fontWeight = FontWeight.Bold
+            )
+
+            // Campo de texto para digitar o nome do usuário
+            OutlinedTextField(
+                modifier = Modifier.padding(10.dp),
+                value = name,
+                onValueChange = { name = it },
+                label = { Text(text = "Nome") }
+            )
+
+            // Campo de texto para digitar o email do usuário
+            OutlinedTextField(
+                modifier = Modifier.padding(10.dp),
+                value = email,
+                onValueChange = { email = it },
+                label = { Text(text = "Email") }
+            )
+
+            // Campo de texto para digitar a senha do usuário
+            OutlinedTextField(
+                modifier = Modifier.padding(10.dp),
+                value = password,
+                onValueChange = { password = it },
+                label = { Text(text = "Senha") },
+
+                // Esconde os caracteres da senha
+                // Baseado na documentação: https://developer.android.com/develop/ui/compose/text/user-input?hl=pt-br
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+            )
+
+            // Campo de texto para confirmar a senha do usuário
+            OutlinedTextField(
+                modifier = Modifier.padding(10.dp),
+                value = confirmPassword,
+                onValueChange = { confirmPassword = it },
+                label = { Text(text = "Confirmar Senha") },
+
+                // Esconde os caracteres da senha
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+            )
+
+            // Botão que quando clicado salva informações do cadastro no banco Firestore
+            Button(
+                onClick = {
+                    // Verifica se algum campo está em branco (se está vazio ou apenas com espaços)
+                    // Baseado na documentação: https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.text/is-blank.html
+                    if (name.isBlank() || email.isBlank() || password.isBlank() || confirmPassword.isBlank()) {
+                        Log.i("SIGN UP", "Preencha todos os campos!")
+
+                        // Toast para avisar que precisa preencher todos os dados
+                        // Baseado na documentação: https://developer.android.com/guide/topics/ui/notifiers/toasts?hl=pt-br
+                        Toast.makeText(context, "Preencha todos os campos!", Toast.LENGTH_LONG)
+                            .show()
+                    }
+
+                    // Se "@" não estiver contido "!in" no email
+                    if ("@" !in email) {
+                        Log.i("SIGN UP", "Você digitou um email que não é válido!")
+
+                        // Toast para avisar que o email é invalido
+                        Toast.makeText(context, "Email inválido!", Toast.LENGTH_LONG).show()
+                    }
+
+                    // Se as senhas forem iguais
+                    else if (password == confirmPassword) {
+                        // Cria a conta no Firebase
+                        saveUserToAuth(email, password, name, context)
+                    } else {
+                        // Se forem senhas diferentes
+                        Log.i("SIGN UP", "As senhas não coincidem.")
+
+                        // Toast para avisar que as senhas estão diferentes
+                        Toast.makeText(context, "As senhas não coincidem!", Toast.LENGTH_LONG)
+                            .show()
+                    }
+                }
+            ) {
+                // Define o texto que está dentro do botão
+                Text(text = "Cadastrar")
+            }
         }
     }
 }
