@@ -37,7 +37,7 @@ class AddCategoryActivity : ComponentActivity() {
     }
 }
 
-fun addNewCategory(context: Context, nomeCategoria: String) {
+fun addNewCategory(context: Context, nomeCategoria: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
     if (nomeCategoria.isBlank()) {
         Toast.makeText(context, "Preencha o nome da categoria!", Toast.LENGTH_SHORT).show()
         return
@@ -52,12 +52,13 @@ fun addNewCategory(context: Context, nomeCategoria: String) {
     db.collection("categorias")
         .add(categoria)
         .addOnSuccessListener {
-            Toast.makeText(context, "Categoria cadastrada com sucesso!", Toast.LENGTH_SHORT).show()
+            onSuccess()
         }
         .addOnFailureListener { e ->
-            Toast.makeText(context, "Erro ao cadastrar: ${e.message}", Toast.LENGTH_SHORT).show()
+            onFailure(e)
         }
 }
+
 
 
 @Composable
@@ -88,10 +89,19 @@ fun AddCat() {
 
         Button(
             onClick = {
-                addNewCategory(context, categoryName.value)
-                categoryName.value = "" // Limpa o campo após a tentativa
+                addNewCategory(
+                    context,
+                    categoryName.value,
+                    onSuccess = {
+                        Toast.makeText(context, "Categoria cadastrada com sucesso!", Toast.LENGTH_SHORT).show()
+                        categoryName.value = ""
+                    },
+                    onFailure = { e ->
+                        Toast.makeText(context, "Erro ao cadastrar: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
+                )
             },
-            colors = ButtonDefaults.buttonColors(
+                    colors = ButtonDefaults.buttonColors(
                 containerColor = Color(0xFF9DA783)
             )
         ) {
