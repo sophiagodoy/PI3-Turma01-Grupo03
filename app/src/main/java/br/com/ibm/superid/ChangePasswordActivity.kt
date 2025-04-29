@@ -30,6 +30,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import br.com.ibm.superid.ui.theme.SuperIDTheme
@@ -58,6 +59,7 @@ class ChangePasswordActivity : ComponentActivity() {
 // FAZER A FUNÇÃO AQUI
 
 // Função Composable que apresenta o formulário de adicionar senha
+@Preview(showBackground = true)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChangePassword(modifier: Modifier = Modifier) {
@@ -82,10 +84,10 @@ fun ChangePassword(modifier: Modifier = Modifier) {
                     //  Cria um botão que será clicável, o botão envolverá o ícone de voltar
                     IconButton(
                         onClick = {
-                            /*
-                            val intent = Intent(context, MainActivity::class.java) // COLOCAR O NOME DA TELA DO ARTHUR
+
+                            val intent = Intent(context, EditPasswordActivity::class.java) // COLOCAR O NOME DA TELA DO ARTHUR
                             context.startActivity(intent)
-                            */
+
                         }
                     ) {
                         // Cria o ícone da seta de voltar
