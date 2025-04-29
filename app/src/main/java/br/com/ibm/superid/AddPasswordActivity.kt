@@ -23,6 +23,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import br.com.ibm.superid.ui.theme.SuperIDTheme
@@ -57,13 +58,13 @@ class AddPasswordActivity : ComponentActivity() {
 
 // Função para adicionar uma nova senha no Firestore
 @OptIn(ExperimentalEncodingApi::class)
-fun addNewPassword(context: Context, senha: String, categoria: String, descricao: String) {
+fun addNewPassword(context: Context, senha: String, categoria: String, descricao: String, titulo: String) {
     // Baseado na documentação: https://firebase.google.com/docs/auth/android/manage-users?hl=pt-br#get_the_currently_signed-in_user
     // Identifica o usuário atual conectado
     val user = Firebase.auth.currentUser
 
     // Validando campos obrigatórios
-    if (senha.isBlank() || categoria.isBlank() || descricao.isBlank()) {
+    if (senha.isBlank() || categoria.isBlank() || descricao.isBlank() || titulo.isBlank()) {
         Toast.makeText(context, "Preencha todos os campos!", Toast.LENGTH_LONG).show()
         return
     }
@@ -79,6 +80,7 @@ fun addNewPassword(context: Context, senha: String, categoria: String, descricao
 
         // Criando uma mapa mutável (hashMap) com informações da nova senha
         val dadosNovaSenha = hashMapOf(
+            "titulo" to titulo,
             "senha" to encryptpassword,
             "categoria" to categoria,
             "descricao" to descricao,
@@ -154,6 +156,7 @@ fun encryptpassword(password: String, encryptionKey: String = "ProjetoIntegrador
 }
 
 // Função Composable que apresenta o formulário de adicionar senha
+@Preview(showBackground = true)
 @Composable
 fun AddPassword(modifier: Modifier = Modifier) {
 
@@ -164,6 +167,7 @@ fun AddPassword(modifier: Modifier = Modifier) {
     var senha by remember { mutableStateOf("") }
     var categoria by remember { mutableStateOf("") }
     var descricao by remember { mutableStateOf("") }
+    var titulo by remember { mutableStateOf("") }
 
     // Layout em coluna que ocupa toda a tela e aplica padding de 16dp
     Column(
@@ -183,6 +187,14 @@ fun AddPassword(modifier: Modifier = Modifier) {
 
         // Espaço de 24dp abaixo do título
         Spacer(Modifier.height(24.dp))
+
+        // Campo de texto para escolher a categoria da nova senha
+        OutlinedTextField(
+            value = titulo,
+            onValueChange = { titulo = it },
+            label = { Text("Título") },
+            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+        )
 
         // Campo de texto para digitar a nova senha
         OutlinedTextField(
@@ -218,7 +230,7 @@ fun AddPassword(modifier: Modifier = Modifier) {
         Button(
             onClick = {
                 // Chama a função que valida e grava a nova senha no no Firestore
-                addNewPassword(context, senha, categoria, descricao)
+                addNewPassword(context, senha, categoria, descricao, titulo)
             },
             modifier = Modifier
                 .fillMaxWidth(0.5f)
