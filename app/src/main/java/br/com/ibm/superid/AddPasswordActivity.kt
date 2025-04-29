@@ -98,7 +98,11 @@ fun addNewPassword(context: Context, senha: String, categoria: String, descricao
             // Adiciona um novo documento na subcoleção "senhas" usados os dados de "dadosNovaSenha"
             .add(dadosNovaSenha)
             // Caso a senha seja adicionada com sucesso, chama um Toast dando o aviso
-            .addOnSuccessListener {
+            .addOnSuccessListener { documentReference ->
+                // Captura o ID gerado automaticamente
+                val documentId = documentReference.id
+                // Atualiza o mesmo documento adicionando o campo "id"
+                documentReference.update("id", documentId)
                 Toast.makeText(context, "Senha salva com sucesso!", Toast.LENGTH_SHORT).show()
             }
             // Caso a senha de erro ao adicionar no banco de dados, chama um Toast dando o aviso
