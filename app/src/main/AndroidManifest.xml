@@ -12,59 +12,101 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SuperID"
         tools:targetApi="31">
+
+        <!-- Início de AddCategoryActivity -->
+        <activity
+            android:name=".AddCategoryActivity"
+            android:exported="false"
+            android:label="@string/title_activity_add_category"
+            android:theme="@style/Theme.SuperID" />
+        <!-- Fim de AddCategoryActivity -->
+
+        <!-- Início de AddCActivity -->
+        <activity
+            android:name=".AddCActivity"
+            android:exported="false"
+            android:label="@string/title_activity_add_cactivity"
+            android:theme="@style/Theme.SuperID" />
+        <!-- Fim de AddCActivity -->
+
+        <!-- Início de ChangePasswordActivity -->
         <activity
             android:name=".ChangePasswordActivity"
             android:exported="false"
             android:label="@string/title_activity_change_password"
             android:theme="@style/Theme.SuperID" />
+        <!-- Fim de ChangePasswordActivity -->
+
         <!-- Início de EditPasswordActivity -->
         <activity
             android:name=".EditPasswordActivity"
             android:exported="false"
             android:label="@string/title_activity_edit_password"
-            android:theme="@style/Theme.SuperID" /> <!-- Início de AddPasswordActivity -->
+            android:theme="@style/Theme.SuperID" />
+        <!-- Fim de EditPasswordActivity -->
+
+        <!-- Início de AddPasswordActivity -->
         <activity
             android:name=".AddPasswordActivity"
             android:exported="false"
             android:label="@string/title_activity_add_password"
-            android:theme="@style/Theme.SuperID" /> <!-- Início de WelcomeActivity -->
+            android:theme="@style/Theme.SuperID" />
+        <!-- Fim de AddPasswordActivity -->
+
+        <!-- Início de WelcomeActivity -->
         <activity
             android:name=".WelcomeActivity"
             android:exported="true"
             android:label="@string/title_activity_welcome"
             android:theme="@style/Theme.SuperID"
-            tools:ignore="MissingClass">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+            tools:ignore="MissingClass" />
+        <!-- Fim de WelcomeActivity -->
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity> <!-- Início de AccessOptionActivity -->
+        <!-- Início de AccessOptionActivity -->
         <activity
             android:name=".AccessOptionActivity"
             android:exported="true"
             android:label="@string/title_activity_access_option"
-            android:theme="@style/Theme.SuperID" /> <!-- Início de MainActivity -->
+            android:theme="@style/Theme.SuperID" />
+        <!-- Fim de AccessOptionActivity -->
+
+        <!-- Início de MainActivity -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/title_activity_main"
-            android:theme="@style/Theme.SuperID" /> <!-- Início de SignInActivity -->
+            android:theme="@style/Theme.SuperID" />
+        <!-- Fim de MainActivity -->
+
+        <!-- Início de SignInActivity -->
         <activity
             android:name=".SignInActivity"
             android:exported="true"
             android:label="@string/title_activity_sign_in"
-            android:theme="@style/Theme.SuperID" /> <!-- Início de SignUpActivity -->
+            android:theme="@style/Theme.SuperID">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <!-- Fim de SignInActivity -->
+
+        <!-- Início de SignUpActivity -->
         <activity
             android:name=".SignUpActivity"
             android:exported="true"
             android:label="@string/app_name"
-            android:theme="@style/Theme.SuperID" /> <!-- Início de ForgotPasswordActivity -->
+            android:theme="@style/Theme.SuperID" />
+        <!-- Fim de SignUpActivity -->
+
+        <!-- Início de ForgotPasswordActivity -->
         <activity
             android:name=".ForgotPasswordActivity"
             android:exported="true"
             android:label="@string/title_activity_forgot_password"
             android:theme="@style/Theme.SuperID" />
+        <!-- Fim de ForgotPasswordActivity -->
+
     </application>
 
 </manifest>

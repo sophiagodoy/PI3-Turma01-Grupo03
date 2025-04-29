@@ -8,4 +8,6 @@
     <string name="title_activity_add_password">AddPasswordActivity</string>
     <string name="title_activity_edit_password">EditPasswordActivity</string>
     <string name="title_activity_change_password">ChangePasswordActivity</string>
+    <string name="title_activity_add_cactivity">AddCActivity</string>
+    <string name="title_activity_add_category">AddCategoryActivity</string>
 </resources>

@@ -50,7 +50,7 @@ fun AddPasswordOrCat(){
     ) {
         Button(onClick = {
             if(categoria){
-                val intent = Intent(context, AddCategory::class.java) //
+                val intent = Intent(context, AddCategoryActivity::class.java) //
                 context.startActivity(intent)
             }
         },
