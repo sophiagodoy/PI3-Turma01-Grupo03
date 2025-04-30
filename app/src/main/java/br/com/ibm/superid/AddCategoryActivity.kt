@@ -54,21 +54,20 @@ fun addNewCategory(context: Context, nomeCategoria: String) {
     }
 
     val db = Firebase.firestore
-
     val novaCategoria = hashMapOf("nome" to nomeCategoria)
 
     db.collection("users")
         .document(user.uid)
         .collection("categorias")
         .add(novaCategoria)
-        .addOnSuccessListener {
-            Toast.makeText(context, "Categoria adicionada com sucesso!", Toast.LENGTH_SHORT).show()
-        }
-        .addOnFailureListener { e ->
-            Toast.makeText(context, "Erro ao adicionar categoria: ${e.message}", Toast.LENGTH_SHORT).show()
+        .addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                Toast.makeText(context, "Categoria adicionada com sucesso!", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(context, "Erro ao adicionar categoria: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+            }
         }
 }
-
 
 
 @Composable
@@ -100,10 +99,10 @@ fun AddCat() {
         Button(
             onClick = {
                 addNewCategory(context, categoryName.value)
-                categoryName.value = "" 
+                categoryName.value = ""
             },
 
-                    colors = ButtonDefaults.buttonColors(
+            colors = ButtonDefaults.buttonColors(
                 containerColor = Color(0xFF9DA783)
             )
         ) {
