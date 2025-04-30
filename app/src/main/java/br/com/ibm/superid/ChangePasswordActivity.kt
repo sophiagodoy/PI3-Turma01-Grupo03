@@ -37,18 +37,40 @@ import br.com.ibm.superid.ui.theme.SuperIDTheme
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import java.security.SecureRandom
+import javax.crypto.Cipher
+import javax.crypto.spec.IvParameterSpec
+import javax.crypto.spec.SecretKeySpec
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.ktx.firestore
 
 // Declarando a Activity (ChangePasswordActivity)
 class ChangePasswordActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        // Extrai os dados que enviamos
+        val passwordId       = intent.getStringExtra("PASSWORD_ID")       ?: ""
+        val initialSenha     = intent.getStringExtra("PASSWORD_VALUE")    ?: ""
+        val initialCategoria = intent.getStringExtra("PASSWORD_CATEGORY") ?: ""
+        val initialDescricao = intent.getStringExtra("PASSWORD_DESCRIPTION") ?: ""
+        val initialTitulo    = intent.getStringExtra("PASSWORD_TITLE")    ?: ""
+
         setContent {
             SuperIDTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     // Chama a função composable ChangePassword e aplica o padding interno do Scaffold
                     ChangePassword(
-                        modifier = Modifier.padding(innerPadding)
+                        modifier = Modifier.padding(innerPadding),
+                        // Passa os valores iniciais
+                        passwordId       = passwordId,
+                        initialTitulo    = initialTitulo,
+                        initialSenha     = initialSenha,
+                        initialDescricao = initialDescricao,
+                        initialCategoria = initialCategoria,
                     )
                 }
             }
@@ -56,13 +78,18 @@ class ChangePasswordActivity : ComponentActivity() {
     }
 }
 
-// FAZER A FUNÇÃO AQUI
+
 
 // Função Composable que apresenta o formulário de adicionar senha
-@Preview(showBackground = true)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChangePassword(modifier: Modifier = Modifier) {
+fun ChangePassword(
+    passwordId: String,
+    initialTitulo: String,
+    initialSenha: String,
+    initialCategoria: String,
+    initialDescricao: String,
+    modifier: Modifier = Modifier) {
 
     // Cria variável para poder trocar de tela
     val context = LocalContext.current
@@ -85,7 +112,7 @@ fun ChangePassword(modifier: Modifier = Modifier) {
                     IconButton(
                         onClick = {
 
-                            val intent = Intent(context, EditPasswordActivity::class.java) // COLOCAR O NOME DA TELA DO ARTHUR
+                            val intent = Intent(context, MainActivity::class.java) //
                             context.startActivity(intent)
 
                         }
@@ -113,7 +140,7 @@ fun ChangePassword(modifier: Modifier = Modifier) {
 
             // Define o título da tela em negrito e tamanho 30sp
             Text(
-                text = "ALTERAR SENHA",
+                text = "ALTERAR: ${initialTitulo.uppercase()}",
                 fontSize = 30.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -156,7 +183,17 @@ fun ChangePassword(modifier: Modifier = Modifier) {
             // Botão que quando clicado salva a nova senha no banco Firestore
             Button(
                 onClick = {
-                    // CHAMAR A FUNÇÃO AQUI
+                    // Chama nossa função de atualização
+                    updatePassword(
+                        context      = context,
+                        documentId   = passwordId,
+                        newPassword  = senha,
+                        newCategory  = categoria,
+                        newDesc      = descricao
+                    )
+
+                    if(senha.isNotBlank())// volta para a Main
+                    context.startActivity(Intent(context, MainActivity::class.java))
                 },
                 modifier = Modifier
                     .fillMaxWidth(0.5f)
@@ -167,4 +204,77 @@ fun ChangePassword(modifier: Modifier = Modifier) {
             }
         }
     }
+}
+
+// Baseado na documentação: https://www.baeldung.com/kotlin/advanced-encryption-standard
+// Criptografa uma senha usando AES, tendo como a chave "ProjetoIntegrador3Semestre062025"
+@OptIn(ExperimentalEncodingApi::class)
+fun encryptPassword(password: String, encryptionKey: String = "ProjetoIntegrador3Semestre062025"): Pair<String, String> {
+    // Converte a chave para bytes UTF-8 e ajusta para 32 bytes (256 bits)
+    val keyBytes = encryptionKey.toByteArray(Charsets.UTF_8).copyOf(32)
+    // Cria a especificação da chave secreta para o algoritmo AES
+    val secretKey = SecretKeySpec(keyBytes, "AES")
+    // Gera 16 bytes aleatórios (tamanho pedido pela AES)
+    val iv = ByteArray(16)
+    // Preenche com bytes criptografados
+    SecureRandom().nextBytes(iv)
+    // Cria o objeto IV
+    val ivSpec = IvParameterSpec(iv)
+    // Configuração da criptografia, aonde obtem a instancia do cipher
+    val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
+    // Inicializa para a criptografia com a chave e IV
+    cipher.init(Cipher.ENCRYPT_MODE, secretKey, ivSpec)
+    // Converte a senha para bytes UTF-8 e criptografa
+    val encryptedBytes = cipher.doFinal(password.toByteArray(Charsets.UTF_8))
+
+    // Utilizado "Return Pair", para que consiga dar return em dois elementos ncessarios para descriptografar
+    // Retorna Pair com a senha criptografada e IV, ambos em Base64
+    return Pair(
+        Base64.encode(encryptedBytes),
+        Base64.encode(iv)
+    )
+}
+
+
+fun updatePassword(
+    context: Context,
+    documentId: String,
+    newPassword: String,
+    newCategory: String,
+    newDesc: String
+) {
+    val user = Firebase.auth.currentUser
+    if (user == null) {
+        Toast.makeText(context, "Usuário não autenticado!", Toast.LENGTH_SHORT).show()
+        return
+    }
+    if (newPassword.isBlank() || newCategory.isBlank()) {
+        Toast.makeText(context, "Senha e Categoria não podem estar em branco!", Toast.LENGTH_SHORT).show()
+        return
+    }
+
+    // Encripta a nova senha
+    val (encrypted, iv) = encryptPassword(newPassword)
+
+    // Prepara o map pra atualizar
+    val updates = mapOf(
+        "senha"     to encrypted,
+        "iv"        to iv,
+        "categoria" to newCategory,
+        "descricao" to newDesc
+    )
+
+    // Executa o update no Firestore
+    Firebase.firestore
+        .collection("users")
+        .document(user.uid)
+        .collection("senhas")
+        .document(documentId)
+        .update(updates)
+        .addOnSuccessListener {
+            Toast.makeText(context, "Senha atualizada com sucesso!", Toast.LENGTH_SHORT).show()
+        }
+        .addOnFailureListener { e ->
+            Toast.makeText(context, "Erro ao atualizar: ${e.message}", Toast.LENGTH_LONG).show()
+        }
 }

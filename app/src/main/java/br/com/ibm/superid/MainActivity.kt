@@ -192,11 +192,12 @@ fun MainScreen() {
             shape = CircleShape,
             containerColor = MaterialTheme.colorScheme.primary
         ) {
-            Image(
+            //comentei pq ta dando erro
+            /*Image(
                 painter = painterResource(id = R.drawable.qrcode),
                 contentDescription = "QR Code",
                 modifier = Modifier.size(24.dp)
-            )
+           )*/
         }
 
         // Popup para o QR Code
@@ -284,8 +285,19 @@ fun Categories(title: String, items: List<SenhaItem>) {
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         // Botão para ir para a tela de alteração de senha
+
+
                         TextButton(onClick = {
-                            val intent = Intent(context, ChangePasswordActivity::class.java)
+                            val intent = Intent(context, ChangePasswordActivity::class.java).apply{
+                            putExtra("PASSWORD_ID", item.id)
+                            putExtra("PASSWORD_TITLE", item.titulo)
+                            putExtra("PASSWORD_VALUE", item.senha)
+                            putExtra("PASSWORD_DESCRIPTION", item.descricao)
+                            putExtra("PASSWORD_CATEGORY", item.categoria)
+
+                            // Link da documentação que mostra como enviar valores de uma Activity (tela) para outra:
+                            // https://developer.android.com/guide/components/activities/parcelables-and-bundles?hl=pt-br#kotlin
+                        }
                             context.startActivity(intent)
                         }) {
                             Text("Alterar")
