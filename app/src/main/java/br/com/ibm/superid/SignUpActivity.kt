@@ -118,7 +118,7 @@ fun saveUserToFirestore(name: String, email: String, context: Context) {
         .add(dados_cadastro)
         .addOnSuccessListener {
             Log.i("Firestore", "Usuário salvo em users")
-            context.startActivity(Intent(context, SignInActivity::class.java))
+            context.startActivity(Intent(context, EmailVerificationActivity::class.java))
         }
         .addOnFailureListener { e ->
             Log.e("Firestore", "Erro ao salvar usuário", e)
@@ -180,7 +180,7 @@ fun SignUp(modifier: Modifier = Modifier) {
 
             // Define o título da tela em negrito e tamanho 30sp
             Text(
-                text = "Cadastro",
+                text = "CADASTRO",
                 fontSize = 30.sp,
                 fontWeight = FontWeight.Bold
             )

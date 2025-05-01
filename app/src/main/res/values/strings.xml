@@ -10,4 +10,5 @@
     <string name="title_activity_change_password">ChangePasswordActivity</string>
     <string name="title_activity_add_cactivity">AddCActivity</string>
     <string name="title_activity_add_category">AddCategoryActivity</string>
+    <string name="title_activity_email_verification">EmailVerificationActivity</string>
 </resources>
