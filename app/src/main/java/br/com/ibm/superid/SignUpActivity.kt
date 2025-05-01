@@ -75,9 +75,8 @@ fun saveUserToAuth(email: String, password: String, name: String, context: Conte
         .addOnCompleteListener { task ->
             // Se a criação da conta for bem-sucedida, obtemos o usuário e seu UID
             if (task.isSuccessful) {
-                val user = task.result.user
-                val uid = user!!.uid
-                Log.i("AUTH", "Conta criada com sucesso. UID: $uid")
+                val user = task.result?.user!!
+                Log.i("AUTH", "Conta criada com sucesso")
 
                 // Enviar email para confirmar a conta
                 // Implementado com base na seção "Gerenciar usuários > Enviar e-mail de verificação" da documentação oficial do Firebase Authentication
@@ -96,7 +95,7 @@ fun saveUserToAuth(email: String, password: String, name: String, context: Conte
                     }
 
                 // Chama a função para salvar os dados do usuário no Firestore
-                saveUserToFirestore(name, email, uid, context)
+                saveUserToFirestore(name, email, context)
             } else {
                 // Em caso de falha, registra o erro
                 Log.i("AUTH", "Falha ao criar conta.", task.exception)
@@ -105,22 +104,20 @@ fun saveUserToAuth(email: String, password: String, name: String, context: Conte
 }
 
 // Função para salvar os dados necessários durante o cadastro no Firestore
-fun saveUserToFirestore(name: String, email: String, uid: String, context: Context) {
+fun saveUserToFirestore(name: String, email: String, context: Context) {
     // Obtendo a instância do banco de dados Firestore
     val db = Firebase.firestore
 
     // Criando uma mapa mutável (hashMap) com informações do cadastro
     val dados_cadastro = hashMapOf(
-        "uid"   to uid,
         "name"  to name,
         "email" to email
     )
 
     db.collection("users")
-        .document(uid)
-        .set(dados_cadastro)
+        .add(dados_cadastro)
         .addOnSuccessListener {
-            Log.i("Firestore", "Usuário salvo em users/$uid")
+            Log.i("Firestore", "Usuário salvo em users")
             context.startActivity(Intent(context, SignInActivity::class.java))
         }
         .addOnFailureListener { e ->
@@ -229,45 +226,36 @@ fun SignUp(modifier: Modifier = Modifier) {
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
             )
 
-            // Botão que quando clicado salva informações do cadastro no banco Firestore
-            Button(
-                onClick = {
-                    // Verifica se algum campo está em branco (se está vazio ou apenas com espaços)
-                    // Baseado na documentação: https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.text/is-blank.html
-                    if (name.isBlank() || email.isBlank() || password.isBlank() || confirmPassword.isBlank()) {
-                        Log.i("SIGN UP", "Preencha todos os campos!")
-
-                        // Toast para avisar que precisa preencher todos os dados
-                        // Baseado na documentação: https://developer.android.com/guide/topics/ui/notifiers/toasts?hl=pt-br
-                        Toast.makeText(context, "Preencha todos os campos!", Toast.LENGTH_LONG)
-                            .show()
+            // Botão que quando clicado salva informações do cadastro no banco Firestore e verifica se tem algo errado
+            // Baseado na documentação: https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.text/is-blank.html
+            // Baseado na documentação: https://developer.android.com/guide/topics/ui/notifiers/toasts?hl=pt-br
+            Button(onClick = {
+                when {
+                    // Verifica se os campos estão em brancos ou apenas com espaços
+                    name.isBlank() || email.isBlank() || password.isBlank() || confirmPassword.isBlank() -> {
+                        Toast.makeText(context, "Preencha todos os campos!", Toast.LENGTH_LONG).show()
                     }
 
-                    // Se "@" não estiver contido "!in" no email
-                    if ("@" !in email) {
-                        Log.i("SIGN UP", "Você digitou um email que não é válido!")
-
-                        // Toast para avisar que o email é invalido
+                    //  Verifica se é um email válido
+                    "@" !in email -> {
                         Toast.makeText(context, "Email inválido!", Toast.LENGTH_LONG).show()
                     }
 
-                    // Se as senhas forem iguais
-                    else if (password == confirmPassword) {
-                        // Cria a conta no Firebase
-                        saveUserToAuth(email, password, name, context)
-                    } else {
-                        // Se forem senhas diferentes
-                        Log.i("SIGN UP", "As senhas não coincidem.")
+                    // Verifica se as senhas são diferentes
+                    password != confirmPassword -> {
+                        Toast.makeText(context, "As senhas não coincidem!", Toast.LENGTH_LONG).show()
+                    }
 
-                        // Toast para avisar que as senhas estão diferentes
-                        Toast.makeText(context, "As senhas não coincidem!", Toast.LENGTH_LONG)
-                            .show()
+                    // Caso não tenha erro, salva no banco de dados Firestore
+                    else -> {
+                        saveUserToAuth(email, password, name, context)
                     }
                 }
-            ) {
-                // Define o texto que está dentro do botão
-                Text(text = "Cadastrar")
+            }) {
+                Text("Cadastrar")
             }
         }
     }
 }
+
+

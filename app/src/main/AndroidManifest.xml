@@ -21,14 +21,6 @@
             android:theme="@style/Theme.SuperID" />
         <!-- Fim de AddCategoryActivity -->
 
-        <!-- Início de AddCActivity -->
-        <activity
-            android:name=".AddCActivity"
-            android:exported="false"
-            android:label="@string/title_activity_add_cactivity"
-            android:theme="@style/Theme.SuperID" />
-        <!-- Fim de AddCActivity -->
-
         <!-- Início de ChangePasswordActivity -->
         <activity
             android:name=".ChangePasswordActivity"
@@ -59,7 +51,12 @@
             android:exported="true"
             android:label="@string/title_activity_welcome"
             android:theme="@style/Theme.SuperID"
-            tools:ignore="MissingClass" />
+            tools:ignore="MissingClass">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <!-- Fim de WelcomeActivity -->
 
         <!-- Início de AccessOptionActivity -->
@@ -83,12 +80,7 @@
             android:name=".SignInActivity"
             android:exported="true"
             android:label="@string/title_activity_sign_in"
-            android:theme="@style/Theme.SuperID">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:theme="@style/Theme.SuperID" />
         <!-- Fim de SignInActivity -->
 
         <!-- Início de SignUpActivity -->
