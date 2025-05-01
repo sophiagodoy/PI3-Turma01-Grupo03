@@ -108,24 +108,24 @@ fun saveUserToFirestore(name: String, email: String, context: Context) {
     // Obtendo a instância do banco de dados Firestore
     val db = Firebase.firestore
 
-    // Criando uma mapa mutável (hashMap) com informações do cadastro
-    val dados_cadastro = hashMapOf(
+    // Criando um mapa mutável (hashMap) com informações do cadastro
+    val dadosCadastro = hashMapOf(
         "name"  to name,
         "email" to email
     )
 
     db.collection("users")
-        .add(dados_cadastro)
-        .addOnSuccessListener {
-            Log.i("Firestore", "Usuário salvo em users")
-            context.startActivity(Intent(context, EmailVerificationActivity::class.java))
-        }
-        .addOnFailureListener { e ->
-            Log.e("Firestore", "Erro ao salvar usuário", e)
-            Toast.makeText(context, "Erro ao criar usuário", Toast.LENGTH_LONG).show()
+        .add(dadosCadastro)
+        .addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                Toast.makeText(context, "Usuário Criado com sucesso!", Toast.LENGTH_LONG).show()
+                // Se salvou com sucesso vai para a EmailVerificationActivity
+                context.startActivity(Intent(context, EmailVerificationActivity::class.java))
+            } else {
+                Toast.makeText(context, "Erro ao criar usuário", Toast.LENGTH_LONG).show()
+            }
         }
 }
-
 
 // Função Composable que apresenta o formulário de cadastro do usuário
 @OptIn(ExperimentalMaterial3Api::class)
