@@ -57,8 +57,13 @@ class AddPasswordActivity : ComponentActivity() {
 }
 
 // Função para adicionar uma nova senha no Firestore
-@OptIn(ExperimentalEncodingApi::class)
-fun addNewPassword(context: Context, senha: String, categoria: String, descricao: String, titulo: String) {
+fun addNewPassword(
+    context: Context,
+    senha: String,
+    categoria: String,
+    descricao: String,
+    titulo: String
+) {
     // Baseado na documentação: https://firebase.google.com/docs/auth/android/manage-users?hl=pt-br#get_the_currently_signed-in_user
     // Identifica o usuário atual conectado
     val user = Firebase.auth.currentUser
@@ -69,49 +74,44 @@ fun addNewPassword(context: Context, senha: String, categoria: String, descricao
         return
     }
 
-    // Testa a criptografia, verificando se está funcionando
     try {
         // Obtendo a instância do banco de dados Firestore
         val db = Firebase.firestore
-        // Chama EncryptPassword e obtém tanto a senha criptografada quanto o IV (Vetor de Inicialização)
-        // Utilizado para criptografar a senha quando o IV
+
+        // Criptografa a senha e obtém o IV
         val (encryptpassword, iv) = encryptpassword(senha)
         val accessToken = createacesstoken()
 
-        // Criando uma mapa mutável (hashMap) com informações da nova senha
+        // Mapa com informações da nova senha
         val dadosNovaSenha = hashMapOf(
-            "titulo" to titulo,
-            "senha" to encryptpassword,
-            "categoria" to categoria,
-            "descricao" to descricao,
+            "titulo"      to titulo,
+            "senha"       to encryptpassword,
+            "categoria"   to categoria,
+            "descricao"   to descricao,
             "accessToken" to accessToken,
-            "iv" to iv // Vetor de Inicialização
+            "iv"          to iv
         )
 
-        // Gravando os dados no banco de dados Firestore
-        // Acessa a coleção chamada users do banco de dados
+        // Adiciona o documento e usa addOnCompleteListener
         db.collection("users")
-            // Dentro da coleção "users", aponta para o documento cujo ID é o uid do usuário autenticado
             .document(user!!.uid)
-            // Cria uma subcoleção dentro do documento chamada "senhas"
             .collection("senhas")
-            // Adiciona um novo documento na subcoleção "senhas" usados os dados de "dadosNovaSenha"
             .add(dadosNovaSenha)
-            // Caso a senha seja adicionada com sucesso, chama um Toast dando o aviso
-            .addOnSuccessListener { documentReference ->
-                // Captura o ID gerado automaticamente
-                val documentId = documentReference.id
-                // Atualiza o mesmo documento adicionando o campo "id"
-                documentReference.update("id", documentId)
-                Toast.makeText(context, "Senha salva com sucesso!", Toast.LENGTH_SHORT).show()
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    // Se salvou com sucesso, obtém a referência do documento
+                    val documentReference = task.result
+                    // Atualiza o próprio documento adicionando o campo "id"
+                    documentReference.update("id", documentReference.id)
+                    Toast.makeText(context, "Senha salva com sucesso!", Toast.LENGTH_SHORT).show()
+                } else {
+                    // Em caso de erro, exibe a mensagem
+                    val e = task.exception
+                    Toast.makeText(context, "Erro ao salvar senha: ${e?.message}", Toast.LENGTH_LONG).show()
+                }
             }
-            // Caso a senha de erro ao adicionar no banco de dados, chama um Toast dando o aviso
-            .addOnFailureListener { e ->
-                Toast.makeText(context, "Erro ao salvar senha: ${e.message}", Toast.LENGTH_LONG).show()
-            }
-    }
-    // Tratar dos possiveis erros de criptografia
-    catch (e: Exception) {
+    } catch (e: Exception) {
+        // Trata possíveis erros de criptografia
         Toast.makeText(context, "Erro de criptografia: ${e.message}", Toast.LENGTH_LONG).show()
     }
 }
