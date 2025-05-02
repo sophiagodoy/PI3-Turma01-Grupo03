@@ -6,6 +6,7 @@ package br.com.ibm.superid
 // Importações necessárias
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -21,6 +22,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import br.com.ibm.superid.ui.theme.SuperIDTheme
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 
 // Declarando a Activity (EmailVerificationActivity)
 class EmailVerificationActivity : ComponentActivity() {
@@ -74,11 +77,21 @@ fun EmailVerification(modifier: Modifier = Modifier) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Botão para reenviar o email de verificação
         Button(onClick = {
-            Toast.makeText(context, "Email reenviado!", Toast.LENGTH_SHORT).show()
+            val user = Firebase.auth.currentUser
+            if (user != null) {
+                user.sendEmailVerification()
+                    .addOnSuccessListener {
+                        Toast.makeText(context, "E-mail de verificação reenviado!", Toast.LENGTH_LONG).show()
+                    }
+
+                    .addOnFailureListener { e ->
+                        Toast.makeText(context, "Falha ao reenviar", Toast.LENGTH_LONG).show()
+                    }
+            } else {
+                Toast.makeText(context, "Usuário não autenticado!", Toast.LENGTH_LONG).show()
+            }
         }) {
-            // Define o texto que está dentro do botão
             Text("Reenviar email")
         }
     }
