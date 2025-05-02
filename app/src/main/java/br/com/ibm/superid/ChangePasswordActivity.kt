@@ -95,9 +95,10 @@ fun ChangePassword(
     val context = LocalContext.current
 
     // Variáveis que guardam o valor digitado nos campos do formulário
-    var senha by remember { mutableStateOf("") }
-    var categoria by remember { mutableStateOf("") }
-    var descricao by remember { mutableStateOf("") }
+    var titulo by remember { mutableStateOf(initialTitulo) }
+    var senha by remember { mutableStateOf(initialSenha) }
+    var categoria by remember { mutableStateOf(initialCategoria) }
+    var descricao by remember { mutableStateOf(initialDescricao) }
 
     // Seta que volta para (COLOCAR O NOME DA TELA Q O ARTHUR CRIOU)
     Scaffold(
@@ -148,13 +149,20 @@ fun ChangePassword(
             // Espaço de 24dp abaixo do título
             Spacer(Modifier.height(24.dp))
 
+            OutlinedTextField(
+                value = titulo,
+                onValueChange = { titulo = it },
+                label = { Text("Titulo") },
+                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+            )
+
             // Campo de texto para digitar a nova senha
             OutlinedTextField(
                 value = senha,
                 onValueChange = { senha = it },
                 label = { Text("Senha") },
-                // Esconde os caracteres da senha
-                visualTransformation = PasswordVisualTransformation(),
+                /*// Esconde os caracteres da senha
+                visualTransformation = PasswordVisualTransformation(),*/
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -187,12 +195,13 @@ fun ChangePassword(
                     updatePassword(
                         context      = context,
                         documentId   = passwordId,
+                        newTitulo    = titulo,
                         newPassword  = senha,
                         newCategory  = categoria,
                         newDesc      = descricao
                     )
 
-                    if(senha.isNotBlank())// volta para a Main
+                    if(senha.isNotBlank() && titulo.isNotBlank() && categoria.isNotBlank() && descricao.isNotBlank())// volta para a Main
                     context.startActivity(Intent(context, MainActivity::class.java))
                 },
                 modifier = Modifier
@@ -239,6 +248,7 @@ fun encryptPassword(password: String, encryptionKey: String = "ProjetoIntegrador
 fun updatePassword(
     context: Context,
     documentId: String,
+    newTitulo:  String,
     newPassword: String,
     newCategory: String,
     newDesc: String
@@ -248,8 +258,8 @@ fun updatePassword(
         Toast.makeText(context, "Usuário não autenticado!", Toast.LENGTH_SHORT).show()
         return
     }
-    if (newPassword.isBlank() || newCategory.isBlank()) {
-        Toast.makeText(context, "Senha e Categoria não podem estar em branco!", Toast.LENGTH_SHORT).show()
+    if (newPassword.isBlank() || newTitulo.isBlank() || newCategory.isBlank() || newDesc.isBlank()) {
+        Toast.makeText(context, "Preencha todos os dados!", Toast.LENGTH_SHORT).show()
         return
     }
 
@@ -260,21 +270,25 @@ fun updatePassword(
     val updates = mapOf(
         "senha"     to encrypted,
         "iv"        to iv,
+        "titulo"    to newTitulo,
         "categoria" to newCategory,
         "descricao" to newDesc
     )
 
-    // Executa o update no Firestore
-    Firebase.firestore
-        .collection("users")
-        .document(user.uid)
-        .collection("senhas")
-        .document(documentId)
-        .update(updates)
-        .addOnSuccessListener {
-            Toast.makeText(context, "Senha atualizada com sucesso!", Toast.LENGTH_SHORT).show()
-        }
-        .addOnFailureListener { e ->
-            Toast.makeText(context, "Erro ao atualizar: ${e.message}", Toast.LENGTH_LONG).show()
-        }
+
+    if (newTitulo.isNotBlank() && newPassword.isNotBlank() &&  newCategory.isNotBlank() && newDesc.isNotBlank()){
+        // Executa o update no Firestore
+        Firebase.firestore
+            .collection("users")
+            .document(user.uid)
+            .collection("senhas")
+            .document(documentId)
+            .update(updates)
+            .addOnSuccessListener {
+                Toast.makeText(context, "Senha atualizada com sucesso!", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(context, "Erro ao atualizar: ${e.message}", Toast.LENGTH_LONG).show()
+            }}
+
 }
