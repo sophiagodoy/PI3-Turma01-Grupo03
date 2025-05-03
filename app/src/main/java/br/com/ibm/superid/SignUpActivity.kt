@@ -12,9 +12,14 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -24,10 +29,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,6 +49,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
+import br.com.ibm.superid.ui.theme.core.util.CustomOutlinedTextField
+import br.com.ibm.superid.ui.theme.core.util.SuperIDHeader
 
 // Declarando a Activity (signUpActivity)
 class SignUpActivity : ComponentActivity() {
@@ -129,6 +136,7 @@ fun saveUserToFirestore(name: String, email: String, context: Context) {
 
 // Função Composable que apresenta o formulário de cadastro do usuário
 @OptIn(ExperimentalMaterial3Api::class)
+@Preview
 @Composable
 fun SignUp(modifier: Modifier = Modifier) {
 
@@ -141,42 +149,36 @@ fun SignUp(modifier: Modifier = Modifier) {
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
 
-    // Seta que volta para AccessOptionActivity
-    Scaffold(
-        // Define que a tela terá uma barra superior, onde vamos colocar o TopAppBar
-        topBar = {
-            // Começa a criação da barra de app superior (TopAppBar)
-            TopAppBar(
-                title = { }, // Indica que não terá texto no meio da barra
-                // Define o ícone de navegação da TopAppBar
-                navigationIcon = {
-                    //  Cria um botão que será clicável, o botão envolverá o ícone de voltar
-                    IconButton(
-                        onClick = {
-                            val intent = Intent(context, AccessOptionActivity::class.java)
-                            context.startActivity(intent)
-                        }
-                    ) {
-                        // Cria o ícone da seta de voltar
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Voltar" // Usado para acessibilidade (leitores de tela vão anunciar "Voltar" para deficientes visuais)
-                        )
-                    }
-                }
+    
+    Column (modifier = Modifier
+        .fillMaxSize()
+        .background(MaterialTheme.colorScheme.background)) {
+        // Cabeçalho visual personalizado
+        SuperIDHeader()
+
+        // Botão de voltar
+        IconButton(
+            onClick = {
+                val intent = Intent(context, AccessOptionActivity::class.java)
+                context.startActivity(intent)
+            },
+            modifier = Modifier.padding(start = 8.dp, top = 8.dp)
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Voltar"
             )
         }
-    ) { innerPadding -> // Fecha o Scaffold e começa a definir o conteúdo principal da tela
 
         // Layout em coluna que ocupa toda a tela e aplica padding de 16dp
         Column(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
-                .padding(16.dp),
-            verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center,
+                .padding(top = 50.dp),
+            verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+        )
+        {
 
             // Define o título da tela em negrito e tamanho 30sp
             Text(
@@ -186,45 +188,43 @@ fun SignUp(modifier: Modifier = Modifier) {
             )
 
             // Campo de texto para digitar o nome do usuário
-            OutlinedTextField(
-                modifier = Modifier.padding(10.dp),
+            CustomOutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text(text = "Nome") }
+                label = "Nome"
             )
 
             // Campo de texto para digitar o email do usuário
-            OutlinedTextField(
-                modifier = Modifier.padding(10.dp),
+            CustomOutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
-                label = { Text(text = "Email") }
+                label = "Email"
             )
 
             // Campo de texto para digitar a senha do usuário
-            OutlinedTextField(
-                modifier = Modifier.padding(10.dp),
+
+            CustomOutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
-                label = { Text(text = "Senha") },
+                label = "Senha",
 
                 // Esconde os caracteres da senha
                 // Baseado na documentação: https://developer.android.com/develop/ui/compose/text/user-input?hl=pt-br
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
             )
-
             // Campo de texto para confirmar a senha do usuário
-            OutlinedTextField(
-                modifier = Modifier.padding(10.dp),
+            CustomOutlinedTextField(
                 value = confirmPassword,
                 onValueChange = { confirmPassword = it },
-                label = { Text(text = "Confirmar Senha") },
+                label = "Confirmar Senha",
 
                 // Esconde os caracteres da senha
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
             )
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             // Botão que quando clicado salva informações do cadastro no banco Firestore e verifica se tem algo errado
             // Baseado na documentação: https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.text/is-blank.html
@@ -251,7 +251,11 @@ fun SignUp(modifier: Modifier = Modifier) {
                         saveUserToAuth(email, password, name, context)
                     }
                 }
-            }) {
+            },
+                modifier = Modifier
+                    .height(60.dp)    // altura maior
+                    .width(150.dp)  // largura maior
+            ) {
                 Text("Cadastrar")
             }
         }

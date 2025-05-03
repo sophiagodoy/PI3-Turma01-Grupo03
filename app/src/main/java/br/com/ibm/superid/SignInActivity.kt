@@ -12,6 +12,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -40,11 +41,20 @@ import androidx.compose.ui.unit.sp
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
-import br.com.ibm.superid.ui.theme.ui.theme.SuperIDTheme
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.tooling.preview.Preview
+import br.com.ibm.superid.ui.theme.SuperIDTheme
+import br.com.ibm.superid.ui.theme.core.util.CustomOutlinedTextField
+import br.com.ibm.superid.ui.theme.core.util.SuperIDHeader
+import br.com.ibm.superid.ui.theme.core.util.SuperIDHeaderImage
 import kotlin.jvm.java
 
 // Declarando a Activity (signInActivity)
@@ -92,6 +102,7 @@ fun signInWithFirebaseAuth(email: String, password: String, context: Context) {
 
 // Função Composable que apresenta o formulário de login do usuário
 @OptIn(ExperimentalMaterial3Api::class)
+@Preview
 @Composable
 fun SignIn(modifier: Modifier = Modifier) {
 
@@ -102,45 +113,40 @@ fun SignIn(modifier: Modifier = Modifier) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
+
+
     // Seta que volta para AccessOptionActivity
     // Baseado em: https://developer.android.com/develop/ui/compose/components/app-bars?hl=pt-br#top-app-bar
     // Baseado em: https://alexzh.com/visual-guide-to-topappbar-variants-in-jetpack-compose/?utm_source=chatgpt.com
-    // Estrutura básica da tela utilizando Scaffold para organizar a barra superior e o conteúdo principal
-    Scaffold(
-        // Define que a tela terá uma barra superior, onde vamos colocar o TopAppBar
-        topBar = {
-            // Começa a criação da barra de app superior (TopAppBar)
-            TopAppBar(
-                title = { }, // Indica que não terá texto no meio da barra
-                // Define o ícone de navegação da TopAppBar
-                navigationIcon = {
-                    //  Cria um botão que será clicável, o botão envolverá o ícone de voltar
-                    IconButton(
-                        onClick = {
-                            val intent = Intent(context, AccessOptionActivity::class.java)
-                            context.startActivity(intent)
-                        }
-                    ) {
-                        // Cria o ícone da seta de voltar
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Voltar" // Usado para acessibilidade (leitores de tela vão anunciar "Voltar" para deficientes visuais)
-                        )
-                    }
-                }
+
+    Column (modifier = Modifier
+        .fillMaxSize()
+        .background(MaterialTheme.colorScheme.background)) {
+        // Cabeçalho visual personalizado
+        SuperIDHeader()
+
+        // Botão de voltar
+        IconButton(
+            onClick = {
+                val intent = Intent(context, AccessOptionActivity::class.java)
+                context.startActivity(intent)
+            },
+            modifier = Modifier.padding(start = 8.dp, top = 8.dp)
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Voltar"
             )
         }
-    ) { innerPadding -> // Fecha o Scaffold e começa a definir o conteúdo principal da tela
 
         // Layout em coluna que ocupa toda a tela e aplica padding de 16dp
         Column(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+                .padding(top = 80.dp),
+            verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+        ){
 
             // Define o título da tela em negrito e tamanho 30sp
             Text(
@@ -150,19 +156,17 @@ fun SignIn(modifier: Modifier = Modifier) {
             )
 
             // Campo de texto para digitar o email do usuário
-            OutlinedTextField(
-                modifier = Modifier.padding(10.dp),
+            CustomOutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
-                label = { Text("Email") }
+                label = "Email"
             )
 
             // Campo de texto para digitar a senha do usuário
-            OutlinedTextField(
-                modifier = Modifier.padding(10.dp),
+            CustomOutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
-                label = { Text("Senha") },
+                label = "Senha",
 
                 // Esconde os caracteres da senha
                 visualTransformation = PasswordVisualTransformation(),
@@ -173,7 +177,10 @@ fun SignIn(modifier: Modifier = Modifier) {
             Text(
                 text = "Esqueceu a senha?",
                 fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.primary,
+                color = MaterialTheme.colorScheme.tertiary,
+                fontSize = 16.sp,
+                style = TextStyle(
+                    textDecoration = TextDecoration.Underline),
                 modifier = Modifier
                     .padding(top = 8.dp)
                     // Torna o texto clicável
@@ -184,6 +191,8 @@ fun SignIn(modifier: Modifier = Modifier) {
                         context.startActivity(intent)
                     }
             )
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             // Botão que quando clicado salva no FirebaseAuth
             Button(
@@ -200,7 +209,10 @@ fun SignIn(modifier: Modifier = Modifier) {
                         signInWithFirebaseAuth(email, password, context)
                         Log.i("SIGN IN", "Usuário logado com sucesso")
                     }
-                }
+                },
+                modifier = Modifier
+                    .height(60.dp)    // altura maior
+                    .width(150.dp)  // largura maior
             ) {
                 // Define o texto que está dentro do botão
                 Text("Entrar")

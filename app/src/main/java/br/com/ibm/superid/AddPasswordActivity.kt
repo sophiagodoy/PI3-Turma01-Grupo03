@@ -5,14 +5,21 @@ package br.com.ibm.superid
 
 // Importações necessárias
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -27,6 +34,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import br.com.ibm.superid.ui.theme.SuperIDTheme
+import br.com.ibm.superid.ui.theme.core.util.CustomOutlinedTextField
+import br.com.ibm.superid.ui.theme.core.util.SuperIDHeader
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -174,74 +183,96 @@ fun AddPassword(modifier: Modifier = Modifier) {
     var titulo by remember { mutableStateOf("") }
 
     // Layout em coluna que ocupa toda a tela e aplica padding de 16dp
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+    // Seta que volta para AccessOptionActivity
+    // Baseado em: https://developer.android.com/develop/ui/compose/components/app-bars?hl=pt-br#top-app-bar
+    // Baseado em: https://alexzh.com/visual-guide-to-topappbar-variants-in-jetpack-compose/?utm_source=chatgpt.com
 
-        // Define o título da tela em negrito e tamanho 30sp
-        Text(
-            text = "ADICIONAR SENHA",
-            fontSize = 30.sp,
-            fontWeight = FontWeight.Bold
-        )
+    Column (modifier = Modifier
+        .fillMaxSize()
+        .background(MaterialTheme.colorScheme.background)) {
+        // Cabeçalho visual personalizado
+        SuperIDHeader()
 
-        // Espaço de 24dp abaixo do título
-        Spacer(Modifier.height(24.dp))
-
-        // Campo de texto para escolher a categoria da nova senha
-        OutlinedTextField(
-            value = titulo,
-            onValueChange = { titulo = it },
-            label = { Text("Título") },
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
-        )
-
-        // Campo de texto para digitar a nova senha
-        OutlinedTextField(
-            value = senha,
-            onValueChange = { senha = it },
-            label = { Text("Senha") },
-            // Esconde os caracteres da senha
-            visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
-        )
-
-        // Campo de texto para escolher a categoria da nova senha
-        OutlinedTextField(
-            value = categoria,
-            onValueChange = { categoria = it },
-            label = { Text("Categoria") },
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
-        )
-
-        // Campo de texto para digitar a descrição da noa senha
-        OutlinedTextField(
-            value = descricao,
-            onValueChange = { descricao = it },
-            label = { Text("Descrição") },
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
-        )
-
-        // Espaço de 24dp antes do botão
-        Spacer(Modifier.height(24.dp))
-
-        // Botão que quando clicado salva a nova senha no banco Firestore
-        Button(
+        // Botão de voltar
+        IconButton(
             onClick = {
-                // Chama a função que valida e grava a nova senha no no Firestore
-                addNewPassword(context, senha, categoria, descricao, titulo)
+                val intent = Intent(context, MainActivity::class.java)
+                context.startActivity(intent)
             },
-            modifier = Modifier
-                .fillMaxWidth(0.5f)
-                .height(48.dp)
+            modifier = Modifier.padding(start = 8.dp, top = 8.dp)
         ) {
-            // Define o texto que está dentro do botão
-            Text("Salvar")
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Voltar"
+            )
+        }
+
+        // Layout em coluna que ocupa toda a tela e aplica padding de 16dp
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 50.dp),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+
+            // Define o título da tela em negrito e tamanho 30sp
+            Text(
+                text = "ADICIONAR SENHA",
+                fontSize = 30.sp,
+                fontWeight = FontWeight.Bold
+            )
+
+            // Espaço de 24dp abaixo do título
+            Spacer(Modifier.height(24.dp))
+
+            // Campo de texto para escolher a categoria da nova senha
+            CustomOutlinedTextField(
+                value = titulo,
+                onValueChange = { titulo = it },
+                label = "Título"
+            )
+
+            // Campo de texto para digitar a nova senha
+            CustomOutlinedTextField(
+                value = senha,
+                onValueChange = { senha = it },
+                label ="Senha",
+                // Esconde os caracteres da senha
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            )
+
+            // Campo de texto para escolher a categoria da nova senha
+            CustomOutlinedTextField(
+                value = categoria,
+                onValueChange = { categoria = it },
+                label ="Categoria"
+            )
+
+            // Campo de texto para digitar a descrição da noa senha
+            CustomOutlinedTextField(
+                value = descricao,
+                onValueChange = { descricao = it },
+                label ="Descrição"
+            )
+
+            // Espaço de 24dp antes do botão
+            Spacer(Modifier.height(24.dp))
+
+            // Botão que quando clicado salva a nova senha no banco Firestore
+            Button(
+                onClick = {
+                    // Chama a função que valida e grava a nova senha no no Firestore
+                    addNewPassword(context, senha, categoria, descricao, titulo)
+                },
+                modifier = Modifier
+                    .height(60.dp)    // altura maior
+                    .width(150.dp)
+            ) {
+                // Define o texto que está dentro do botão
+                Text("Salvar")
+            }
         }
     }
 }

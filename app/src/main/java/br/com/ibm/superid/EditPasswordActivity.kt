@@ -1,4 +1,4 @@
-// TELA PARA ALTERAR / REMOLVER SENHA
+/*TODO: precisa Remover */
 package br.com.ibm.superid
 
 import android.content.Intent

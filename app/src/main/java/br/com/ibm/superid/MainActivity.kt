@@ -4,6 +4,8 @@ package br.com.ibm.superid
 
 // Importações necessárias
 import android.content.Intent
+import android.content.res.Configuration.UI_MODE_NIGHT_NO
+import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -11,11 +13,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -23,13 +27,21 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.focusModifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import br.com.ibm.superid.ui.theme.SuperIDTheme
+import br.com.ibm.superid.ui.theme.core.util.BackButtonBar
+import br.com.ibm.superid.ui.theme.core.util.StandardBoxPopUp
+import br.com.ibm.superid.ui.theme.core.util.SuperIDHeader
+import br.com.ibm.superid.ui.theme.primaryLight
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -48,7 +60,11 @@ class MainActivity : ComponentActivity() {
         // Define o conteúdo da tela com o tema do app
         setContent {
             SuperIDTheme {
-                PreviewMainScreen()
+                Surface(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    PreviewMainScreen()
+                }
             }
         }
     }
@@ -80,36 +96,26 @@ fun decryptPassword(encrypted: String, ivBase64: String, key: String = "ProjetoI
 @Composable
 fun MainScreen() {
     val context = LocalContext.current
-    var passwords by remember { mutableStateOf<List<SenhaItem>>(emptyList()) } // Lista de senhas
-    var showAddPopUp by remember { mutableStateOf(false) } // Exibe o popup de adicionar senha
-    var showQRCodePopUp by remember { mutableStateOf(false) } // Exibe o popup do QR Code
+    var passwords by remember { mutableStateOf<List<SenhaItem>>(emptyList()) }
+    var showAddPopUp by remember { mutableStateOf(false) }
+    var showQRCodePopUp by remember { mutableStateOf(false) }
 
     // Carrega as senhas do Firestore assim que a tela iniciar
     LaunchedEffect(Unit) {
-        // Obtém o usuário atualmente autenticado no Firebase
         val user = Firebase.auth.currentUser
-
-        // Verifica se há um usuário logado
         if (user != null) {
-            // Acessa a subcoleção "senhas" dentro do documento do usuário logado
             Firebase.firestore.collection("users")
                 .document(user.uid)
                 .collection("senhas")
-                .get() // Realiza a leitura de todos os documentos dessa subcoleção
+                .get()
                 .addOnSuccessListener { result ->
-                    // Lista temporária para armazenar as senhas descriptografadas
                     val tempList = mutableListOf<SenhaItem>()
-
-                    // percorre cada documento retornado
                     for (doc in result) {
                         try {
-                            // Descriptografa a senha utilizando os dados armazenados (senha e IV)
                             val decrypted = decryptPassword(
                                 encrypted = doc.getString("senha") ?: "",
                                 ivBase64 = doc.getString("iv") ?: ""
                             )
-
-                            // Cria um objeto SenhaItem com os dados do documento
                             tempList.add(
                                 SenhaItem(
                                     titulo = doc.getString("titulo") ?: "",
@@ -120,70 +126,49 @@ fun MainScreen() {
                                 )
                             )
                         } catch (e: Exception) {
-                            // Caso ocorra erro ao descriptografar, loga o erro no console
                             Log.e("Decrypt", "Erro ao descriptografar: ${e.message}")
                         }
                     }
-
-                    // Atualiza o estado da lista de senhas com os itens carregados
                     passwords = tempList
                 }
                 .addOnFailureListener {
-                    // Caso ocorra erro ao acessar o Firestore, loga o erro no console
                     Log.e("Firestore", "Erro ao carregar senhas: ${it.message}")
                 }
         }
     }
 
-    // Agrupa as senhas por categoria
     val categorias = passwords.groupBy { it.categoria }
 
-    // Layout principal da tela
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .background(MaterialTheme.colorScheme.background)) {
+
+        SuperIDHeader()
+
         Column(modifier = Modifier.padding(16.dp)) {
-
-            // Título e botão de adicionar senha
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("SuperID", fontSize = 30.sp, fontWeight = FontWeight.ExtraBold)
-                FloatingActionButton(
-                    onClick = { showAddPopUp = true },
-                    shape = CircleShape,
-                    containerColor = MaterialTheme.colorScheme.primary
-                ) {
-                    Icon(Icons.Default.Add,
-                        contentDescription = "Adicionar")
-                }
-            }
-
-            // Exibe os grupos por categoria
+            Spacer(modifier = Modifier.height(130.dp))
             categorias.forEach { (categoria, itens) ->
                 Spacer(modifier = Modifier.height(16.dp))
                 Categories(title = categoria, items = itens)
             }
-
-            // Popup de confirmação para adicionar senha
-            if (showAddPopUp) {
-                AlertDialog(
-                    onDismissRequest = { showAddPopUp = false },
-                    confirmButton = {
-                        TextButton(onClick = {
-                            showAddPopUp = false
-                            context.startActivity(Intent(context, AddPasswordActivity::class.java))
-                        }) {
-                            Text("Adicionar senha")
-                        }
-                        TextButton(onClick = {
-                            showAddPopUp = false
-                            context.startActivity(Intent(context, AddCategoryActivity::class.java))
-                        }) {
-                            Text("Adicionar Categoria")
-                        }
-                    }
-                )
-            }
         }
 
-        // Botão flutuante para abrir o leitor de QR Code
+        // Botão flutuante de adicionar
+        FloatingActionButton(
+            onClick = { showAddPopUp = true },
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(top = 90.dp, end = 15.dp),
+            shape = CircleShape,
+            containerColor = MaterialTheme.colorScheme.primary
+        ) {
+            Icon(
+                Icons.Default.Add,
+                contentDescription = "Adicionar Senha e Categoria"
+            )
+        }
+
+        // Botão flutuante do QR Code
         FloatingActionButton(
             onClick = { showQRCodePopUp = true },
             modifier = Modifier
@@ -192,23 +177,91 @@ fun MainScreen() {
             shape = CircleShape,
             containerColor = MaterialTheme.colorScheme.primary
         ) {
-            //comentei pq ta dando erro
-            /*Image(
+            Image(
                 painter = painterResource(id = R.drawable.qrcode),
                 contentDescription = "QR Code",
-                modifier = Modifier.size(24.dp)
-           )*/
+                modifier = Modifier.size(45.dp)
+            )
         }
 
-        // Popup para o QR Code
+        // Popup de adicionar
+        if (showAddPopUp) {
+            Dialog(onDismissRequest = { showAddPopUp = false }) {
+                Surface(
+                    shape = RoundedCornerShape(16.dp),
+                    tonalElevation = 8.dp,
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        // Sua faixa verde com botão de voltar
+                        BackButtonBar(onBackClick = {
+                            showAddPopUp = false
+                        })
+
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                        ) {
+
+                            // Botões
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                            ) {
+                                Button(onClick = {
+                                    showAddPopUp = false
+                                    context.startActivity(Intent(context, AddPasswordActivity::class.java))
+                                },
+                                    modifier = Modifier
+                                        .height(50.dp)    // altura maior
+                                        .width(250.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.secondary // cor de fundo
+                                    )
+                                ) {
+                                    Text("Adicionar Senha")
+                                }
+
+                                Spacer(Modifier.height(10.dp))
+
+                                Button(onClick = {
+                                    showAddPopUp = false
+                                    context.startActivity(Intent(context, AddCategoryActivity::class.java))
+                                },
+                                    modifier = Modifier
+                                        .height(50.dp)    // altura maior
+                                        .width(250.dp)
+                                ) {
+                                    Text("Adicionar Categoria")
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        /*TODO: Mudar o POP-UP para abir a camera*/
+
+        // Popup de leitura do QR Code
         if (showQRCodePopUp) {
             AlertDialog(
                 onDismissRequest = { showQRCodePopUp = false },
+                title = {
+                    // Faixa verde com o botão de voltar
+                    BackButtonBar(onBackClick = {
+                        showAddPopUp = false
+                    })
+                },
                 confirmButton = {
                     TextButton(onClick = {
                         showQRCodePopUp = false
                     }) {
-                        Text("Leitura do QRCOde")
+                        Text("Esse pop-up nao vai existir, ele abre a camera direto.")
                     }
                 }
             )
@@ -216,30 +269,49 @@ fun MainScreen() {
     }
 }
 
-// Composable que exibe cada grupo de senhas por categoria
 @Composable
 fun Categories(title: String, items: List<SenhaItem>) {
-    var expanded by remember { mutableStateOf(false) } // Controla expansão da categoria
-    var selectedItem by remember { mutableStateOf<SenhaItem?>(null) } // Item selecionado
-    val context = LocalContext.current
-    var showRemovePopUp by remember { mutableStateOf(false) } // Popup de remoção
+    var expanded by remember { mutableStateOf(false) }
+    var selectedItem by remember { mutableStateOf<SenhaItem?>(null) }
 
-    // Card que representa cada categoria
+    CategoryCard(
+        title = title,
+        expanded = expanded,
+        onExpandToggle = { expanded = !expanded },
+        items = items,
+        onItemClick = { selectedItem = it }
+    )
+
+    selectedItem?.let {
+        PasswordDetailDialog(
+            item = it,
+            onDismiss = { selectedItem = null }
+        )
+    }
+}
+
+@Composable
+fun CategoryCard(
+    title: String,
+    expanded: Boolean,
+    onExpandToggle: () -> Unit,
+    items: List<SenhaItem>,
+    onItemClick: (SenhaItem) -> Unit
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(5.dp)
     ) {
         Column {
-            // Cabeçalho da categoria (expansível)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { expanded = !expanded }
+                    .clickable { onExpandToggle() }
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(text = title, fontSize = 30.sp, fontWeight = FontWeight.Bold)
-                IconButton(onClick = { expanded = !expanded }) {
+                IconButton(onClick = { onExpandToggle() }) {
                     Icon(
                         imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
                         contentDescription = null
@@ -247,7 +319,6 @@ fun Categories(title: String, items: List<SenhaItem>) {
                 }
             }
 
-            // Exibe os itens da categoria se expandido
             if (expanded) {
                 items.forEach { item ->
                     Text(
@@ -256,123 +327,177 @@ fun Categories(title: String, items: List<SenhaItem>) {
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 30.dp, vertical = 8.dp)
-                            .clickable { selectedItem = item }
+                            .clickable { onItemClick(item) }
                     )
                 }
             }
         }
     }
+}
 
-    // Verifica se algum item foi selecionado na lista
-    selectedItem?.let { item ->
-        // Exibe um AlertDialog com os detalhes da senha selecionada
-        AlertDialog(
-            onDismissRequest = { selectedItem = null }, // Fecha o popup ao clicar fora
-            confirmButton = {}, // Sem botão de confirmação principal
-            title = {
-                Column {
-                    // Título da senha (em destaque)
-                    Text(text = item.titulo, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+@Composable
+fun PasswordDetailDialog(item: SenhaItem, onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    var showRemovePopUp by remember { mutableStateOf(false) }
+
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            tonalElevation = 8.dp,
+            color = MaterialTheme.colorScheme.background
+        ) {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                BackButtonBar(onBackClick = onDismiss)
+
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = item.titulo,
+                        fontSize = 30.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+
+                    Text("Senha:", fontWeight = FontWeight.Bold)
+                    StandardBoxPopUp {
+                        Text(item.senha)
+                    }
+
+                    Text("Descrição:", fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 8.dp))
+                    StandardBoxPopUp {
+                        Text(item.descricao)
+                    }
+
+                    Text("Categoria:", fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 8.dp))
+                    StandardBoxPopUp {
+                        Text(item.categoria)
+                    }
+
                     Spacer(modifier = Modifier.height(16.dp))
-                    // Exibe a senha descriptografada
-                    Text(text = "Senha: ${item.senha}")
-                    Spacer(modifier = Modifier.height(4.dp))
-                    // Exibe a descrição da senha
-                    Text(text = "Descrição: ${item.descricao}")
-                    Spacer(modifier = Modifier.height(16.dp))
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        // Botão para ir para a tela de alteração de senha
-
-
-                        TextButton(onClick = {
-                            val intent = Intent(context, ChangePasswordActivity::class.java).apply{
-                            putExtra("PASSWORD_ID", item.id)
-                            putExtra("PASSWORD_TITLE", item.titulo)
-                            putExtra("PASSWORD_VALUE", item.senha)
-                            putExtra("PASSWORD_DESCRIPTION", item.descricao)
-                            putExtra("PASSWORD_CATEGORY", item.categoria)
-
-                            // Link da documentação que mostra como enviar valores de uma Activity (tela) para outra:
-                            // https://developer.android.com/guide/components/activities/parcelables-and-bundles?hl=pt-br#kotlin
-                        }
+                        Button(onClick = {
+                            val intent = Intent(context, ChangePasswordActivity::class.java).apply {
+                                putExtra("PASSWORD_ID", item.id)
+                                putExtra("PASSWORD_TITLE", item.titulo)
+                                putExtra("PASSWORD_VALUE", item.senha)
+                                putExtra("PASSWORD_DESCRIPTION", item.descricao)
+                                putExtra("PASSWORD_CATEGORY", item.categoria)
+                            }
                             context.startActivity(intent)
                         }) {
                             Text("Alterar")
                         }
-                        // Botão que ativa a exibição do popup de confirmação de remoção
-                        TextButton(onClick = { showRemovePopUp = true }) {
+
+                        Button(onClick = { showRemovePopUp = true },
+                                colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.secondary
+                                )){
                             Text("Remover")
                         }
                     }
 
-                    // Verifica se o popup de confirmação de remoção deve ser exibido
                     if (showRemovePopUp) {
-                        AlertDialog(
-                            onDismissRequest = { showRemovePopUp = false }, // Fecha o popup se clicar fora
-                            // Botões de ação no popup de confirmação
-                            confirmButton = {
-                                Row {
-                                    // Botão "Cancelar"
-                                    TextButton(onClick = {
-                                        showRemovePopUp = false
-                                    }) {
-                                        Text("Cancelar")
-                                    }
-                                    // Botão "Remover"
-                                    TextButton(onClick = {
-                                        showRemovePopUp = false
-                                        val user = Firebase.auth.currentUser
-                                        user?.uid?.let { uid ->
-                                            // Acessa o documento da senha e remove do Firestore
-                                            Firebase.firestore
-                                                .collection("users")
-                                                .document(uid)
-                                                .collection("senhas")
-                                                .document(item.id)
-                                                .delete()
-                                                .addOnSuccessListener {
-                                                    // Exibe confirmação e fecha o popup
-                                                    Toast.makeText(
-                                                        context,
-                                                        "Senha excluída com sucesso!",
-                                                        Toast.LENGTH_SHORT
-                                                    ).show()
-                                                    selectedItem = null
-                                                    // TODO: Atualizar a lista após exclusão
-                                                }
-                                                .addOnFailureListener { e ->
-                                                    // Exibe mensagem de erro caso a exclusão falhe
-                                                    Toast.makeText(
-                                                        context,
-                                                        "Erro ao excluir: ${e.message}",
-                                                        Toast.LENGTH_LONG
-                                                    ).show()
-                                                }
-                                        }
-                                    }) {
-                                        Text("Remover")
-                                    }
-                                }
+                        RemovePasswordDialog(
+                            item = item,
+                            onDismiss = { showRemovePopUp = false },
+                            onSuccess = {
+                                Toast.makeText(context, "Senha excluída com sucesso!", Toast.LENGTH_SHORT).show()
+                                showRemovePopUp = false
+                                onDismiss()
                             },
-                            // Título do popup de confirmação
-                            title = {
-                                Text("Tem certeza que deseja remover essa senha?")
+                            onError = { e ->
+                                Toast.makeText(context, "Erro ao excluir: ${e.message}", Toast.LENGTH_LONG).show()
                             }
                         )
                     }
                 }
             }
-        )
+        }
     }
-
 }
+
+@Composable
+fun RemovePasswordDialog(
+    item: SenhaItem,
+    onDismiss: () -> Unit,
+    onSuccess: () -> Unit,
+    onError: (Exception) -> Unit
+) {
+    val context = LocalContext.current
+
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            tonalElevation = 8.dp,
+            color = MaterialTheme.colorScheme.background
+        ) {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                BackButtonBar(onBackClick = onDismiss)
+
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "Certeza que deseja remover a senha?",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        Button(onClick = onDismiss) {
+                            Text("Cancelar")
+                        }
+
+                        Button(
+                            onClick = {
+                                val user = Firebase.auth.currentUser
+                                user?.uid?.let { uid ->
+                                    Firebase.firestore
+                                        .collection("users")
+                                        .document(uid)
+                                        .collection("senhas")
+                                        .document(item.id)
+                                        .delete()
+                                        .addOnSuccessListener { onSuccess() }
+                                        .addOnFailureListener { e -> onError(e) }
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.error
+                            )
+                        ) {
+                            Text("Remover")
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
 
 // Preview da tela principal
-@Preview
-@Composable
+@Preview(
+    name = "Dark Mode",
+    showBackground = true,
+    uiMode = UI_MODE_NIGHT_YES
+)
+@Preview(
+    name = "Light Mode",
+    showBackground = true,
+    uiMode = UI_MODE_NIGHT_NO
+)@Composable
 fun PreviewMainScreen() {
-    MainScreen()
+    SuperIDTheme(
+        dynamicColor = false
+    ) {
+        MainScreen()
+    }
 }
+

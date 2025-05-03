@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -19,6 +20,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -34,6 +36,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import br.com.ibm.superid.ui.theme.SuperIDTheme
+import br.com.ibm.superid.ui.theme.core.util.CustomOutlinedTextField
+import br.com.ibm.superid.ui.theme.core.util.SuperIDHeader
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -72,6 +76,7 @@ class ChangePasswordActivity : ComponentActivity() {
                         initialDescricao = initialDescricao,
                         initialCategoria = initialCategoria,
                     )
+
                 }
             }
         }
@@ -100,42 +105,36 @@ fun ChangePassword(
     var categoria by remember { mutableStateOf(initialCategoria) }
     var descricao by remember { mutableStateOf(initialDescricao) }
 
-    // Seta que volta para (COLOCAR O NOME DA TELA Q O ARTHUR CRIOU)
-    Scaffold(
-        // Define que a tela terá uma barra superior, onde vamos colocar o TopAppBar
-        topBar = {
-            // Começa a criação da barra de app superior (TopAppBar)
-            TopAppBar(
-                title = { }, // Indica que não terá texto no meio da barra
-                // Define o ícone de navegação da TopAppBar
-                navigationIcon = {
-                    //  Cria um botão que será clicável, o botão envolverá o ícone de voltar
-                    IconButton(
-                        onClick = {
+    // Seta que volta para AccessOptionActivity
+    // Baseado em: https://developer.android.com/develop/ui/compose/components/app-bars?hl=pt-br#top-app-bar
+    // Baseado em: https://alexzh.com/visual-guide-to-topappbar-variants-in-jetpack-compose/?utm_source=chatgpt.com
 
-                            val intent = Intent(context, MainActivity::class.java) //
-                            context.startActivity(intent)
+    Column (modifier = Modifier
+        .fillMaxSize()
+        .background(MaterialTheme.colorScheme.background)) {
+        // Cabeçalho visual personalizado
+        SuperIDHeader()
 
-                        }
-                    ) {
-                        // Cria o ícone da seta de voltar
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Voltar" // Usado para acessibilidade (leitores de tela vão anunciar "Voltar" para deficientes visuais)
-                        )
-                    }
-                }
+        // Botão de voltar
+        IconButton(
+            onClick = {
+                val intent = Intent(context, SignInActivity::class.java)
+                context.startActivity(intent)
+            },
+            modifier = Modifier.padding(start = 8.dp, top = 8.dp)
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Voltar"
             )
         }
-    ) { innerPadding -> // Fecha o Scaffold e começa a definir o conteúdo principal da tela
 
         // Layout em coluna que ocupa toda a tela e aplica padding de 16dp
         Column(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
+                .padding(top = 70.dp),
+            verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
@@ -149,40 +148,34 @@ fun ChangePassword(
             // Espaço de 24dp abaixo do título
             Spacer(Modifier.height(24.dp))
 
-            OutlinedTextField(
+            CustomOutlinedTextField(
                 value = titulo,
                 onValueChange = { titulo = it },
-                label = { Text("Titulo") },
-                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+                label ="Titulo"
             )
 
             // Campo de texto para digitar a nova senha
-            OutlinedTextField(
+            CustomOutlinedTextField(
                 value = senha,
                 onValueChange = { senha = it },
-                label = { Text("Senha") },
+                label = "Senha",
                 /*// Esconde os caracteres da senha
                 visualTransformation = PasswordVisualTransformation(),*/
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp)
             )
 
             // Campo de texto para escolher a categoria da nova senha
-            OutlinedTextField(
+            CustomOutlinedTextField(
                 value = categoria,
                 onValueChange = { categoria = it },
-                label = { Text("Categoria") },
-                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+                label ="Categoria"
             )
 
             // Campo de texto para digitar a descrição da nova senha
-            OutlinedTextField(
+            CustomOutlinedTextField(
                 value = descricao,
                 onValueChange = { descricao = it },
-                label = { Text("Descrição") },
-                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+                label ="Descrição"
             )
 
             // Espaço de 24dp antes do botão
@@ -205,8 +198,8 @@ fun ChangePassword(
                     context.startActivity(Intent(context, MainActivity::class.java))
                 },
                 modifier = Modifier
-                    .fillMaxWidth(0.5f)
-                    .height(48.dp)
+                    .height(60.dp)    
+                    .width(150.dp)
             ) {
                 // Define o texto que está dentro do botão
                 Text("Salvar")
@@ -268,15 +261,15 @@ fun updatePassword(
 
     // Prepara o map pra atualizar
     val updates = mapOf(
-        "senha"     to encrypted,
-        "iv"        to iv,
-        "titulo"    to newTitulo,
+        "senha" to encrypted,
+        "iv" to iv,
+        "titulo" to newTitulo,
         "categoria" to newCategory,
         "descricao" to newDesc
     )
 
 
-    if (newTitulo.isNotBlank() && newPassword.isNotBlank() &&  newCategory.isNotBlank() && newDesc.isNotBlank()){
+    if (newTitulo.isNotBlank() && newPassword.isNotBlank() && newCategory.isNotBlank() && newDesc.isNotBlank()) {
         // Executa o update no Firestore
         Firebase.firestore
             .collection("users")
@@ -289,6 +282,21 @@ fun updatePassword(
             }
             .addOnFailureListener { e ->
                 Toast.makeText(context, "Erro ao atualizar: ${e.message}", Toast.LENGTH_LONG).show()
-            }}
+            }
+    }
+}
 
+
+@Preview(showSystemUi = true, showBackground = true)
+@Composable
+fun ChangePasswordPreview() {
+    SuperIDTheme {
+        ChangePassword(
+            passwordId = "id_teste",
+            initialTitulo = "Minha Conta",
+            initialSenha = "123456",
+            initialCategoria = "Email",
+            initialDescricao = "Conta pessoal do Gmail"
+        )
+    }
 }
