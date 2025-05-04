@@ -77,6 +77,7 @@ fun saveUserToAuth(email: String, password: String, name: String, context: Conte
     // Obtemos a instância do Firebase Auth
     val auth = Firebase.auth
 
+
     // Cria um novo usuário com e-mail e senha
     auth.createUserWithEmailAndPassword(email, password)
         .addOnCompleteListener { task ->
@@ -115,24 +116,37 @@ fun saveUserToFirestore(name: String, email: String, context: Context) {
     // Obtendo a instância do banco de dados Firestore
     val db = Firebase.firestore
 
+    // Obtemos a instância do Firebase Auth
+    val auth = Firebase.auth
+    val uid = auth.currentUser?.uid
+
     // Criando um mapa mutável (hashMap) com informações do cadastro
     val dadosCadastro = hashMapOf(
         "name"  to name,
-        "email" to email
+        "email" to email,
+        "emailVerified" to false
     )
 
-    db.collection("users")
-        .add(dadosCadastro)
-        .addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                Toast.makeText(context, "Usuário Criado com sucesso!", Toast.LENGTH_LONG).show()
-                // Se salvou com sucesso vai para a EmailVerificationActivity
-                context.startActivity(Intent(context, EmailVerificationActivity::class.java))
-            } else {
-                Toast.makeText(context, "Erro ao criar usuário", Toast.LENGTH_LONG).show()
+    if (uid != null) {
+        db.collection("users")
+            .document(uid)
+            .set(dadosCadastro)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    Toast.makeText(context, "Usuário Criado com sucesso!", Toast.LENGTH_LONG).show()
+                    // Se salvou com sucesso vai para a EmailVerificationActivity
+                    context.startActivity(Intent(context, EmailVerificationActivity::class.java))
+                } else {
+                    Toast.makeText(context, "Erro ao criar usuário", Toast.LENGTH_LONG).show()
+                }
             }
-        }
+    } else {
+        Toast.makeText(context, "Erro interno: usuário não autenticado", Toast.LENGTH_LONG).show()
+        return
+    }
 }
+
+
 
 // Função Composable que apresenta o formulário de cadastro do usuário
 @OptIn(ExperimentalMaterial3Api::class)

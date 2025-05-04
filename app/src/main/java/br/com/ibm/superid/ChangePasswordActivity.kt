@@ -118,7 +118,7 @@ fun ChangePassword(
         // Botão de voltar
         IconButton(
             onClick = {
-                val intent = Intent(context, SignInActivity::class.java)
+                val intent = Intent(context, MainActivity::class.java)
                 context.startActivity(intent)
             },
             modifier = Modifier.padding(start = 8.dp, top = 8.dp)
