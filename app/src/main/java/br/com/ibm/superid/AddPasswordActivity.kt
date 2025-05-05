@@ -16,7 +16,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -168,6 +171,43 @@ fun encryptpassword(password: String, encryptionKey: String = "ProjetoIntegrador
     )
 }
 
+// Lista mutável que guarda as categorias lidas no Firestore do tipo String
+val categoriasUsuario = mutableStateListOf<String>()
+
+// Função que lê as categorias do Firestore
+fun fetchCategoriasUsuario(context: Context) {
+    // Pega a instância de autenticação do Firebase
+    val auth = Firebase.auth
+
+    // Recupera o usuário atualmente autenticado
+    val currentUser = auth.currentUser
+
+    // Se não houver usuário logado, interrompe a função
+    if (currentUser == null) return
+
+    // A partir daqui sabemos que currentUser não é null, então pegamos o UID
+    val uid = currentUser.uid
+
+    // Limpa a lista antes de buscar novas categorias
+    categoriasUsuario.clear()
+
+    // Acessa o banco de dados Firestore
+    Firebase.firestore
+        .collection("users")
+        .document(uid)
+        .collection("categorias")
+        .get()
+        .addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                task.result?.documents?.forEach { doc ->
+                    doc.getString("nome")?.let { categoriasUsuario.add(it) }
+                }
+            } else {
+                Toast.makeText(context, "Erro ao ler categorias: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+            }
+        }
+}
+
 // Função Composable que apresenta o formulário de adicionar senha
 @Preview(showBackground = true)
 @Composable
@@ -181,6 +221,10 @@ fun AddPassword(modifier: Modifier = Modifier) {
     var categoria by remember { mutableStateOf("") }
     var descricao by remember { mutableStateOf("") }
     var titulo by remember { mutableStateOf("") }
+
+    // Variável que controla se o meu DropdownMenu está aberto ou fechado
+    var expanded  by remember { mutableStateOf(false) }
+
 
     // Layout em coluna que ocupa toda a tela e aplica padding de 16dp
     // Seta que volta para AccessOptionActivity
@@ -243,12 +287,55 @@ fun AddPassword(modifier: Modifier = Modifier) {
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             )
 
-            // Campo de texto para escolher a categoria da nova senha
-            CustomOutlinedTextField(
-                value = categoria,
-                onValueChange = { categoria = it },
-                label ="Categoria"
-            )
+            // Box para sobrepor os elementos: OutlinedTextField e DropdownMenu
+            Box {
+                // Campo de texto para escolher a categoria da nova senha
+                OutlinedTextField(
+                    value        = categoria,
+                    onValueChange = { },
+                    readOnly     = true, // campo é apenas uma leitura, usuário não pode digitar nada
+                    label        = { Text("Categoria") },
+
+                    // Adicionando ícone de seta
+                    trailingIcon = {
+                        IconButton(
+                            // Quando clicado na seta:
+                            onClick = {
+                                fetchCategoriasUsuario(context)  // chama a função que guarda as categorias
+                                expanded = true                  // abre o dropdown
+                            }
+                        ) {
+                            Icon(Icons.Filled.ArrowDropDown, contentDescription = "Escolher")
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                DropdownMenu(
+                    expanded        = expanded,
+                    onDismissRequest = { expanded = false },
+                    modifier        = Modifier.fillMaxWidth()
+                ) {
+                    // Se categoriaUsuario estiver vazio
+                    if (categoriasUsuario.isEmpty()) {
+                        // Exibe "Nenhuma categoria" e ao clicar fecha o menu
+                        DropdownMenuItem(
+                            text    = { Text("Nenhuma categoria") },
+                            onClick = { expanded = false }
+                        )
+                    } else {
+                        categoriasUsuario.forEach { cat ->
+                            DropdownMenuItem(
+                                text    = { Text(cat) },
+                                onClick = {
+                                    categoria = cat
+                                    expanded  = false
+                                }
+                            )
+                        }
+                    }
+                }
+            }
 
             // Campo de texto para digitar a descrição da noa senha
             CustomOutlinedTextField(
