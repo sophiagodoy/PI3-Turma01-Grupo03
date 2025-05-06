@@ -68,9 +68,6 @@ class ForgotPasswordActivity : ComponentActivity() {
     }
 }
 
-// Função para enviar email de redefinição de senha (Arthur)
-
-
 // Função Composable que apresenta o formulário de recuperação de senha
 @SuppressLint("SuspiciousIndentation")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -148,6 +145,7 @@ fun ForgotPasswordScreen(modifier: Modifier = Modifier) {
                 onClick = {
                     // Ao clicar no botão, chama a função para enviar o link de redefinição
                     if (email.isNotBlank() && email.contains("@")){
+                        // Adicionar lógica para enviar o link de redefinição
                         val intent = Intent(context, EmailVerificationActivity::class.java)
                             context.startActivity(intent)
                     } else{

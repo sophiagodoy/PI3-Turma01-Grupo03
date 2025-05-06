@@ -14,31 +14,30 @@
         tools:targetApi="31">
         <activity
             android:name=".EmailVerificationActivity"
-            android:exported="false"
+            android:exported="true"
             android:label="@string/title_activity_email_verification"
-            android:theme="@style/Theme.SuperID" />
-        <!-- Início de AddCategoryActivity -->
+            android:theme="@style/Theme.SuperID" /> <!-- Início de AddCategoryActivity -->
         <activity
             android:name=".AddCategoryActivity"
-            android:exported="false"
+            android:exported="true"
             android:label="@string/title_activity_add_category"
             android:theme="@style/Theme.SuperID" /> <!-- Fim de AddCategoryActivity -->
         <!-- Início de ChangePasswordActivity -->
         <activity
             android:name=".ChangePasswordActivity"
-            android:exported="false"
+            android:exported="true"
             android:label="@string/title_activity_change_password"
             android:theme="@style/Theme.SuperID" /> <!-- Fim de ChangePasswordActivity -->
         <!-- Início de EditPasswordActivity -->
         <activity
             android:name=".EditPasswordActivity"
-            android:exported="false"
+            android:exported="true"
             android:label="@string/title_activity_edit_password"
             android:theme="@style/Theme.SuperID" /> <!-- Fim de EditPasswordActivity -->
         <!-- Início de AddPasswordActivity -->
         <activity
             android:name=".AddPasswordActivity"
-            android:exported="false"
+            android:exported="true"
             android:label="@string/title_activity_add_password"
             android:theme="@style/Theme.SuperID" /> <!-- Fim de AddPasswordActivity -->
         <!-- Início de WelcomeActivity -->
@@ -53,9 +52,7 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-
-        <!-- Início de AccessOptionActivity -->
+        </activity> <!-- Início de AccessOptionActivity -->
         <activity
             android:name=".AccessOptionActivity"
             android:exported="true"
@@ -77,7 +74,7 @@
         <activity
             android:name=".SignUpActivity"
             android:exported="true"
-            android:label="@string/app_name"
+            android:label="@string/title_activity_sign_in"
             android:theme="@style/Theme.SuperID" /> <!-- Fim de SignUpActivity -->
         <!-- Início de ForgotPasswordActivity -->
         <activity
