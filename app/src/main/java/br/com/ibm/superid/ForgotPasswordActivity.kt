@@ -4,8 +4,10 @@
 package br.com.ibm.superid
 
 // Importações necessárias
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -70,6 +72,7 @@ class ForgotPasswordActivity : ComponentActivity() {
 
 
 // Função Composable que apresenta o formulário de recuperação de senha
+@SuppressLint("SuspiciousIndentation")
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
 @Composable
@@ -143,11 +146,20 @@ fun ForgotPasswordScreen(modifier: Modifier = Modifier) {
             // Botão que será clicado para enviar o link de redefinição
             Button(
                 onClick = {
-                    // A ação de envio ainda será implementada
+                    // Ao clicar no botão, chama a função para enviar o link de redefinição
+                    if (email.isNotBlank() && email.contains("@")){
+                        val intent = Intent(context, EmailVerificationActivity::class.java)
+                            context.startActivity(intent)
+                    } else{
+                        // Mostra uma mensagem de erro ou feedback visual
+                        Toast.makeText(context, "Por favor, insira seu email", Toast.LENGTH_SHORT).show()
+                    }
                 },
+                // Se o email estiver em branco, desabilita o botão
                 modifier = Modifier
                     .height(50.dp)
-                    .width(250.dp)
+                    .width(250.dp),
+                enabled = email.isNotBlank()
             ) {
                 // Texto exibido no botão
                 Text("Enviar Link de Redefinição")

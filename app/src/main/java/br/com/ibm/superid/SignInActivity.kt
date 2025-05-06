@@ -23,10 +23,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -54,7 +52,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import br.com.ibm.superid.ui.theme.SuperIDTheme
 import br.com.ibm.superid.ui.theme.core.util.CustomOutlinedTextField
 import br.com.ibm.superid.ui.theme.core.util.SuperIDHeader
-import br.com.ibm.superid.ui.theme.core.util.SuperIDHeaderImage
 import kotlin.jvm.java
 
 // Declarando a Activity (signInActivity)
@@ -102,7 +99,7 @@ fun signInWithFirebaseAuth(email: String, password: String, context: Context) {
 
 // Função Composable que apresenta o formulário de login do usuário
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun SignIn(modifier: Modifier = Modifier) {
 
