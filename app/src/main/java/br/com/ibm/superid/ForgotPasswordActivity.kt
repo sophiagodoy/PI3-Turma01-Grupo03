@@ -5,8 +5,11 @@ package br.com.ibm.superid
 
 // Importações necessárias
 import android.annotation.SuppressLint
+import android.content.ContentValues.TAG
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -48,6 +51,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import br.com.ibm.superid.ui.theme.SuperIDTheme
 import br.com.ibm.superid.ui.theme.core.util.CustomOutlinedTextField
 import br.com.ibm.superid.ui.theme.core.util.SuperIDHeader
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import kotlin.jvm.java
 
 // Declarando a Activity (ForgotPasswordActivity)
@@ -67,6 +73,58 @@ class ForgotPasswordActivity : ComponentActivity() {
         }
     }
 }
+
+fun checkEmailVerification(email: String, context: Context){
+    val db = Firebase.firestore
+
+    db.collection("users")
+        .whereEqualTo("email", email)
+        .get()
+        .addOnSuccessListener { result ->
+            if ( result.documents.isNotEmpty()) {
+                // Pega o primeiro documento que contenha esse email
+                val userDoc =  result.documents[0]
+                // Lê o campo "emailVerified" (ou false, se não existir)
+                val isVerified = userDoc.getBoolean("emailVerified") ?: false
+
+                if (isVerified) {
+                    // E-mail verificado: prossegue com o envio do link
+                    sendEmail(email, context)
+                } else {
+                    // Ainda não confirmou o e-mail
+                    Toast.makeText(
+                        context,
+                        "Por favor, verifique seu e-mail antes de redefinir a senha.", Toast.LENGTH_LONG).show()
+                        val intent = Intent(context, EmailVerificationActivity::class.java)
+                        context.startActivity(intent)
+                }
+            } else {
+                // Nenhum usuário encontrado com esse e-mail
+                Toast.makeText(context, "E-mail não encontrado. Cadastre-se antes de tentar redefinir a senha.", Toast.LENGTH_LONG).show()
+            }
+        }
+        .addOnFailureListener { e ->
+            Toast.makeText(context, "Erro ao verificar o status de verificação: ${e.message}", Toast.LENGTH_LONG).show()
+        }
+}
+
+fun sendEmail(email: String, context: Context ){
+
+    Firebase.auth.sendPasswordResetEmail(email)
+        .addOnSuccessListener {
+                Log.d(TAG, "Email enviado para $email.")
+                Toast.makeText(
+                    context, "Link de redefinição enviado ", Toast.LENGTH_LONG).show()
+            /*
+            dps levará a pessoa pra outra tela pra redefinir a senha
+             */
+            }
+        .addOnFailureListener{ e ->
+            Log.e(TAG, "Erro no envio do email para $email", e)
+            Toast.makeText(context, "Falha ao enviar link de redefinição: ${e.message}", Toast.LENGTH_LONG).show()
+
+        }
+        }
 
 // Função Composable que apresenta o formulário de recuperação de senha
 @SuppressLint("SuspiciousIndentation")
@@ -144,10 +202,12 @@ fun ForgotPasswordScreen(modifier: Modifier = Modifier) {
             Button(
                 onClick = {
                     // Ao clicar no botão, chama a função para enviar o link de redefinição
+
+
                     if (email.isNotBlank() && email.contains("@")){
-                        // Adicionar lógica para enviar o link de redefinição
-                        val intent = Intent(context, EmailVerificationActivity::class.java)
-                            context.startActivity(intent)
+
+                        checkEmailVerification(email, context)
+
                     } else{
                         // Mostra uma mensagem de erro ou feedback visual
                         Toast.makeText(context, "Por favor, insira seu email", Toast.LENGTH_SHORT).show()

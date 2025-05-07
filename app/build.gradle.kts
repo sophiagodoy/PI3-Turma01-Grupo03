@@ -58,6 +58,7 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-firestore-ktx:25.1.3")
     implementation("com.google.firebase:firebase-auth-ktx")
+    implementation(libs.androidx.lifecycle.process)
 
     // Testes
     testImplementation(libs.junit)

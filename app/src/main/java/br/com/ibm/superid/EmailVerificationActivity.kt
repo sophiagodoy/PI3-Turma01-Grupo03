@@ -1,4 +1,4 @@
-// TELA PARA VERIFICAÇÃO DE CÓDIGO POR EMAIL
+// TELA PARA O USUÁRIO SER INFORMADO SOBRE A VERIFICAÇÃO DO EMAIL E SUAS CONDIÇÕES
 
 // Definição do pacote aplicativo
 package br.com.ibm.superid
@@ -6,29 +6,36 @@ package br.com.ibm.superid
 // Importações necessárias
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import br.com.ibm.superid.ui.theme.SuperIDTheme
-import br.com.ibm.superid.ui.theme.core.util.CustomOutlinedTextField
 import br.com.ibm.superid.ui.theme.core.util.SuperIDHeader
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 
 // Declarando a Activity (EmailVerificationActivity)
 class EmailVerificationActivity : ComponentActivity() {
@@ -37,10 +44,9 @@ class EmailVerificationActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             SuperIDTheme {
-                // Utiliza Scaffold para manter consistência de layout
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    // Chama a função composable EmailVerificationScreen
-                    EmailVerificationScreen(
+                    // Chama a função composable EmailVerification e aplica o padding interno do Scaffold
+                    EmailVerification(
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
@@ -49,28 +55,24 @@ class EmailVerificationActivity : ComponentActivity() {
     }
 }
 
-// Função Composable que exibe a tela de verificação do código
-@OptIn(ExperimentalMaterial3Api::class)
+// Função Composable que apresenta as informações sobre a confirmação do email
+@Preview
 @Composable
-fun EmailVerificationScreen(modifier: Modifier = Modifier) {
-    // Recupera o contexto atual para navegação
-    val context = LocalContext.current
-    // Variável de estado para armazenar o código digitado
-    var verificationCode by remember { mutableStateOf("") }
+fun EmailVerification(modifier: Modifier = Modifier) {
 
-    // Layout principal da tela
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background) // Define o fundo com o tema do app
-    ) {
+    // Cria variável para poder trocar de tela e mostrar toast
+    val context = LocalContext.current
+
+
+    Column (modifier = Modifier
+        .fillMaxSize()
+        .background(MaterialTheme.colorScheme.background)) {
         // Cabeçalho visual personalizado
         SuperIDHeader()
 
         // Botão de voltar
         IconButton(
             onClick = {
-                // Ao clicar, retorna para a tela de esqueci minha senha
                 val intent = Intent(context, ForgotPasswordActivity::class.java)
                 context.startActivity(intent)
             },
@@ -81,84 +83,76 @@ fun EmailVerificationScreen(modifier: Modifier = Modifier) {
                 contentDescription = "Voltar"
             )
         }
-        // Coluna para alinhar os elementos principais da tela
+
+        // Layout em coluna que ocupa toda a tela e aplica padding de 16dp
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 80.dp),
+                .padding(top = 110.dp),
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // Título da tela
+        )
+        {
+            // Exibe um texto na tela sobre as informações do email
             Text(
-                text = "VERIFICAÇÃO DE E-MAIL",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 16.dp)
+                text = "Verifique a sua caixa de email e confirme o email.\n" +
+                        "Se o email não for confirmado não será possível usar a funcionalidade \"Login Sem Senha\".",
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
             )
+            Spacer(modifier = Modifier.height(32.dp))
 
-            // Mensagem explicativa para o usuário
-            Text(
-                text = "Digite o código recebido no seu email",
-                fontSize = 16.sp,
-                modifier = Modifier.padding(horizontal = 32.dp, vertical = 16.dp),
-                textAlign = TextAlign.Center
-            )
-
-            // Campo para o usuário digitar o código de verificação
-            CustomOutlinedTextField(
-                value = verificationCode,
-                onValueChange = {
-                    // Limita o código a no máximo 6 caracteres
-                    if (it.length <= 6) {
-                        verificationCode = it
-                    }
-                },
-                label = "Código de verificação",
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            // Botão para continuar para o login
+            Button(onClick = {
+                context.startActivity(Intent(context, SignInActivity::class.java))
+            },
                 modifier = Modifier
-                    .width(300.dp)
-                    .padding(vertical = 16.dp)
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Botão que realiza a verificação e redireciona para a tela de nova senha
-            Button(
-                onClick = {
-                    // Fazer funçao que verifica se o código é o mesmo que o enviado no E-Mail
-
-                    // Codigo para alterar de tela apos o codigo ser verificado
-                    // val intent = Intent(context, ChangePasswordActivity::class.java)
-                    // context.startActivity(intent)
-                },
-                modifier = Modifier
-                    .height(50.dp)
-                    .width(250.dp),
-                enabled = verificationCode.length == 6 // Só habilita o botão se tiver 6 dígitos
+                    .height(60.dp)    // altura maior
+                    .width(150.dp)
             ) {
-                Text("Verificar Código")
+                // Define o texto que está dentro do botão
+                Text("Continuar")
             }
 
-            // Texto clicável para reenviar código
+            Spacer(modifier = Modifier.height(16.dp))
+
             Text(
-                text = "Não recebeu o código? Reenviar",
-                color = MaterialTheme.colorScheme.primary,
+                text = "Reenviar e-mail de verificação",
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.tertiary,
+                fontSize = 16.sp,
+                style = TextStyle(
+                    textDecoration = TextDecoration.Underline),
                 modifier = Modifier
-                    .padding(top = 24.dp)
+                    .padding(top = 8.dp)
                     .clickable {
-                        // Aqui precisa colocar a logica para reenviar o codigo
+                        val user = Firebase.auth.currentUser
+                        if (user != null) {
+                            user.sendEmailVerification()
+                                .addOnSuccessListener {
+                                    Toast.makeText(
+                                        context,
+                                        "E-mail de verificação reenviado!",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                                .addOnFailureListener {
+                                    Toast.makeText(
+                                        context,
+                                        "Falha ao reenviar",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                        } else {
+                            Toast.makeText(
+                                context,
+                                "Usuário não autenticado!",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
                     }
             )
-        }
-    }
-}
 
-// Função de preview para testes visuais no Android Studio
-@Preview(showBackground = true)
-@Composable
-fun EmailVerificationPreview() {
-    SuperIDTheme {
-        EmailVerificationScreen()
+        }
     }
 }
