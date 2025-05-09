@@ -1,8 +1,8 @@
-// Definição do pacote
+// TELA PRINCIPAL DO APLICATIVO
+
 // TODO: Decidir se vai remover a categoria pelo X ou se, removendo todas as senhas da categoria, ela e removida tambem
 package br.com.ibm.superid
 
-// Importações necessárias
 import android.content.Intent
 import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -45,6 +46,9 @@ import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+
 
 // Classe principal que define a Activity inicial do aplicativo
 class MainActivity : ComponentActivity() {
@@ -91,9 +95,12 @@ fun decryptPassword(encrypted: String, ivBase64: String, key: String = "ProjetoI
 @Composable
 fun MainScreen() {
     val context = LocalContext.current
+
+    // Declarando variáveis
     var passwords by remember { mutableStateOf<List<SenhaItem>>(emptyList()) }
     var showAddPopUp by remember { mutableStateOf(false) }
     var showQRCodePopUp by remember { mutableStateOf(false) }
+    var showExitDialog by remember { mutableStateOf(false) } // Controla o estado do diálogo de saída
 
     // Carrega as senhas do Firestore assim que a tela iniciar
     LaunchedEffect(Unit) {
@@ -136,9 +143,23 @@ fun MainScreen() {
 
     Box(modifier = Modifier
         .fillMaxSize()
-        .background(MaterialTheme.colorScheme.background)) {
+        .background(MaterialTheme.colorScheme.background)
+    ) {
 
         SuperIDHeader()
+
+        // Seta de voltar para a AcessOptionActivity (saindo do aplicativo)
+        IconButton(
+            onClick = { showExitDialog = true }, // Altera a variável de estado para ativo
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(start = 8.dp, top = 80.dp)
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Sair do aplicativo"
+            )
+        }
 
         Column(modifier = Modifier.padding(16.dp)) {
             Spacer(modifier = Modifier.height(130.dp))
@@ -257,6 +278,50 @@ fun MainScreen() {
                         showQRCodePopUp = false
                     }) {
                         Text("Esse pop-up nao vai existir, ele abre a camera direto.")
+                    }
+                }
+            )
+        }
+
+        // Baseado em: https://www.geeksforgeeks.org/alertdialog-in-android-using-jetpack-compose/?utm_source
+        // Se a showExitDialog estiver como true (ativa)
+        if (showExitDialog) {
+
+            // Exibe uma caixa de diálogo (pop-up)
+            AlertDialog(
+                onDismissRequest = { showExitDialog = false }, // Fecha o pop-up ao tocar fora
+                title = { Text("Deseja sair do SuperID?") },
+
+                // Botão de confirmação (fecha o pop-up quando clicado)
+                confirmButton = {
+                    TextButton(
+                        // Define showExistDialog como inativo e muda de página
+                        onClick = {
+                            showExitDialog = false
+                            val intent = Intent(context, AccessOptionActivity::class.java)
+                            context.startActivity(intent)
+                        }
+                    ) {
+                        Text(
+                            text = "Sim",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                    }
+                },
+
+                // Botão de cancelamento
+                dismissButton = {
+                    TextButton(
+                        onClick = {
+                            showExitDialog = false // Define showExistDialog como inativo
+                        }
+                    ) {
+                        Text(
+                            text = "Não",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
                     }
                 }
             )
