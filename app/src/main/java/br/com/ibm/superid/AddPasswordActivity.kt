@@ -355,15 +355,15 @@ fun AddPassword(modifier: Modifier = Modifier) {
             // Botão que quando clicado salva a nova senha no banco Firestore
             Button(
                 onClick = {
-                    // Chama a função que valida e grava a nova senha no no Firestore
                     addNewPassword(context, senha, categoria, descricao, titulo)
+                    val intent = Intent(context, MainActivity::class.java)
+                    context.startActivity(intent)
                 },
                 modifier = Modifier
-                    .height(60.dp)    // altura maior
+                    .height(60.dp)
                     .width(150.dp)
                     .align(Alignment.CenterHorizontally),
             ) {
-                // Define o texto que está dentro do botão
                 Text("Salvar")
             }
 

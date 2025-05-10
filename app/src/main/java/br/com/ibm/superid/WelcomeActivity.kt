@@ -47,7 +47,7 @@ class WelcomeActivity : ComponentActivity() {
 @Composable
 fun Welcome(modifier: Modifier = Modifier) {
 
-    // Defino o contexto atual da minha Activity para usar Intents
+    // Defino o contexto atual da Activity para usar Intents
     val context = LocalContext.current
 
     // Declarando variáveis que controlam o comportamento da tela
@@ -94,7 +94,7 @@ fun Welcome(modifier: Modifier = Modifier) {
             Text(
                 text = "Ler mais",
                 color = MaterialTheme.colorScheme.tertiary,
-                fontSize = 15.sp,
+                fontSize = 18.sp,
                 style = TextStyle(textDecoration = TextDecoration.Underline),
                 modifier = Modifier
                     .padding(bottom = 16.dp)
@@ -314,6 +314,7 @@ fun Welcome(modifier: Modifier = Modifier) {
                         ) {
                             Text(
                                 text = "Fechar",
+                                fontSize = 18.sp,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                         }

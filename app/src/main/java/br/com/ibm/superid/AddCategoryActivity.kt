@@ -1,3 +1,5 @@
+// TELA PARA O USUÁRIO ADICIONAR CATEGORIA
+
 package br.com.ibm.superid
 
 import android.content.Context
@@ -27,28 +29,23 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import br.com.ibm.superid.ui.theme.SuperIDTheme
 import br.com.ibm.superid.ui.theme.core.util.CustomOutlinedTextField
 import br.com.ibm.superid.ui.theme.core.util.SuperIDHeader
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.firestore
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 
 
 class AddCategoryActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Ativa o modo de bordas estendidas
         enableEdgeToEdge()
-        // Define o conteúdo da tela com o tema do app
         setContent {
             SuperIDTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    PreviewAddCat()
-                }
+                AddCat()
             }
         }
     }
@@ -87,11 +84,7 @@ fun addNewCategory(context: Context, nomeCategoria: String) {
 @Composable
 fun AddCat() {
     val context = LocalContext.current
-    val categoryName = remember { mutableStateOf("") }
-
-    // Seta que volta para AccessOptionActivity
-    // Baseado em: https://developer.android.com/develop/ui/compose/components/app-bars?hl=pt-br#top-app-bar
-    // Baseado em: https://alexzh.com/visual-guide-to-topappbar-variants-in-jetpack-compose/?utm_source=chatgpt.com
+    var categoryName by remember { mutableStateOf("") }
 
     Column (modifier = Modifier
         .fillMaxSize()
@@ -113,7 +106,6 @@ fun AddCat() {
             )
         }
 
-        // Layout em coluna que ocupa toda a tela e aplica padding de 16dp
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -122,14 +114,14 @@ fun AddCat() {
             horizontalAlignment = Alignment.CenterHorizontally
             ) {
             Text(
-                text = "Adicionar Categoria".uppercase(),
+                text = "ADICIONAR CATEGORIA",
                 fontWeight = FontWeight.Bold,
                 fontSize = 30.sp
             )
 
             CustomOutlinedTextField(
-                value = categoryName.value,
-                onValueChange = { categoryName.value = it },
+                value = categoryName,
+                onValueChange = { categoryName = it },
                 label = "Nome da Categoria"
             )
 
@@ -137,11 +129,11 @@ fun AddCat() {
 
             Button(
                 onClick = {
-                    addNewCategory(context, categoryName.value)
-                    categoryName.value = ""
+                    addNewCategory(context, categoryName)
+                    categoryName = ""
                 },
                 modifier = Modifier
-                    .height(60.dp)    // altura maior
+                    .height(60.dp)
                     .width(150.dp)
             ) {
                 Text(text = "Salvar")

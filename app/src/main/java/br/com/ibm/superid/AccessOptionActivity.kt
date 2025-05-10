@@ -1,7 +1,5 @@
-// TELA QUE O USUÁRIO ESCOLHE QUAL ACESSO DESEJA
-// LOGIN
-// CADASTRO
-// ENTRAR SEM SENHA
+// TELA QUE O USUÁRIO ESCOLHE QUAL ACESSO DESEJA (LOGIN, CADASTRO, ENTRAR SEM SENHA)
+
 package br.com.ibm.superid
 
 // Importações necessárias para a Activity, Jetpack Compose e componentes visuais
@@ -87,7 +85,11 @@ fun AccessOptions(modifier: Modifier = Modifier) {
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.secondary)
             ) {
-                Text("Login")
+                Text(
+                    text = "Login",
+                    fontSize = 18.sp,
+                    style = MaterialTheme.typography.titleMedium
+                )
             }
 
             Spacer(Modifier.height(18.dp))
@@ -101,7 +103,11 @@ fun AccessOptions(modifier: Modifier = Modifier) {
                     .height(60.dp)    // altura maior
                     .width(150.dp)
             ) {
-                Text("Cadastro")
+                Text(
+                    text = "Cadastro",
+                    fontSize = 18.sp,
+                    style = MaterialTheme.typography.titleMedium
+                )
             }
 
             Spacer(Modifier.height(8.dp))
@@ -118,7 +124,7 @@ fun AccessOptions(modifier: Modifier = Modifier) {
                     color = MaterialTheme.colorScheme.tertiary,
                     style = TextStyle(
                         textDecoration = TextDecoration.Underline,
-                        fontSize = 16.sp,
+                        fontSize = 20.sp,
                         fontWeight = FontWeight.Normal
                     )
                 )

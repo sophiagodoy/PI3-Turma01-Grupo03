@@ -1,3 +1,5 @@
+// TELA PARA O USUÁRIO ESCOLHER ENTRE ADICIONAR SENHA E ADICIONAR CATEGORIA
+
 /*TODO: precisa Remover */
 
 package br.com.ibm.superid
@@ -10,16 +12,13 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -40,8 +39,6 @@ class AddPasswordOrCategory : ComponentActivity() {
 @Composable
 fun AddPasswordOrCat(){
     val context = LocalContext.current
-    var categoria by remember { mutableStateOf(false) }
-    var senha by remember { mutableStateOf(false) }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -51,22 +48,19 @@ fun AddPasswordOrCat(){
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Button(onClick = {
-            if(categoria){
                 val intent = Intent(context, AddCategoryActivity::class.java) //
                 context.startActivity(intent)
             }
-        },
-            enabled = categoria
         ) {
-            Text(text = "Adicionar Categoria: ")
+            Text(text = "Adicionar Categoria")
         }
+        Spacer(modifier = Modifier.height(16.dp))
         Button(onClick = {
-            val intent = Intent(context, AddPasswordActivity::class.java) //
-            context.startActivity(intent)
-        },
-            enabled = senha
+                val intent = Intent(context, AddPasswordActivity::class.java) //
+                context.startActivity(intent)
+            }
         ) {
-            Text(text = "Adicionar senha: ")
+            Text(text = "Adicionar Senha")
         }
     }
 }
