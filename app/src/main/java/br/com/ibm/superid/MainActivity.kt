@@ -200,9 +200,17 @@ fun MainScreen() {
             )
         }
 
-        // Popup de adicionar
+        // Pop-up de adicionar senha e categoria (showAddPopUp = true)
         if (showAddPopUp) {
-            Dialog(onDismissRequest = { showAddPopUp = false }) {
+
+            // Exibe uma caixa de diálogo (pop-up)
+            Dialog(
+                onDismissRequest = {
+                    showAddPopUp = false // Fecha o pop-up ao tocar fora da tela
+                }
+            ) {
+
+                // Aplicando cor de fundo, forma e elevação
                 Surface(
                     shape = RoundedCornerShape(16.dp),
                     tonalElevation = 8.dp,
@@ -212,31 +220,37 @@ fun MainScreen() {
                         modifier = Modifier
                             .fillMaxWidth()
                     ) {
-                        // Sua faixa verde com botão de voltar
-                        BackButtonBar(onBackClick = {
-                            showAddPopUp = false
-                        })
 
+                        // Sua faixa verde com botão de voltar
+                        BackButtonBar(
+                                onBackClick = {
+                                showAddPopUp = false
+                            }
+                        )
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(16.dp)
                         ) {
 
-                            // Botões
+                            // Criando os botões em forma de coluna
                             Column(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalAlignment = Alignment.CenterHorizontally,
                             ) {
-                                Button(onClick = {
-                                    showAddPopUp = false
-                                    context.startActivity(Intent(context, AddPasswordActivity::class.java))
+
+                                // Botão de adicionar senha
+                                Button(
+                                    // Fecha o botão ao clicar e vai para a AddPasswordActivity
+                                    onClick = {
+                                        showAddPopUp = false
+                                        context.startActivity(Intent(context, AddPasswordActivity::class.java))
                                 },
                                     modifier = Modifier
-                                        .height(50.dp)    // altura maior
+                                        .height(50.dp)
                                         .width(250.dp),
                                     colors = ButtonDefaults.buttonColors(
-                                        containerColor = MaterialTheme.colorScheme.secondary // cor de fundo
+                                        containerColor = MaterialTheme.colorScheme.secondary // cor de fundo do botão
                                     )
                                 ) {
                                     Text("Adicionar Senha")
@@ -244,13 +258,18 @@ fun MainScreen() {
 
                                 Spacer(Modifier.height(10.dp))
 
-                                Button(onClick = {
-                                    showAddPopUp = false
-                                    context.startActivity(Intent(context, AddCategoryActivity::class.java))
+                                // Botão de adicionar categoria
+                                Button(
+                                    onClick = {
+                                        showAddPopUp = false
+                                        context.startActivity(Intent(context, AddCategoryActivity::class.java))
                                 },
                                     modifier = Modifier
-                                        .height(50.dp)    // altura maior
-                                        .width(250.dp)
+                                        .height(50.dp)
+                                        .width(250.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.secondary
+                                    )
                                 ) {
                                     Text("Adicionar Categoria")
                                 }

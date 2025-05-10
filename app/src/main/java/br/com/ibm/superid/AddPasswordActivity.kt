@@ -1,9 +1,7 @@
 // TELA PARA O USUÁRIO ADICIONAR UMA NOVA SENHA
 
-// Definição do pacote aplicativo
 package br.com.ibm.superid
 
-// Importações necessárias
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -223,7 +221,7 @@ fun AddPassword(modifier: Modifier = Modifier) {
     var titulo by remember { mutableStateOf("") }
 
     // Variável que controla se o meu DropdownMenu está aberto ou fechado
-    var expanded  by remember { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(false) }
 
 
     // Layout em coluna que ocupa toda a tela e aplica padding de 16dp
@@ -231,9 +229,11 @@ fun AddPassword(modifier: Modifier = Modifier) {
     // Baseado em: https://developer.android.com/develop/ui/compose/components/app-bars?hl=pt-br#top-app-bar
     // Baseado em: https://alexzh.com/visual-guide-to-topappbar-variants-in-jetpack-compose/?utm_source=chatgpt.com
 
-    Column (modifier = Modifier
-        .fillMaxSize()
-        .background(MaterialTheme.colorScheme.background)) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
         // Cabeçalho visual personalizado
         SuperIDHeader()
 
@@ -255,7 +255,8 @@ fun AddPassword(modifier: Modifier = Modifier) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 50.dp),
+                .padding(top = 50.dp)
+                .fillMaxWidth(),
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -270,6 +271,7 @@ fun AddPassword(modifier: Modifier = Modifier) {
             // Espaço de 24dp abaixo do título
             Spacer(Modifier.height(24.dp))
 
+
             // Campo de texto para escolher a categoria da nova senha
             CustomOutlinedTextField(
                 value = titulo,
@@ -281,55 +283,57 @@ fun AddPassword(modifier: Modifier = Modifier) {
             CustomOutlinedTextField(
                 value = senha,
                 onValueChange = { senha = it },
-                label ="Senha",
+                label = "Senha",
                 // Esconde os caracteres da senha
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             )
 
-            // Box para sobrepor os elementos: OutlinedTextField e DropdownMenu
-            Box {
-                // Campo de texto para escolher a categoria da nova senha
-                OutlinedTextField(
-                    value        = categoria,
-                    onValueChange = { },
-                    readOnly     = true, // campo é apenas uma leitura, usuário não pode digitar nada
-                    label        = { Text("Categoria") },
-
-                    // Adicionando ícone de seta
-                    trailingIcon = {
-                        IconButton(
-                            // Quando clicado na seta:
-                            onClick = {
-                                fetchCategoriasUsuario(context)  // chama a função que guarda as categorias
-                                expanded = true                  // abre o dropdown
-                            }
-                        ) {
-                            Icon(Icons.Filled.ArrowDropDown, contentDescription = "Escolher")
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth()
+            Box(
+                modifier = Modifier
+            ) {
+                // 1) Seu campo customizado, sem precisar mudar nada nele:
+                CustomOutlinedTextField(
+                    value = categoria,
+                    onValueChange = { /* não edita */ },
+                    label = "Categoria"
                 )
 
-                DropdownMenu(
-                    expanded        = expanded,
-                    onDismissRequest = { expanded = false },
-                    modifier        = Modifier.fillMaxWidth()
+                // 2) Ícone “drop-down” alinhado à direita, por cima do campo:
+                IconButton(
+                    onClick = {
+                        fetchCategoriasUsuario(context)
+                        expanded = true
+                    },
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .padding(end = 16.dp)      // encaixa bem com o padding interno do campo
                 ) {
-                    // Se categoriaUsuario estiver vazio
+                    Icon(Icons.Filled.ArrowDropDown, contentDescription = "Escolher")
+                }
+
+                // 3) O DropdownMenu logo abaixo, igual antes:
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false },
+
+                    // TODO: ARRUMAR TAMANHO DO DROP DOWN AQUI
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .padding(end = 16.dp)
+                ) {
                     if (categoriasUsuario.isEmpty()) {
-                        // Exibe "Nenhuma categoria" e ao clicar fecha o menu
                         DropdownMenuItem(
-                            text    = { Text("Nenhuma categoria") },
+                            text = { Text("Nenhuma categoria") },
                             onClick = { expanded = false }
                         )
                     } else {
                         categoriasUsuario.forEach { cat ->
                             DropdownMenuItem(
-                                text    = { Text(cat) },
+                                text = { Text(cat) },
                                 onClick = {
                                     categoria = cat
-                                    expanded  = false
+                                    expanded = false
                                 }
                             )
                         }
@@ -341,8 +345,9 @@ fun AddPassword(modifier: Modifier = Modifier) {
             CustomOutlinedTextField(
                 value = descricao,
                 onValueChange = { descricao = it },
-                label ="Descrição"
+                label = "Descrição"
             )
+
 
             // Espaço de 24dp antes do botão
             Spacer(Modifier.height(24.dp))
@@ -356,10 +361,13 @@ fun AddPassword(modifier: Modifier = Modifier) {
                 modifier = Modifier
                     .height(60.dp)    // altura maior
                     .width(150.dp)
+                    .align(Alignment.CenterHorizontally),
             ) {
                 // Define o texto que está dentro do botão
                 Text("Salvar")
             }
+
         }
     }
 }
+

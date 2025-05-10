@@ -106,7 +106,7 @@ fun Welcome(modifier: Modifier = Modifier) {
 
                 // Exibe uma caixa de diálogo (pop-up)
                 AlertDialog(
-                    onDismissRequest = { mostrarDialogo = false }, // Fecha o pop-up ao tocar fora
+                    onDismissRequest = { mostrarDialogo = false }, // Fecha o pop-up ao tocar fora da tela
 
                     // Definindo o título do diálogo
                     title = {
@@ -149,6 +149,7 @@ fun Welcome(modifier: Modifier = Modifier) {
                                 text = "Bem-vindo ao SuperID, um aplicativo criado para fins educacionais. " +
                                         "Ao usar, você concorda com estes termos.",
                                 style = MaterialTheme.typography.bodyMedium,
+                                // Baseado em: https://developer.android.com/reference/kotlin/androidx/compose/ui/text/style/TextAlign
                                 textAlign = TextAlign.Justify
                             )
 
