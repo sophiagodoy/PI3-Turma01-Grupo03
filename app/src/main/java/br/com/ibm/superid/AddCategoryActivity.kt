@@ -73,7 +73,7 @@ fun addNewCategory(context: Context, nomeCategoria: String) {
         .add(novaCategoria)
         .addOnCompleteListener { task ->
             if (task.isSuccessful) {
-                Toast.makeText(context, "Categoria adicionada com sucesso!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "✅ Categoria adicionada com sucesso!", Toast.LENGTH_SHORT).show()
             } else {
                 Toast.makeText(context, "Erro ao adicionar categoria: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
             }
