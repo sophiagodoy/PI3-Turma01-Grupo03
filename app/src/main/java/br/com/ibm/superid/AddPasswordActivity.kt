@@ -247,7 +247,8 @@ fun AddPassword(modifier: Modifier = Modifier) {
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Voltar"
+                contentDescription = "Voltar",
+                modifier = Modifier.size(35.dp)
             )
         }
 
