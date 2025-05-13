@@ -189,16 +189,16 @@ fun MainScreen() {
         FloatingActionButton(
             onClick = { showQRCodePopUp = true },
             modifier = Modifier
-                .size(100.dp)
+                .size(120.dp)
                 .align(Alignment.BottomEnd)
                 .padding(16.dp),
             shape = CircleShape,
             containerColor = MaterialTheme.colorScheme.primary
         ) {
             Image(
-                painter = painterResource(id = R.drawable.qrcode),
+                painter = painterResource(id = R.drawable.qrcodewhite),
                 contentDescription = "QR Code",
-                modifier = Modifier.size(60.dp)
+                modifier = Modifier.size(80.dp)
             )
         }
 

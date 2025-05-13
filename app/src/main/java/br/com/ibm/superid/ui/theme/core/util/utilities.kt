@@ -145,20 +145,20 @@ fun SuperIDHeaderImage() {
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(5.dp))
 
             // Círculo com imagem centralizada
 
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .size(64.dp)
-                    .background(Color(0xFFEDEDE5), shape = CircleShape)
+                    .size(90.dp)
+                    .background(color = MaterialTheme.colorScheme.background,shape = CircleShape)
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.ic_laucher),
+                    painter = painterResource(id = R.drawable.icon),
                     contentDescription = "Ícone do App",
-                    modifier = Modifier.size(100.dp)
+                    modifier = Modifier.size(200.dp)
                 )
             }
         }
