@@ -1,0 +1,235 @@
+
+body {
+    background-color: #a1bfe0;
+    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    padding-top: 120px;
+    font-size: 30px;
+}
+
+.bodyForms {
+    background-image: url("imagens/moedasInteira.png");
+    background-size:auto;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    justify-content: center;  
+    align-items: center;      
+    height: 100vh;     
+    margin: 0;
+
+}
+.bodyPagina1 {
+    background-image: url("imagens/GvEDnG0.png");
+    background-size: 2000px 1000px;
+    background-position: right;
+    background-repeat: no-repeat;
+}
+.top-rectangle {
+    width: 100%;          
+    height: 100px;        
+    background-color: #4D85D5;  
+    position: fixed;      
+    top: 0;               
+    left: 0;              
+    z-index: 1000;
+    display: flex;       
+    justify-content: space-between;  
+    align-items: center;  
+    padding: 0 20px;      
+}
+
+.top-rectangle a {
+    color: #fae5ca;   
+    text-decoration: none;  
+    font-size: 1.2em;  
+}
+
+.top-rectangle a:hover {
+    text-decoration: underline;  
+}
+
+
+h1 {
+    font-size: 2em;
+    color: #fae5ca;
+}
+
+h2 {
+    font-size: 150%;
+}
+
+h3 {
+    font-size: 1.5rem;
+}
+
+.pPage1{
+    
+    font-weight: bold;
+    margin-top: 50px;
+    margin-bottom: 30px; 
+    max-width: 75%; 
+    margin-left: 3%; 
+    margin-right: auto; 
+}
+
+.p2Page1{
+    
+    font-weight: bold;
+    margin-top: 0px;
+    margin-bottom: 20px; 
+    max-width: 60%; 
+    margin-left: 3%; 
+    margin-right: auto; 
+    font-size: 50px;
+}
+
+.button {
+    background-color: #ff7d00; 
+    color: #fae5ca; 
+    padding: 30px 50px; 
+    border: none; 
+    border-radius: 5px; 
+    font-size: 30px; 
+    cursor: pointer; 
+    margin-top: 3%; 
+    margin-left: 15%;
+    
+}
+.button:hover {
+    background-color: #e06a00; 
+}
+
+.buttonPUCBets {
+    color: #fae5ca;
+    font-size: 2em; 
+}
+
+.buttonPUCBets:hover {
+    color: #e2d0b9; 
+}
+.orange {
+    color: #ff7d00;
+}
+
+.darkblue {
+    color: #4D85D5;
+}
+.eggyolk {
+    color: #fae5ca;
+}
+
+.middleblue {
+    color: #88A8D6;
+}
+
+.rectangleForms {
+    background-color: #4D85D5;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    width: 60%;
+    margin: 0 auto; /* centraliza horizontalmente */
+  }
+  
+  /* Estiliza o formulário */
+  .rectangleForms form {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Estiliza os inputs */
+  .rectangleForms input {
+    padding: 5px;
+    margin-bottom: 10px;
+    border: none;
+    border-radius: 5px;
+  }
+  
+  /* Estiliza os botões em geral */
+  .rectangleForms button {
+    padding: 10px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 10px; /* espaçamento entre os botões */
+  }
+  
+  /* Hover dos botões */
+  .rectangleForms button:hover {
+    background-color: #6781a5;
+    color: #fae5ca;
+  }
+  
+  /* Estiliza os botões sociais para ficarem na vertical */
+  .rectangleForms .d-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 15px;
+  }
+  
+
+.messagebox {
+    display: none;
+    border-radius: 5px;
+    margin-top: 20px;
+}
+
+.messagebox p{
+    margin: 5px;
+    padding: 0;
+}
+
+.messagebox.error {
+    background-color: #e85f5c;
+    border: 3px solid #E84B48;
+    color: #fae5ca;
+}
+
+.messagebox.success {
+    background-color: rgb(106, 194, 106);
+    border: 3px solid green;
+    color: #fae5ca;
+}
+
+.popup {
+  display: none;
+  position: fixed;
+  z-index: 999;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+}
+
+.popup-content {
+  background-color: #fff;
+  margin: 10% auto;
+  padding: 30px;
+  border-radius: 10px;
+  width: 300px;
+  text-align: center;
+  position: relative;
+}
+
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+button {
+    background-color: #FAFAEEFF;
+    color: #4D85D5;
+    border: 1px solid #ccc;
+    transition: 0.3s;
+  }
+  
+  button:hover {
+    background-color: #f0f0f0;
+  }
+  
