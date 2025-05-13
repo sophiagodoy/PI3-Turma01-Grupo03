@@ -101,7 +101,9 @@ fun AccessOptions(modifier: Modifier = Modifier) {
             },
                 modifier = Modifier
                     .height(60.dp)    // altura maior
-                    .width(150.dp)
+                    .width(150.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.secondary)
             ) {
                 Text(
                     text = "Cadastro",

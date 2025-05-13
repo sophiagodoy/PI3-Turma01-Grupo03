@@ -153,11 +153,12 @@ fun MainScreen() {
             onClick = { showExitDialog = true }, // Altera a variável de estado para ativo
             modifier = Modifier
                 .align(Alignment.TopStart)
-                .padding(start = 8.dp, top = 80.dp)
+                .padding(start = 10.dp, top = 95.dp)
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Sair do aplicativo"
+                contentDescription = "Sair do aplicativo",
+                modifier = Modifier.size(35.dp)
             )
         }
 
@@ -188,6 +189,7 @@ fun MainScreen() {
         FloatingActionButton(
             onClick = { showQRCodePopUp = true },
             modifier = Modifier
+                .size(100.dp)
                 .align(Alignment.BottomEnd)
                 .padding(16.dp),
             shape = CircleShape,
@@ -196,7 +198,7 @@ fun MainScreen() {
             Image(
                 painter = painterResource(id = R.drawable.qrcode),
                 contentDescription = "QR Code",
-                modifier = Modifier.size(45.dp)
+                modifier = Modifier.size(60.dp)
             )
         }
 
@@ -238,6 +240,23 @@ fun MainScreen() {
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalAlignment = Alignment.CenterHorizontally,
                             ) {
+                                // Botão de adicionar categoria
+                                Button(
+                                    onClick = {
+                                        showAddPopUp = false
+                                        context.startActivity(Intent(context, AddCategoryActivity::class.java))
+                                    },
+                                    modifier = Modifier
+                                        .height(50.dp)
+                                        .width(250.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.secondary
+                                    )
+                                ) {
+                                    Text("Adicionar Categoria")
+                                }
+
+                                Spacer(Modifier.height(10.dp))
 
                                 // Botão de adicionar senha
                                 Button(
@@ -256,23 +275,6 @@ fun MainScreen() {
                                     Text("Adicionar Senha")
                                 }
 
-                                Spacer(Modifier.height(10.dp))
-
-                                // Botão de adicionar categoria
-                                Button(
-                                    onClick = {
-                                        showAddPopUp = false
-                                        context.startActivity(Intent(context, AddCategoryActivity::class.java))
-                                },
-                                    modifier = Modifier
-                                        .height(50.dp)
-                                        .width(250.dp),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = MaterialTheme.colorScheme.secondary
-                                    )
-                                ) {
-                                    Text("Adicionar Categoria")
-                                }
                             }
                         }
                     }
@@ -466,7 +468,10 @@ fun PasswordDetailDialog(item: SenhaItem, onDismiss: () -> Unit) {
                                 putExtra("PASSWORD_CATEGORY", item.categoria)
                             }
                             context.startActivity(intent)
-                        }) {
+                        },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.secondary
+                            )) {
                             Text("Alterar")
                         }
 
