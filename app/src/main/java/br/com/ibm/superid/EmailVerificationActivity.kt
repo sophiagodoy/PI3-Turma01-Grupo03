@@ -2,7 +2,6 @@
 
 // Definição do pacote aplicativo
 package br.com.ibm.superid
-
 // Importações necessárias
 import android.content.Intent
 import android.os.Bundle
