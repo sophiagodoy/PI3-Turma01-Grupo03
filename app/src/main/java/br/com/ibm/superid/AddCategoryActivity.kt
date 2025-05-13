@@ -117,7 +117,7 @@ fun AddCat() {
             Text(
                 text = "ADICIONAR CATEGORIA",
                 fontWeight = FontWeight.Bold,
-                fontSize = 30.sp
+                fontSize = 20.sp
             )
 
             CustomOutlinedTextField(
