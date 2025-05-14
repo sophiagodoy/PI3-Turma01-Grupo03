@@ -1,8 +1,8 @@
 // TELA PARA O USUÁRIO SER INFORMADO SOBRE A VERIFICAÇÃO DO EMAIL E SUAS CONDIÇÕES
 
-// Definição do pacote aplicativo
+
 package br.com.ibm.superid
-// Importações necessárias
+
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
@@ -72,7 +72,7 @@ fun EmailVerification(modifier: Modifier = Modifier) {
         // Botão de voltar
         IconButton(
             onClick = {
-                val intent = Intent(context, ForgotPasswordActivity::class.java)
+                val intent = Intent(context, AccessOptionActivity::class.java)
                 context.startActivity(intent)
             },
             modifier = Modifier.padding(start = 8.dp, top = 8.dp)
@@ -94,11 +94,15 @@ fun EmailVerification(modifier: Modifier = Modifier) {
         {
             // Exibe um texto na tela sobre as informações do email
             Text(
-                text = "Verifique a sua caixa de email e confirme o email.\n" +
-                        "Se o email não for confirmado não será possível usar a funcionalidade \"Login Sem Senha\".",
+                text = "Verifique sua caixa de e-mail e confirme o endereço fornecido.\n\n" +
+                        "Sem a confirmação, não será possível utilizar o login sem senha nem redefinir sua senha no aplicativo.",
                 textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
+                fontSize = 16.sp,
+                modifier = Modifier
+                    .padding(horizontal = 24.dp)
+                    .fillMaxWidth()
             )
+
             Spacer(modifier = Modifier.height(32.dp))
 
             // Botão para continuar para o login
@@ -129,29 +133,25 @@ fun EmailVerification(modifier: Modifier = Modifier) {
                         if (user != null) {
                             user.sendEmailVerification()
                                 .addOnSuccessListener {
-                                    Toast.makeText(
-                                        context,
-                                        "E-mail de verificação reenviado!",
-                                        Toast.LENGTH_LONG
-                                    ).show()
+                                    Toast.makeText(context, "E-mail de verificação reenviado!", Toast.LENGTH_LONG).show()
                                 }
                                 .addOnFailureListener {
-                                    Toast.makeText(
-                                        context,
-                                        "Falha ao reenviar",
-                                        Toast.LENGTH_LONG
-                                    ).show()
+                                    Toast.makeText(context, "Falha ao reenviar", Toast.LENGTH_LONG).show()
                                 }
                         } else {
-                            Toast.makeText(
-                                context,
-                                "Usuário não autenticado!",
-                                Toast.LENGTH_LONG
-                            ).show()
+                            Toast.makeText(context, "Usuário não autenticado!", Toast.LENGTH_LONG).show()
                         }
                     }
             )
 
         }
+    }
+}
+
+@Preview
+@Composable
+fun EmailVerificationPreview() {
+    SuperIDTheme {
+        EmailVerification()
     }
 }
