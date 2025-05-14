@@ -12,7 +12,6 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -20,9 +19,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -65,6 +66,107 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@Composable
+fun StandardAddPopup(
+    onDismiss: () -> Unit,
+    onAddPassword: () -> Unit,
+    onAddCategory: () -> Unit
+) {
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        tonalElevation = 8.dp,
+        color = MaterialTheme.colorScheme.background
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            BackButtonBar(onBackClick = onDismiss)
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Button(
+                        onClick = onAddPassword,
+                        modifier = Modifier
+                            .height(50.dp)
+                            .width(250.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.secondary
+                        )
+                    ) {
+                        Text("Adicionar Senha")
+                    }
+
+                    Spacer(Modifier.height(10.dp))
+
+                    Button(
+                        onClick = onAddCategory,
+                        modifier = Modifier
+                            .height(50.dp)
+                            .width(250.dp)
+                    ) {
+                        Text("Adicionar Categoria")
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun BottomBar(
+    onLogoutClick: () -> Unit,
+    onQRClick: () -> Unit,
+    onProfileClick: () -> Unit
+) {
+    BottomAppBar(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp),
+        containerColor = MaterialTheme.colorScheme.primary,
+        tonalElevation = 8.dp
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 24.dp), // padding horizontal para afastar das bordas
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Ícone de Logout
+            IconButton(onClick = onLogoutClick) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+                    contentDescription = "Logout",
+                    tint = MaterialTheme.colorScheme.onPrimary
+                )
+            }
+
+            // Ícone de QR Code
+            IconButton(onClick = onQRClick) {
+                Icon(
+                    painter = painterResource(id = R.drawable.qrcode),
+                    contentDescription = "QR Code",
+                    tint = MaterialTheme.colorScheme.onPrimary
+                )
+            }
+            // Ícone de Perfil
+            IconButton(onClick = onProfileClick) {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = "Perfil",
+                    tint = MaterialTheme.colorScheme.onPrimary
+                )
+            }
+        }
+    }
+}
+
+
 // Modelo de dados para representar uma senha
 data class SenhaItem(
     val id: String,
@@ -77,7 +179,6 @@ data class SenhaItem(
 // função que representa a tela principal do app
 @Composable
 fun MainScreen() {
-
     // Pega o context da minha Activity
     val context = LocalContext.current
 
@@ -88,6 +189,7 @@ fun MainScreen() {
     var showAddPopUp by remember { mutableStateOf(false) }
     var showQRCodePopUp by remember { mutableStateOf(false) }
     var showExitDialog by remember { mutableStateOf(false) }
+    var showLogoutDialog by remember { mutableStateOf(false) }
 
     // Carrega as senhas do Firestore assim que a tela iniciar
     LaunchedEffect(Unit) {
@@ -130,216 +232,159 @@ fun MainScreen() {
     val categorias = passwords.groupBy { it.categoria }
 
     // Estrutura do layout principal
-    Box(
+    Column(
         modifier = Modifier
-        .fillMaxSize()
-        .background(MaterialTheme.colorScheme.background)
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
     ) {
-
-        SuperIDHeader()
-
-        // Seta de voltar para a AcessOptionActivity (saindo do aplicativo)
-        IconButton(
-            onClick = { showExitDialog = true }, // Altera a variável de estado para ativo
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(start = 10.dp, top = 95.dp)
+        // Conteúdo principal (scrollável)
+        Box(
+            modifier = Modifier.weight(1f)
         ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Sair do aplicativo",
-                modifier = Modifier.size(35.dp)
-            )
-        }
+            SuperIDHeader()
 
-        // Column responsável por montar lista de categorias e senha
-        Column(modifier = Modifier.padding(16.dp)) {
-            Spacer(modifier = Modifier.height(130.dp))
-            categorias.forEach { (categoria, itens) ->
-                Spacer(modifier = Modifier.height(16.dp))
-                Categories(title = categoria, items = itens)
-            }
-        }
-
-        // Botão flutuante de adicionar senha e categoria
-        FloatingActionButton(
-            onClick = { showAddPopUp = true }, // showAddPopUp é ativada
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(top = 90.dp, end = 15.dp),
-            shape = CircleShape,
-            containerColor = MaterialTheme.colorScheme.primary
-        ) {
-            Icon(
-                Icons.Default.Add,
-                contentDescription = "Adicionar Senha e Categoria"
-            )
-        }
-
-        // Botão flutuante do QR Code
-        FloatingActionButton(
-            onClick = { showQRCodePopUp = true }, // showQRCodePopUp é ativada
-            modifier = Modifier
-                .size(120.dp)
-                .align(Alignment.BottomEnd)
-                .padding(16.dp),
-            shape = CircleShape,
-            containerColor = MaterialTheme.colorScheme.primary
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.qrcodewhite),
-                contentDescription = "QR Code",
-                modifier = Modifier.size(80.dp)
-            )
-        }
-
-        // Pop-up de adicionar senha e categoria
-        // Se showAddPopUp = true abre o pop-up
-        if (showAddPopUp) {
-
-            // Exibe uma caixa de diálogo (pop-up)
-            Dialog(
-                onDismissRequest = {
-                    showAddPopUp = false // Fecha o pop-up ao tocar fora da tela
-                }
+            // Seta de voltar para a AcessOptionActivity (saindo do aplicativo)
+            IconButton(
+                onClick = { showExitDialog = true },
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(start = 10.dp, top = 95.dp)
             ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Sair do aplicativo",
+                    modifier = Modifier.size(35.dp)
+                )
+            }
 
-                // Aplicando cor de fundo, forma e elevação
-                Surface(
-                    shape = RoundedCornerShape(16.dp),
-                    tonalElevation = 8.dp,
-                    color = MaterialTheme.colorScheme.background
+            // Column responsável por montar lista de categorias e senha
+            Column(modifier = Modifier.padding(16.dp)) {
+                Spacer(modifier = Modifier.height(130.dp))
+                categorias.forEach { (categoria, itens) ->
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Categories(title = categoria, items = itens)
+                }
+            }
+
+            // Botão flutuante de adicionar senha e categoria
+            FloatingActionButton(
+                onClick = { showAddPopUp = true },
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(top = 90.dp, end = 15.dp),
+                shape = CircleShape,
+                containerColor = MaterialTheme.colorScheme.primary
+            ) {
+                Icon(
+                    Icons.Default.Add,
+                    contentDescription = "Adicionar Senha e Categoria"
+                )
+            }
+
+            // Pop-up de adicionar senha e categoria
+            if (showAddPopUp) {
+                Dialog(
+                    onDismissRequest = { showAddPopUp = false }
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    ) {
+                    StandardAddPopup(
+                        onDismiss = { showAddPopUp = false },
+                        onAddPassword = {
+                            showAddPopUp = false
+                            context.startActivity(Intent(context, AddPasswordActivity::class.java))
+                        },
+                        onAddCategory = {
+                            showAddPopUp = false
+                            context.startActivity(Intent(context, AddCategoryActivity::class.java))
+                        }
+                    )
+                }
+            }
 
-                        // Exibe um ícone de voltar e facha o pop-up (false)
-                        BackButtonBar(
-                                onBackClick = {
-                                showAddPopUp = false
-                            }
-                        )
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp)
-                        ) {
-
-                            // Criando os botões em forma de coluna
-                            Column(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                            ) {
-
-                                // Botão de adicionar categoria
-                                Button(
-                                    // Fecha o botão ao clicar e vai para a AddCategoryActivity
-                                    onClick = {
-                                        showAddPopUp = false
-                                        context.startActivity(Intent(context, AddCategoryActivity::class.java))
-                                    },
-                                    modifier = Modifier
-                                        .height(50.dp)
-                                        .width(250.dp),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = MaterialTheme.colorScheme.secondary
-                                    )
-                                ) {
-                                    Text("Adicionar Categoria")
-                                }
-
-                                Spacer(Modifier.height(10.dp))
-
-                                // Botão de adicionar senha
-                                Button(
-                                    // Fecha o botão ao clicar e vai para a AddPasswordActivity
-                                    onClick = {
-                                        showAddPopUp = false
-                                        context.startActivity(Intent(context, AddPasswordActivity::class.java))
-                                },
-                                    modifier = Modifier
-                                        .height(50.dp)
-                                        .width(250.dp),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = MaterialTheme.colorScheme.secondary // cor de fundo do botão
-                                    )
-                                ) {
-                                    Text("Adicionar Senha")
-                                }
-                            }
+            // Popup de leitura do QR Code
+            if (showQRCodePopUp) {
+                AlertDialog(
+                    onDismissRequest = { showQRCodePopUp = false },
+                    title = {
+                        BackButtonBar(onBackClick = { showQRCodePopUp = false })
+                    },
+                    confirmButton = {
+                        TextButton(onClick = { showQRCodePopUp = false }) {
+                            Text("Esse pop-up nao vai existir, ele abre a camera direto.")
                         }
                     }
-                }
+                )
+            }
+
+            // Diálogo de confirmação de saída
+            if (showExitDialog) {
+                AlertDialog(
+                    onDismissRequest = { showExitDialog = false },
+                    title = { Text("Deseja sair do SuperID?") },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                showExitDialog = false
+                                val intent = Intent(context, AccessOptionActivity::class.java)
+                                context.startActivity(intent)
+                            }
+                        ) {
+                            Text(
+                                text = "Sim",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onBackground
+                            )
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            onClick = { showExitDialog = false }
+                        ) {
+                            Text(
+                                text = "Não",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onBackground
+                            )
+                        }
+                    }
+                )
+            }
+
+            // Diálogo de confirmação de logout
+            if (showLogoutDialog) {
+                AlertDialog(
+                    onDismissRequest = { showLogoutDialog = false },
+                    title = { Text("Confirmar Logout") },
+                    text = { Text("Tem certeza que deseja sair da sua conta?") },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                showLogoutDialog = false
+                                Firebase.auth.signOut()
+                                context.startActivity(Intent(context, AccessOptionActivity::class.java))
+                            }
+                        ) {
+                            Text("Sair", color = MaterialTheme.colorScheme.primary)
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            onClick = { showLogoutDialog = false }
+                        ) {
+                            Text("Cancelar", color = MaterialTheme.colorScheme.primary)
+                        }
+                    }
+                )
             }
         }
 
-        /*TODO: Mudar o POP-UP para abir a camera*/
-
-        // Popup de leitura do QR Code
-        if (showQRCodePopUp) {
-            AlertDialog(
-                onDismissRequest = { showQRCodePopUp = false },
-                title = {
-                    // Faixa verde com o botão de voltar
-                    BackButtonBar(onBackClick = {
-                        showAddPopUp = false
-                    })
-                },
-                confirmButton = {
-                    TextButton(onClick = {
-                        showQRCodePopUp = false
-                    }) {
-                        Text("Esse pop-up nao vai existir, ele abre a camera direto.")
-                    }
-                }
-            )
-        }
-
-        // Baseado em: https://www.geeksforgeeks.org/alertdialog-in-android-using-jetpack-compose/?utm_source
-        // Se a showExitDialog estiver como true (ativa)
-        if (showExitDialog) {
-
-            // Exibe uma caixa de diálogo (pop-up)
-            AlertDialog(
-                onDismissRequest = { showExitDialog = false }, // Fecha o pop-up ao tocar fora
-                title = { Text("Deseja sair do SuperID?") },
-
-                // Botão de confirmação (fecha o pop-up quando clicado)
-                confirmButton = {
-                    TextButton(
-                        // Define showExistDialog como inativo e muda de página
-                        onClick = {
-                            showExitDialog = false
-                            val intent = Intent(context, AccessOptionActivity::class.java)
-                            context.startActivity(intent)
-                        }
-                    ) {
-                        Text(
-                            text = "Sim",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
-                    }
-                },
-
-                // Botão de cancelamento
-                dismissButton = {
-                    TextButton(
-                        onClick = {
-                            showExitDialog = false // Define showExistDialog como inativo
-                        }
-                    ) {
-                        Text(
-                            text = "Não",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
-                    }
-                }
-            )
-        }
+        // BottomBar fixa na parte inferior
+        BottomBar(
+            onLogoutClick = { showLogoutDialog = true },
+            onQRClick = { showQRCodePopUp = true },
+            onProfileClick = {
+                context.startActivity(Intent(context, ProfileActivity::class.java))
+            }
+        )
     }
 }
 
@@ -605,7 +650,6 @@ fun RemovePasswordDialog(
     }
 }
 
-
 // Preview da tela principal
 @Preview(
     name = "Dark Mode",
@@ -624,4 +668,3 @@ fun PreviewMainScreen() {
         MainScreen()
     }
 }
-

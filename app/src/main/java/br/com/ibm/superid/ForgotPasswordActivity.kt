@@ -225,4 +225,3 @@ fun ForgotPasswordScreen(modifier: Modifier = Modifier) {
         }
     }
 }
-

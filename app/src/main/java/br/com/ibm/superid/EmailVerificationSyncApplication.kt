@@ -66,4 +66,3 @@ class EmailVerificationSyncApplication : Application(), DefaultLifecycleObserver
         }
     }
 }
-
