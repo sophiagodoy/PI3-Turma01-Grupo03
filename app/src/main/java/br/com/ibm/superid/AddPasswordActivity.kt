@@ -21,8 +21,6 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -40,13 +38,8 @@ import br.com.ibm.superid.ui.theme.core.util.SuperIDHeader
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import java.security.SecureRandom
-import javax.crypto.Cipher
-import javax.crypto.spec.IvParameterSpec
-import javax.crypto.spec.SecretKeySpec
-import kotlin.io.encoding.Base64
-import kotlin.io.encoding.ExperimentalEncodingApi
-
+import br.com.ibm.superid.ui.theme.core.util.createacesstoken
+import br.com.ibm.superid.ui.theme.core.util.encryptpassword
 
 // Declarando a Activity (AddPasswordActivity)
 class AddPasswordActivity : ComponentActivity() {
@@ -54,17 +47,13 @@ class AddPasswordActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            SuperIDTheme{
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    // Chama a função composable AddPassword e aplica o padding interno do Scaffold
-                    AddPassword(
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+            SuperIDTheme {
+                AddPassword()
             }
         }
     }
 }
+
 
 // Função para adicionar uma nova senha no Firestore
 fun addNewPassword(
@@ -75,116 +64,72 @@ fun addNewPassword(
     titulo: String
 ) {
 
-    // Baseado na documentação: https://firebase.google.com/docs/auth/android/manage-users?hl=pt-br#get_the_currently_signed-in_user
-    // Identifica o usuário atual conectado
+    // Obtenho a instância do FirebaseAuth e pego o usuário logado no momento
     val user = Firebase.auth.currentUser
 
-    try {
-        // Obtendo a instância do banco de dados Firestore
-        val db = Firebase.firestore
-
-        // Criptografa a senha e obtém o IV
-        val (encryptpassword, iv) = encryptpassword(senha)
-        val accessToken = createacesstoken()
-
-        // Mapa com informações da nova senha
-        val dadosNovaSenha = hashMapOf(
-            "titulo"      to titulo,
-            "senha"       to encryptpassword,
-            "categoria"   to categoria,
-            "descricao"   to descricao,
-            "accessToken" to accessToken,
-            "iv"          to iv
-        )
-
-        // Adiciona o documento e usa addOnCompleteListener
-        db.collection("users")
-            .document(user!!.uid)
-            .collection("senhas")
-            .add(dadosNovaSenha)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    // Se salvou com sucesso, obtém a referência do documento
-                    val documentReference = task.result
-                    // Atualiza o próprio documento adicionando o campo "id"
-                    documentReference.update("id", documentReference.id)
-                    Toast.makeText(context, "Senha salva com sucesso!", Toast.LENGTH_SHORT).show()
-                } else {
-                    // Em caso de erro, exibe a mensagem
-                    val e = task.exception
-                    Toast.makeText(context, "Erro ao salvar senha: ${e?.message}", Toast.LENGTH_LONG).show()
-                }
-            }
-    } catch (e: Exception) {
-        // Trata possíveis erros de criptografia
-        Toast.makeText(context, "Erro de criptografia: ${e.message}", Toast.LENGTH_LONG).show()
+    // Caso não exista um usuário logado interrompe a execução da função
+    if (user == null) {
+        Toast.makeText(context, "Usuário não autenticado", Toast.LENGTH_LONG).show()
+        return
     }
-}
 
-// Baseado na documentação: https://www.baeldung.com/kotlin/advanced-encryption-standard
-// Gera um token de acesso aleatório para a senha
-@OptIn(ExperimentalEncodingApi::class)
-fun createacesstoken(): String {
-    // Gerador da criptografia
-    val random = SecureRandom()
-    // Criaçao de uma array para que tenha um tamanho adequado de 256 bytes
-    val bytes = ByteArray(32) // 32 bytes = 256 bits
-    // Gerador de bytes aleatórios
-    random.nextBytes(bytes)
-    // Conversão dos bytes binários para string ASCII
-    return Base64.encode(bytes)
-}
+    // Só “try” na criptografia
+    val (encrypted, iv) = try {
+        encryptpassword(senha)
+    } catch (e: Exception) {
+        Toast.makeText(context, "Falha ao criptografar: ${e.message}", Toast.LENGTH_LONG).show()
+        return
+    }
 
-// Baseado na documentação: https://www.baeldung.com/kotlin/advanced-encryption-standard
-// Criptografa uma senha usando AES, tendo como a chave "ProjetoIntegrador3Semestre062025"
-@OptIn(ExperimentalEncodingApi::class)
-fun encryptpassword(password: String, encryptionKey: String = "ProjetoIntegrador3Semestre062025"): Pair<String, String> {
-    // Converte a chave para bytes UTF-8 e ajusta para 32 bytes (256 bits)
-    val keyBytes = encryptionKey.toByteArray(Charsets.UTF_8).copyOf(32)
-    // Cria a especificação da chave secreta para o algoritmo AES
-    val secretKey = SecretKeySpec(keyBytes, "AES")
-    // Gera 16 bytes aleatórios (tamanho pedido pela AES)
-    val iv = ByteArray(16)
-    // Preenche com bytes criptografados
-    SecureRandom().nextBytes(iv)
-    // Cria o objeto IV
-    val ivSpec = IvParameterSpec(iv)
-    // Configuração da criptografia, aonde obtem a instancia do cipher
-    val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
-    // Inicializa para a criptografia com a chave e IV
-    cipher.init(Cipher.ENCRYPT_MODE, secretKey, ivSpec)
-    // Converte a senha para bytes UTF-8 e criptografa
-    val encryptedBytes = cipher.doFinal(password.toByteArray(Charsets.UTF_8))
+    val accessToken = createacesstoken()
 
-    // Utilizado "Return Pair", para que consiga dar return em dois elementos ncessarios para descriptografar
-    // Retorna Pair com a senha criptografada e IV, ambos em Base64
-    return Pair(
-        Base64.encode(encryptedBytes),
-        Base64.encode(iv)
+    // Criando um mapa mutável (hashMap) com informações do que quero salvar no firestore (informações da nova senha e criptografia)
+    val dadosNovaSenha = hashMapOf(
+        "titulo" to titulo,
+        "senha" to encrypted,
+        "categoria" to categoria,
+        "descricao" to descricao,
+        "accessToken" to accessToken,
+        "iv" to iv
     )
+
+    // Gravando os dados no banco Firestore
+    Firebase.firestore
+        .collection("users")
+        .document(user.uid)
+        .collection("senhas")
+        .add(dadosNovaSenha)
+        .addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                Toast.makeText(context, "Senha salva com sucesso!", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(context, "Erro ao salvar: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+            }
+        }
 }
 
-// Lista mutável que guarda as categorias lidas no Firestore do tipo String
+// Crio uma lista mutável que guarda as categorias lidas no Firestore
 val categoriasUsuario = mutableStateListOf<String>()
 
-// Função que lê as categorias do Firestore
+// Função que lê as categorias que estão salvas no banco do usuário
 fun fetchCategoriasUsuario(context: Context) {
-    // Pega a instância de autenticação do Firebase
-    val auth = Firebase.auth
 
-    // Recupera o usuário atualmente autenticado
-    val currentUser = auth.currentUser
+    // Obtenho a instância do FirebaseAuth e pego o usuário logado no momento
+    val user = Firebase.auth.currentUser
 
-    // Se não houver usuário logado, interrompe a função
-    if (currentUser == null) return
+    // Caso não exista um usuário logado interrompe a execução da função
+    if (user == null) {
+        Toast.makeText(context, "Usuário não autenticado", Toast.LENGTH_LONG).show()
+        return
+    }
 
-    // A partir daqui sabemos que currentUser não é null, então pegamos o UID
-    val uid = currentUser.uid
+    // Acesso a propriedade uid do objeto user (pego o uid do usuário logado)
+    val uid = user.uid
 
-    // Limpa a lista antes de buscar novas categorias
+    // Limpo a lista categoriasUsuario
     categoriasUsuario.clear()
 
-    // Acessa o banco de dados Firestore
+    // Fazendo a leitura da coleção categorias no Firestore
     Firebase.firestore
         .collection("users")
         .document(uid)
@@ -201,39 +146,38 @@ fun fetchCategoriasUsuario(context: Context) {
         }
 }
 
+
 // Função Composable que apresenta o formulário de adicionar senha
-@Preview(showBackground = true)
+@Preview
 @Composable
 fun AddPassword(modifier: Modifier = Modifier) {
 
-    // Cria variável para poder trocar de tela
+    // Obtém o Contexto atual da Activity para usar em Toasts, Intents...
     val context = LocalContext.current
 
-    // Variáveis que guardam o valor digitado nos campos do formulário
+    // Declarando variáveis que guardam os valores digitados nos campos
     var senha by remember { mutableStateOf("") }
     var confirmarSenha by remember { mutableStateOf("") }
     var categoria by remember { mutableStateOf("") }
     var descricao by remember { mutableStateOf("") }
     var titulo by remember { mutableStateOf("") }
 
-    // Variável que controla se o meu DropdownMenu está aberto ou fechado
+    // Variável que controla se o DropdownMenu está aberto ou fechado
     var expanded by remember { mutableStateOf(false) }
 
-
-    // Layout em coluna que ocupa toda a tela e aplica padding de 16dp
-    // Seta que volta para AccessOptionActivity
-    // Baseado em: https://developer.android.com/develop/ui/compose/components/app-bars?hl=pt-br#top-app-bar
-    // Baseado em: https://alexzh.com/visual-guide-to-topappbar-variants-in-jetpack-compose/?utm_source=chatgpt.com
-
+    // Column para definir fundo, posicionar cabeçalho e botão de voltar
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
+
         // Cabeçalho visual personalizado
         SuperIDHeader()
 
-        // Botão de voltar
+        // Seta que volta para MainActivity
+        // Baseado na documentação: https://developer.android.com/develop/ui/compose/components/app-bars?hl=pt-br#top-app-bar
+        // Baseado na documentação: https://alexzh.com/visual-guide-to-topappbar-variants-in-jetpack-compose/?utm_source
         IconButton(
             onClick = {
                 val intent = Intent(context, MainActivity::class.java)
@@ -243,12 +187,12 @@ fun AddPassword(modifier: Modifier = Modifier) {
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Voltar",
+                contentDescription = "Voltar para a tela principal",
                 modifier = Modifier.size(35.dp)
             )
         }
 
-        // Layout em coluna que ocupa toda a tela e aplica padding de 16dp
+        // Column que organiza os campos que permite o usuário adicionar a nova senha
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -258,16 +202,14 @@ fun AddPassword(modifier: Modifier = Modifier) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            // Define o título da tela em negrito e tamanho 30sp
+            // Define o título da tela
             Text(
                 text = "ADICIONAR SENHA",
                 fontSize = 30.sp,
                 fontWeight = FontWeight.Bold
             )
 
-            // Espaço de 24dp abaixo do título
             Spacer(Modifier.height(24.dp))
-
 
             // Campo de texto para escolher a categoria da nova senha
             CustomOutlinedTextField(
@@ -299,14 +241,15 @@ fun AddPassword(modifier: Modifier = Modifier) {
             Box(
                 modifier = Modifier
             ) {
-                // 1) Seu campo customizado, sem precisar mudar nada nele:
+
+                // Campo que exibe a categoria selecionada
                 CustomOutlinedTextField(
                     value = categoria,
                     onValueChange = { /* não edita */ },
                     label = "Categoria"
                 )
 
-                // 2) Ícone “drop-down” alinhado à direita, por cima do campo:
+                // Ícone do “drop-down”
                 IconButton(
                     onClick = {
                         fetchCategoriasUsuario(context)
@@ -314,9 +257,12 @@ fun AddPassword(modifier: Modifier = Modifier) {
                     },
                     modifier = Modifier
                         .align(Alignment.CenterEnd)
-                        .padding(end = 16.dp)      // encaixa bem com o padding interno do campo
+                        .padding(end = 16.dp)
                 ) {
-                    Icon(Icons.Filled.ArrowDropDown, contentDescription = "Escolher")
+                    Icon(
+                        Icons.Filled.ArrowDropDown,
+                        contentDescription = "Escolher categoria"
+                    )
                 }
 
                 // 3) O DropdownMenu logo abaixo, igual antes:
@@ -348,20 +294,20 @@ fun AddPassword(modifier: Modifier = Modifier) {
                 }
             }
 
-            // Campo de texto para digitar a descrição da noa senha
+            // Campo de texto para digitar a descrição da nova senha
             CustomOutlinedTextField(
                 value = descricao,
                 onValueChange = { descricao = it },
                 label = "Descrição (opcional)"
             )
 
-            // Espaço de 24dp antes do botão
             Spacer(Modifier.height(24.dp))
 
             // Botão que quando clicado salva a nova senha no banco Firestore
             Button(
                 onClick = {
                     when {
+
                         // Verfica se tem algum campo em branco
                         titulo.isBlank() || senha.isBlank() || categoria.isBlank() ->
                             Toast.makeText(context, "Preencha título, senha e categoria", Toast.LENGTH_SHORT).show()
@@ -383,7 +329,6 @@ fun AddPassword(modifier: Modifier = Modifier) {
             ) {
                 Text("Salvar")
             }
-
         }
     }
 }

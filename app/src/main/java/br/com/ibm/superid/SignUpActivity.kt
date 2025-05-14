@@ -1,9 +1,7 @@
 // TELA PARA O USUÁRIO REALIZAR O CADASTRO
 
-// Definição do pacote aplicativo
 package br.com.ibm.superid
 
-// Importações necessárias
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -28,7 +26,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -58,23 +55,18 @@ class SignUpActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             SuperIDTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    // Chama a função composable SignUp e aplica o padding interno do Scaffold
-                    SignUp(
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                    SignUp()
                 }
             }
         }
     }
-}
+
 
 // Essa função cria uma nova conta no Firebase Authentication
 fun saveUserToAuth(email: String, password: String, name: String, context: Context) {
 
     // Obtemos a instância do Firebase Auth
     val auth = Firebase.auth
-
 
     // Cria um novo usuário com e-mail e senha
     auth.createUserWithEmailAndPassword(email, password)
@@ -131,20 +123,22 @@ fun saveUserToFirestore(name: String, email: String, context: Context) {
             .set(dadosCadastro)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
+                    Log.i("SaveUserToFirestore", "Usuário salvo com sucesso no Firestore")
                     Toast.makeText(context, "Usuário Criado com sucesso!", Toast.LENGTH_LONG).show()
                     // Se salvou com sucesso vai para a EmailVerificationActivity
                     context.startActivity(Intent(context, EmailVerificationActivity::class.java))
                 } else {
+                    Log.i("SaveUserToFirestore", "Erro ao salvar usuário: ${task.exception?.message}")
+
                     Toast.makeText(context, "Erro ao criar usuário", Toast.LENGTH_LONG).show()
                 }
             }
     } else {
+        Log.i("SaveUserToFirestore", "Erro interno: usuário não autenticado")
         Toast.makeText(context, "Erro interno: usuário não autenticado", Toast.LENGTH_LONG).show()
         return
     }
 }
-
-
 
 // Função Composable que apresenta o formulário de cadastro do usuário
 @OptIn(ExperimentalMaterial3Api::class)
