@@ -243,20 +243,6 @@ fun MainScreen() {
         ) {
             SuperIDHeader()
 
-            // Seta de voltar para a AcessOptionActivity (saindo do aplicativo)
-            IconButton(
-                onClick = { showExitDialog = true },
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(start = 10.dp, top = 95.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Sair do aplicativo",
-                    modifier = Modifier.size(35.dp)
-                )
-            }
-
             // Column responsável por montar lista de categorias e senha
             Column(modifier = Modifier.padding(16.dp)) {
                 Spacer(modifier = Modifier.height(130.dp))
