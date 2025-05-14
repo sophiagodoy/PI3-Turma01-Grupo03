@@ -1,3 +1,5 @@
+// ARQUIVO QUE REÚNE COMPOSABLES USADOS EM TODO O APP
+
 package br.com.ibm.superid.ui.theme.core.util
 
 import android.content.Intent
@@ -42,11 +44,14 @@ import br.com.ibm.superid.MainActivity
 import br.com.ibm.superid.R
 import br.com.ibm.superid.SignInActivity
 
+
 @Preview
 @Composable
+// Função que desenha o cabeçalho estilizado Super ID
 fun SuperIDHeader() {
     Box(modifier = Modifier.fillMaxWidth()) {
-        // Parte verde superior
+
+        // Parte verde no topo
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -61,13 +66,16 @@ fun SuperIDHeader() {
                 .padding(top = 60.dp)
                 .fillMaxWidth()
         ) {
+
+            // Cartão branco com cantos arredondados
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .background(MaterialTheme.colorScheme.background, shape = RoundedCornerShape(16.dp))
                     .padding(horizontal = 32.dp, vertical = 8.dp)
             ) {
-                // Título "SuperID"
+
+                // Texto “SuperID” em duas cores
                 Row {
                     Text(
                         text = "Super",
@@ -104,9 +112,11 @@ fun SuperIDHeader() {
     }
 }
 
+// Função que insere o ícone do app dentro do círculo
 @Composable
 fun SuperIDHeaderImage() {
     Box(modifier = Modifier.fillMaxWidth()) {
+
         // Parte verde superior
         Box(
             modifier = Modifier
@@ -122,13 +132,16 @@ fun SuperIDHeaderImage() {
                 .padding(top = 60.dp)
                 .fillMaxWidth()
         ) {
+
+            // Cartão branco arredondado com o texto “SuperID”
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .background(MaterialTheme.colorScheme.background, shape = RoundedCornerShape(16.dp))
                     .padding(horizontal = 32.dp, vertical = 8.dp)
             ) {
-                // Título "SuperID"
+
+                // Texto “SuperID” em duas cores
                 Row {
                     Text(
                         text = "Super",
@@ -147,14 +160,15 @@ fun SuperIDHeaderImage() {
 
             Spacer(modifier = Modifier.height(5.dp))
 
-            // Círculo com imagem centralizada
-
+            // Círculo com ícone do app centralizada
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .size(90.dp)
                     .background(color = MaterialTheme.colorScheme.background,shape = CircleShape)
             ) {
+
+                // Imagem centralizada dentro do círculo
                 Image(
                     painter = painterResource(id = R.drawable.icon),
                     contentDescription = "Ícone do App",
@@ -165,6 +179,7 @@ fun SuperIDHeaderImage() {
     }
 }
 
+// Função quie exibe a seta de voltar
 @Composable
 fun BackButtonBar(onBackClick: () -> Unit) {
     Box(
@@ -186,6 +201,7 @@ fun BackButtonBar(onBackClick: () -> Unit) {
     }
 }
 
+// Função para que os pop-up tenham os mesmos estilos visuais
 @Composable
 fun StandardBoxPopUp(content: @Composable () -> Unit) {
     Box(
@@ -199,6 +215,7 @@ fun StandardBoxPopUp(content: @Composable () -> Unit) {
     }
 }
 
+// Função que cria todos os compos de texto com os mesmos estilos
 @Composable
 fun CustomOutlinedTextField(
     value: String,

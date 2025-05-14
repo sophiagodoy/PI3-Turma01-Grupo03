@@ -94,13 +94,17 @@ fun decryptPassword(encrypted: String, ivBase64: String, key: String = "ProjetoI
 // função que representa a tela principal do app
 @Composable
 fun MainScreen() {
+
+    // Pega o context da minha Activity
     val context = LocalContext.current
 
     // Declarando variáveis
     var passwords by remember { mutableStateOf<List<SenhaItem>>(emptyList()) }
+
+    // Variáveis que controlam a visibilidade de três diálogos (pop-up)
     var showAddPopUp by remember { mutableStateOf(false) }
     var showQRCodePopUp by remember { mutableStateOf(false) }
-    var showExitDialog by remember { mutableStateOf(false) } // Controla o estado do diálogo de saída
+    var showExitDialog by remember { mutableStateOf(false) }
 
     // Carrega as senhas do Firestore assim que a tela iniciar
     LaunchedEffect(Unit) {
@@ -139,9 +143,12 @@ fun MainScreen() {
         }
     }
 
+    // Agrupa as senhas por categoria
     val categorias = passwords.groupBy { it.categoria }
 
-    Box(modifier = Modifier
+    // Estrutura do layout principal
+    Box(
+        modifier = Modifier
         .fillMaxSize()
         .background(MaterialTheme.colorScheme.background)
     ) {
@@ -162,6 +169,7 @@ fun MainScreen() {
             )
         }
 
+        // Column responsável por montar lista de categorias e senha
         Column(modifier = Modifier.padding(16.dp)) {
             Spacer(modifier = Modifier.height(130.dp))
             categorias.forEach { (categoria, itens) ->
@@ -170,9 +178,9 @@ fun MainScreen() {
             }
         }
 
-        // Botão flutuante de adicionar
+        // Botão flutuante de adicionar senha e categoria
         FloatingActionButton(
-            onClick = { showAddPopUp = true },
+            onClick = { showAddPopUp = true }, // showAddPopUp é ativada
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .padding(top = 90.dp, end = 15.dp),
@@ -187,7 +195,7 @@ fun MainScreen() {
 
         // Botão flutuante do QR Code
         FloatingActionButton(
-            onClick = { showQRCodePopUp = true },
+            onClick = { showQRCodePopUp = true }, // showQRCodePopUp é ativada
             modifier = Modifier
                 .size(120.dp)
                 .align(Alignment.BottomEnd)
@@ -202,7 +210,8 @@ fun MainScreen() {
             )
         }
 
-        // Pop-up de adicionar senha e categoria (showAddPopUp = true)
+        // Pop-up de adicionar senha e categoria
+        // Se showAddPopUp = true abre o pop-up
         if (showAddPopUp) {
 
             // Exibe uma caixa de diálogo (pop-up)
@@ -223,7 +232,7 @@ fun MainScreen() {
                             .fillMaxWidth()
                     ) {
 
-                        // Sua faixa verde com botão de voltar
+                        // Exibe um ícone de voltar e facha o pop-up (false)
                         BackButtonBar(
                                 onBackClick = {
                                 showAddPopUp = false
@@ -240,8 +249,10 @@ fun MainScreen() {
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalAlignment = Alignment.CenterHorizontally,
                             ) {
+
                                 // Botão de adicionar categoria
                                 Button(
+                                    // Fecha o botão ao clicar e vai para a AddCategoryActivity
                                     onClick = {
                                         showAddPopUp = false
                                         context.startActivity(Intent(context, AddCategoryActivity::class.java))
@@ -274,7 +285,6 @@ fun MainScreen() {
                                 ) {
                                     Text("Adicionar Senha")
                                 }
-
                             }
                         }
                     }
@@ -350,11 +360,16 @@ fun MainScreen() {
     }
 }
 
+// Função que controla a expansão/recolhimento de um diálogo
 @Composable
 fun Categories(title: String, items: List<SenhaItem>) {
-    var expanded by remember { mutableStateOf(false) }
-    var selectedItem by remember { mutableStateOf<SenhaItem?>(null) }
 
+    // Declarando as variáveis
+    var expanded by remember { mutableStateOf(false) } // Controla se a lista dentro de categoria está aberta ou fechada
+    var selectedItem by remember { mutableStateOf<SenhaItem?>(null) } // Guarda o item selecionado para mostrar o diálogo (pop-up)
+
+    // Exibição de um Card com as informações de cada categoria
+    // todo
     CategoryCard(
         title = title,
         expanded = expanded,
@@ -363,6 +378,7 @@ fun Categories(title: String, items: List<SenhaItem>) {
         onItemClick = { selectedItem = it }
     )
 
+    // todo
     selectedItem?.let {
         PasswordDetailDialog(
             item = it,
@@ -371,6 +387,7 @@ fun Categories(title: String, items: List<SenhaItem>) {
     }
 }
 
+// Função que mostra uma categoria e sua lista de senhas quando está expandido
 @Composable
 fun CategoryCard(
     title: String,
@@ -391,8 +408,16 @@ fun CategoryCard(
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = title, fontSize = 30.sp, fontWeight = FontWeight.Bold)
-                IconButton(onClick = { onExpandToggle() }) {
+                Text(
+                    text = title,
+                    fontSize = 30.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                IconButton(
+                    onClick = {
+                        onExpandToggle()
+                    }
+                ) {
                     Icon(
                         imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
                         contentDescription = null
@@ -400,6 +425,7 @@ fun CategoryCard(
                 }
             }
 
+            // Exibe a lista de itens se expanded = true
             if (expanded) {
                 items.forEach { item ->
                     Text(
@@ -416,21 +442,32 @@ fun CategoryCard(
     }
 }
 
+// Função que mostra um pop-up com todos os detalhes de uma senha que o usuário clicou na lista
 @Composable
 fun PasswordDetailDialog(item: SenhaItem, onDismiss: () -> Unit) {
+    // Controlo o context da minha Activity
     val context = LocalContext.current
+
+    // Variável que controla se vai aparecer o diálogo interno de confirmação de remoção da senha
     var showRemovePopUp by remember { mutableStateOf(false) }
 
+    // Exibe o diálogo (pop-up)
     Dialog(onDismissRequest = onDismiss) {
+
         Surface(
             shape = RoundedCornerShape(16.dp),
             tonalElevation = 8.dp,
             color = MaterialTheme.colorScheme.background
         ) {
+
             Column(modifier = Modifier.fillMaxWidth()) {
+
+                // Seta de voltar
                 BackButtonBar(onBackClick = onDismiss)
 
                 Column(modifier = Modifier.padding(16.dp)) {
+
+                    // Exibo o título da senha
                     Text(
                         text = item.titulo,
                         fontSize = 30.sp,
@@ -438,16 +475,19 @@ fun PasswordDetailDialog(item: SenhaItem, onDismiss: () -> Unit) {
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
 
+                    // Exibo a senha
                     Text("Senha:", fontWeight = FontWeight.Bold)
                     StandardBoxPopUp {
                         Text(item.senha)
                     }
 
+                    // Exibo a descrição da senha
                     Text("Descrição:", fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 8.dp))
                     StandardBoxPopUp {
                         Text(item.descricao)
                     }
 
+                    // Exibo a categoria da senha
                     Text("Categoria:", fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 8.dp))
                     StandardBoxPopUp {
                         Text(item.categoria)
@@ -455,34 +495,44 @@ fun PasswordDetailDialog(item: SenhaItem, onDismiss: () -> Unit) {
 
                     Spacer(modifier = Modifier.height(16.dp))
 
+                    // Crio um Rox (linha) com o botão alterar e remover
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Button(onClick = {
-                            val intent = Intent(context, ChangePasswordActivity::class.java).apply {
-                                putExtra("PASSWORD_ID", item.id)
-                                putExtra("PASSWORD_TITLE", item.titulo)
-                                putExtra("PASSWORD_VALUE", item.senha)
-                                putExtra("PASSWORD_DESCRIPTION", item.descricao)
-                                putExtra("PASSWORD_CATEGORY", item.categoria)
+
+                        // Botão alterar que abre a ChangePasswordActivity com os dados da senha
+                        Button(
+                            onClick = {
+                                val intent = Intent(context, ChangePasswordActivity::class.java).apply {
+                                    putExtra("PASSWORD_ID", item.id)
+                                    putExtra("PASSWORD_TITLE", item.titulo)
+                                    putExtra("PASSWORD_VALUE", item.senha)
+                                    putExtra("PASSWORD_DESCRIPTION", item.descricao)
+                                    putExtra("PASSWORD_CATEGORY", item.categoria)
                             }
                             context.startActivity(intent)
                         },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.secondary
-                            )) {
+                            )
+                        ) {
                             Text("Alterar")
                         }
 
-                        Button(onClick = { showRemovePopUp = true },
+                        // Botão remover que apenas ativa o diálogo de confirmação (se deseja ou não remover a senha)
+                        Button(
+                            onClick = { showRemovePopUp = true },
                                 colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.secondary
-                                )){
+                                )
+                        ) {
                             Text("Remover")
                         }
                     }
 
+                    // Diálogo de confirmação de remoção de senha
+                    // Ativado quando showRemovePopUp = true
                     if (showRemovePopUp) {
                         RemovePasswordDialog(
                             item = item,
@@ -503,6 +553,7 @@ fun PasswordDetailDialog(item: SenhaItem, onDismiss: () -> Unit) {
     }
 }
 
+// Função que exibe um diálogo de confirmação para excluir definitivamente a senha do Firestore
 @Composable
 fun RemovePasswordDialog(
     item: SenhaItem,
@@ -518,9 +569,13 @@ fun RemovePasswordDialog(
             color = MaterialTheme.colorScheme.background
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
+
+                // Seta de voltar
                 BackButtonBar(onBackClick = onDismiss)
 
                 Column(modifier = Modifier.padding(16.dp)) {
+
+                    // Mensagem de confirmação
                     Text(
                         text = "Certeza que deseja remover a senha?",
                         style = MaterialTheme.typography.titleLarge,
@@ -528,14 +583,20 @@ fun RemovePasswordDialog(
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
 
+                    // Crio um Row (linha) com botão cancelar e remover
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
-                        Button(onClick = onDismiss) {
+
+                        // Botão cancelar (penas decha o diálogo)
+                        Button(
+                            onClick = onDismiss
+                        ) {
                             Text("Cancelar")
                         }
 
+                        // Botão remover (executa a exclusão no Firestore)
                         Button(
                             onClick = {
                                 val user = Firebase.auth.currentUser
@@ -562,7 +623,6 @@ fun RemovePasswordDialog(
         }
     }
 }
-
 
 
 // Preview da tela principal
