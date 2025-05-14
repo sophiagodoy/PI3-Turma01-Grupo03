@@ -27,6 +27,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -95,8 +96,14 @@ fun saveUserToAuth(email: String, password: String, name: String, context: Conte
                 // Chama a função para salvar os dados do usuário no Firestore
                 saveUserToFirestore(name, email, context)
             } else {
-                // Em caso de falha, registra o erro
-                Log.i("AUTH", "Falha ao criar conta.", task.exception)
+                // Variável que guarda o que causou a falha da criação da conta
+                val exception = task.exception
+
+                // Verificando se o usuário já está cadastrado
+                // Baseado na documentação: https://firebase.google.com/docs/reference/kotlin/com/google/firebase/auth/FirebaseAuthUserCollisionException
+                if (exception is FirebaseAuthUserCollisionException) {
+                    Toast.makeText(context, "Este e-mail já está cadastrado. Tente fazer login.", Toast.LENGTH_LONG).show()
+                }
             }
         }
 }
@@ -259,8 +266,8 @@ fun SignUp(modifier: Modifier = Modifier) {
                 }
             },
                 modifier = Modifier
-                    .height(60.dp)    // altura maior
-                    .width(150.dp)  // largura maior
+                    .height(60.dp)
+                    .width(150.dp)
             ) {
                 Text("Cadastrar")
             }

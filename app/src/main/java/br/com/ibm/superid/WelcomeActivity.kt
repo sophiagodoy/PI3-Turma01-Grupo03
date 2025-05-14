@@ -26,18 +26,14 @@ import androidx.compose.ui.unit.sp
 import br.com.ibm.superid.ui.theme.SuperIDTheme
 import br.com.ibm.superid.ui.theme.core.util.SuperIDHeaderImage
 
-// Declaração da Activity que exibe a tela de boas-vindas e termos de uso
+// Declarando a Activity (WelcomeActivity)
 class WelcomeActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             SuperIDTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Welcome(
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                Welcome()
             }
         }
     }
@@ -45,7 +41,7 @@ class WelcomeActivity : ComponentActivity() {
 
 // Função Composable que monta toda a interface da tela de boas-vindas
 @Composable
-fun Welcome(modifier: Modifier = Modifier) {
+fun Welcome() {
 
     // Defino o contexto atual da Activity para usar Intents
     val context = LocalContext.current
@@ -54,7 +50,7 @@ fun Welcome(modifier: Modifier = Modifier) {
     var termosAceitos by remember { mutableStateOf(false) }  // Armazena se o usuário aceitou os termos
     var mostrarDialogo by remember { mutableStateOf(false) } // Controla visibilidade do pop-up
 
-    // Layout principal: uma coluna que ocupa toda a tela e pinta o fundo
+    // Coluna que define o fundo do aplicativo e contém todos os elementos visuais da tela
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -64,7 +60,7 @@ fun Welcome(modifier: Modifier = Modifier) {
         // Chamo a função SuperIDHeaderImage() que está em utilities.kt
         SuperIDHeaderImage()
 
-        // Coluna interna para alinhar o conteúdo abaixo do cabeçalho
+        // Coluna interna que posiciona o conteúdo logo abaixo do cabeçalho visual
         Column(
             modifier = Modifier
                 .fillMaxSize()
