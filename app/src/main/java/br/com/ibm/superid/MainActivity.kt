@@ -41,11 +41,7 @@ import br.com.ibm.superid.ui.theme.core.util.SuperIDHeader
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import javax.crypto.Cipher
-import javax.crypto.spec.IvParameterSpec
-import javax.crypto.spec.SecretKeySpec
-import kotlin.io.encoding.Base64
-import kotlin.io.encoding.ExperimentalEncodingApi
+import br.com.ibm.superid.ui.theme.core.util.decryptPassword
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 
@@ -77,19 +73,6 @@ data class SenhaItem(
     val descricao: String,
     val categoria: String
 )
-
-// Função que descriptografa a senha
-@OptIn(ExperimentalEncodingApi::class)
-fun decryptPassword(encrypted: String, ivBase64: String, key: String = "ProjetoIntegrador3Semestre062025"): String {
-    val keyBytes = key.toByteArray(Charsets.UTF_8).copyOf(32)
-    val secretKey = SecretKeySpec(keyBytes, "AES")
-    val iv = Base64.decode(ivBase64)
-    val ivSpec = IvParameterSpec(iv)
-    val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
-    cipher.init(Cipher.DECRYPT_MODE, secretKey, ivSpec)
-    val decryptedBytes = cipher.doFinal(Base64.decode(encrypted))
-    return decryptedBytes.toString(Charsets.UTF_8)
-}
 
 // função que representa a tela principal do app
 @Composable

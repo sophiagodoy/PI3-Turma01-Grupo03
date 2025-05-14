@@ -54,7 +54,6 @@ class AddPasswordActivity : ComponentActivity() {
     }
 }
 
-
 // Função para adicionar uma nova senha no Firestore
 fun addNewPassword(
     context: Context,
