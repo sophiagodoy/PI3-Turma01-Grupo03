@@ -92,7 +92,7 @@ fun signInWithFirebaseAuth(email: String, password: String, context: Context) {
                 Log.i("AUTH", "Falha ao fazer login.", task.exception)
                 // Exibe uma mensagem Toast
                 // Baseado na documentação oficial do Android: https://developer.android.com/guide/topics/ui/notifiers/toasts?hl=pt-br
-                Toast.makeText(context, "Falha ao fazer login!", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, "Email ou senha incorreta!", Toast.LENGTH_LONG).show()
             }
         }
 }

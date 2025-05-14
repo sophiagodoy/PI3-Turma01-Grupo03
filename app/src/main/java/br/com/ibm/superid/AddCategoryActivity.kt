@@ -5,7 +5,6 @@ package br.com.ibm.superid
 import android.content.Context
 import android.content.Intent
 import androidx.compose.ui.platform.LocalContext
-
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -56,11 +55,6 @@ fun addNewCategory(context: Context, nomeCategoria: String) {
 
     if (user == null) {
         Toast.makeText(context, "Usuário não autenticado!", Toast.LENGTH_SHORT).show()
-        return
-    }
-
-    if (nomeCategoria.isBlank()) {
-        Toast.makeText(context, "Preencha o nome da categoria!", Toast.LENGTH_SHORT).show()
         return
     }
 
@@ -130,8 +124,21 @@ fun AddCat() {
 
             Button(
                 onClick = {
-                    addNewCategory(context, categoryName)
-                    categoryName = ""
+                    when {
+                        categoryName.isBlank() ->
+                            Toast.makeText(context, "Preencha o nome da categoria!", Toast.LENGTH_SHORT).show()
+
+                        categoryName.length < 3 ->
+                            Toast.makeText(context, "Nome da categoria deve ter pelo menos 3 caracteres!", Toast.LENGTH_SHORT).show()
+
+                        categoryName.length > 10 ->
+                            Toast.makeText(context, "Nome da categoria deve ter no máximo 10 caracteres!", Toast.LENGTH_SHORT).show()
+
+                        else -> {
+                            addNewCategory(context, categoryName)
+                            categoryName = ""
+                        }
+                    }
                 },
                 modifier = Modifier
                     .height(60.dp)

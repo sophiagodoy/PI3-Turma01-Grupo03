@@ -306,14 +306,22 @@ fun AddPassword(modifier: Modifier = Modifier) {
             Button(
                 onClick = {
                     when {
-
-                        // Verfica se tem algum campo em branco
+                        // Verfica se titulo, senha e categoria estão em branco
                         titulo.isBlank() || senha.isBlank() || categoria.isBlank() ->
                             Toast.makeText(context, "Preencha título, senha e categoria", Toast.LENGTH_SHORT).show()
 
-                        // Verfica se as senhas são iguais
+                        // Verfica se as senhas são diferentes
                         confirmarSenha != senha ->
                             Toast.makeText(context, "As senhas não conferem", Toast.LENGTH_SHORT).show()
+
+                        // Verfica se senha tem mais de 10 caracteres
+                        // Baseado na documentação: https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/
+                        titulo.length > 10 ->
+                            Toast.makeText(context, "Título não pode ter mais de 10 caracteres!", Toast.LENGTH_SHORT).show()
+
+                        // Verfica se descrição está em branco e se tem mais de 15 caracteres
+                        descricao.isNotBlank() && descricao.length > 15 ->
+                            Toast.makeText(context, "Descrição não pode ter mais de 15 caracteres!", Toast.LENGTH_SHORT).show()
 
                         else -> {
                             addNewPassword(context, senha, categoria, descricao, titulo)

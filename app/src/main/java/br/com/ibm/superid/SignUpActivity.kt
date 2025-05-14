@@ -114,6 +114,7 @@ fun saveUserToFirestore(name: String, email: String, context: Context) {
     val db = Firebase.firestore
 
     // Obtemos a instância do Firebase Auth
+    // todo
     val auth = Firebase.auth
     val uid = auth.currentUser?.uid
 
