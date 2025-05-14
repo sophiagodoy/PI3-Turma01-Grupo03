@@ -147,7 +147,7 @@ fun SignIn(modifier: Modifier = Modifier) {
 
             // Define o título da tela em negrito e tamanho 30sp
             Text(
-                text = "Login",
+                text = "LOGIN",
                 fontSize = 30.sp,
                 fontWeight = FontWeight.Bold
             )

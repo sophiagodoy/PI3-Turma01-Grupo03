@@ -369,7 +369,6 @@ fun Categories(title: String, items: List<SenhaItem>) {
     var selectedItem by remember { mutableStateOf<SenhaItem?>(null) } // Guarda o item selecionado para mostrar o diálogo (pop-up)
 
     // Exibição de um Card com as informações de cada categoria
-    // todo
     CategoryCard(
         title = title,
         expanded = expanded,
@@ -378,7 +377,6 @@ fun Categories(title: String, items: List<SenhaItem>) {
         onItemClick = { selectedItem = it }
     )
 
-    // todo
     selectedItem?.let {
         PasswordDetailDialog(
             item = it,

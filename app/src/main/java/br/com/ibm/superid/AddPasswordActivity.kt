@@ -74,15 +74,10 @@ fun addNewPassword(
     descricao: String,
     titulo: String
 ) {
+
     // Baseado na documentação: https://firebase.google.com/docs/auth/android/manage-users?hl=pt-br#get_the_currently_signed-in_user
     // Identifica o usuário atual conectado
     val user = Firebase.auth.currentUser
-
-    // Validando campos obrigatórios
-    if (senha.isBlank() || categoria.isBlank() || descricao.isBlank() || titulo.isBlank()) {
-        Toast.makeText(context, "Preencha todos os campos!", Toast.LENGTH_LONG).show()
-        return
-    }
 
     try {
         // Obtendo a instância do banco de dados Firestore
@@ -216,6 +211,7 @@ fun AddPassword(modifier: Modifier = Modifier) {
 
     // Variáveis que guardam o valor digitado nos campos do formulário
     var senha by remember { mutableStateOf("") }
+    var confirmarSenha by remember { mutableStateOf("") }
     var categoria by remember { mutableStateOf("") }
     var descricao by remember { mutableStateOf("") }
     var titulo by remember { mutableStateOf("") }
@@ -290,6 +286,16 @@ fun AddPassword(modifier: Modifier = Modifier) {
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             )
 
+            // Campo de texto para confirmar a senha digitada
+            CustomOutlinedTextField(
+                value = confirmarSenha,
+                onValueChange = { confirmarSenha = it },
+                label = "Confirmar senha",
+                // Esconde os caracteres da senha
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            )
+
             Box(
                 modifier = Modifier
             ) {
@@ -346,9 +352,8 @@ fun AddPassword(modifier: Modifier = Modifier) {
             CustomOutlinedTextField(
                 value = descricao,
                 onValueChange = { descricao = it },
-                label = "Descrição"
+                label = "Descrição (opcional)"
             )
-
 
             // Espaço de 24dp antes do botão
             Spacer(Modifier.height(24.dp))
@@ -356,9 +361,20 @@ fun AddPassword(modifier: Modifier = Modifier) {
             // Botão que quando clicado salva a nova senha no banco Firestore
             Button(
                 onClick = {
-                    addNewPassword(context, senha, categoria, descricao, titulo)
-                    val intent = Intent(context, MainActivity::class.java)
-                    context.startActivity(intent)
+                    when {
+                        // Verfica se tem algum campo em branco
+                        titulo.isBlank() || senha.isBlank() || categoria.isBlank() ->
+                            Toast.makeText(context, "Preencha título, senha e categoria", Toast.LENGTH_SHORT).show()
+
+                        // Verfica se as senhas são iguais
+                        confirmarSenha != senha ->
+                            Toast.makeText(context, "As senhas não conferem", Toast.LENGTH_SHORT).show()
+
+                        else -> {
+                            addNewPassword(context, senha, categoria, descricao, titulo)
+                            context.startActivity(Intent(context, MainActivity::class.java))
+                        }
+                    }
                 },
                 modifier = Modifier
                     .height(60.dp)
