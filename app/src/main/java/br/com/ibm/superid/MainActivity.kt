@@ -487,7 +487,7 @@ fun CategoryCard(
             ) {
                 Text(
                     text = title,
-                    fontSize = 30.sp,
+                    fontSize = 32.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -517,7 +517,7 @@ fun CategoryCard(
                 items.forEach { item ->
                     Text(
                         text = item.titulo,
-                        fontSize = 24.sp,
+                        fontSize = 26.sp,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 30.dp, vertical = 8.dp)
