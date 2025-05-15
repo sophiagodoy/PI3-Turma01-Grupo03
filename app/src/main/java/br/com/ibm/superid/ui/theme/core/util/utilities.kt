@@ -221,12 +221,16 @@ fun CustomOutlinedTextField(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
+    readOnly: Boolean = false,
+    enabled: Boolean = true,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     modifier: Modifier = Modifier
 ) {
     OutlinedTextField(
         modifier = modifier.padding(10.dp),
+        readOnly = readOnly,
+        enabled = enabled,
         value = value,
         onValueChange = onValueChange,
         label = { Text(text = label) },
