@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.*
@@ -85,13 +86,14 @@ fun MainScreen() {
     var passwords by remember { mutableStateOf<List<SenhaItem>>(emptyList()) }
     var categoriesList by remember { mutableStateOf<List<String>>(emptyList()) }
 
+
     // Variáveis que controlam a visibilidade de três diálogos (pop-up)
     var showAddPopUp by remember { mutableStateOf(false) }
     var showQRCodePopUp by remember { mutableStateOf(false) }
     var showExitDialog by remember { mutableStateOf(false) }
 
     // Carrega as senhas do Firestore assim que a tela iniciar
-    LaunchedEffect(Unit) {
+    fun loadDataFireBase() {
         val user = Firebase.auth.currentUser
         if (user != null) {
             val db = Firebase.firestore
@@ -143,7 +145,11 @@ fun MainScreen() {
         }
     }
 
-    val categoriesMap = remember(passwords, categoriesList) {
+    // Carrega dados na inicialização da tela
+    LaunchedEffect(Unit) {
+        loadDataFireBase()
+    }
+    val categoriasMap = remember(passwords, categoriesList) {
         // Começa com um mapa de todas as categorias, incluindo as que podem estar vazias
         val map = categoriesList.associateWith { mutableListOf<SenhaItem>() }.toMutableMap()
 
@@ -159,6 +165,37 @@ fun MainScreen() {
         }
         map
     }
+
+    fun deleteCategory(categoria: String, onSuccess: () -> Unit, onError: (Exception) -> Unit) {
+        val user = Firebase.auth.currentUser
+        if (user != null) {
+            val db = Firebase.firestore
+            db.collection("users")
+                .document(user.uid)
+                .collection("categorias")
+                .whereEqualTo("nome", categoria)
+                .get()
+                .addOnSuccessListener { query ->
+                    if (query.documents.isNotEmpty()) {
+                        val docId = query.documents[0].id
+                        db.collection("users")
+                            .document(user.uid)
+                            .collection("categorias")
+                            .document(docId)
+                            .delete()
+                            .addOnSuccessListener {
+                                onSuccess()
+                                loadDataFireBase() // Atualiza a lista após exclusão
+                            }
+                            .addOnFailureListener { e -> onError(e) }
+                    } else {
+                        onError(Exception("Categoria não encontrada"))
+                    }
+                }
+                .addOnFailureListener { e -> onError(e) }
+        }
+    }
+
     // Estrutura do layout principal
     Box(
         modifier = Modifier
@@ -181,9 +218,28 @@ fun MainScreen() {
 
         Column(modifier = Modifier.padding(16.dp)) {
             Spacer(modifier = Modifier.height(130.dp))
-            categoriesMap.forEach { (categoria, itens) ->
+            categoriasMap.forEach { (categoria, itens) ->
                 Spacer(modifier = Modifier.height(16.dp))
-                Categories(title = categoria, items = itens)
+                Categories(
+                    title = categoria,
+                    items = itens,
+                    onDeleteCategory = { cat ->
+                        if (itens.isEmpty()) {
+                            // Confirma antes de excluir
+                            // Aqui podemos abrir diálogo para confirmar
+                            deleteCategory(cat,
+                                onSuccess = {
+                                    Toast.makeText(context, "Categoria excluída", Toast.LENGTH_SHORT).show()
+                                },
+                                onError = { e ->
+                                    Toast.makeText(context, "Erro ao excluir categoria: ${e.message}", Toast.LENGTH_LONG).show()
+                                }
+                            )
+                        } else {
+                            Toast.makeText(context, "Não é possível excluir categoria com senhas", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                )
             }
         }
 
@@ -192,7 +248,8 @@ fun MainScreen() {
             onClick = { showAddPopUp = true }, // showAddPopUp é ativada
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .padding(top = 90.dp, end = 15.dp),
+                .padding(top = 90.dp, end = 15.dp)
+                .size(70.dp), // aumenta o tamanho do botão
             shape = CircleShape,
             containerColor = MaterialTheme.colorScheme.primary
         ) {
@@ -201,6 +258,7 @@ fun MainScreen() {
                 contentDescription = "Adicionar Senha e Categoria"
             )
         }
+
 
         // Botão flutuante do QR Code
         FloatingActionButton(
@@ -369,21 +427,22 @@ fun MainScreen() {
     }
 }
 
-// Função que controla a expansão/recolhimento de um diálogo
 @Composable
-fun Categories(title: String, items: List<SenhaItem>) {
+fun Categories(
+    title: String,
+    items: List<SenhaItem>,
+    onDeleteCategory: (String) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    var selectedItem by remember { mutableStateOf<SenhaItem?>(null) }
 
-    // Declarando as variáveis
-    var expanded by remember { mutableStateOf(false) } // Controla se a lista dentro de categoria está aberta ou fechada
-    var selectedItem by remember { mutableStateOf<SenhaItem?>(null) } // Guarda o item selecionado para mostrar o diálogo (pop-up)
-
-    // Exibição de um Card com as informações de cada categoria
     CategoryCard(
         title = title,
         expanded = expanded,
         onExpandToggle = { expanded = !expanded },
         items = items,
-        onItemClick = { selectedItem = it }
+        onItemClick = { selectedItem = it },
+        onDeleteCategory = onDeleteCategory // Passa o callback para CategoryCard
     )
 
     selectedItem?.let {
@@ -394,15 +453,17 @@ fun Categories(title: String, items: List<SenhaItem>) {
     }
 }
 
-// Função que mostra uma categoria e sua lista de senhas quando está expandido
 @Composable
 fun CategoryCard(
     title: String,
     expanded: Boolean,
     onExpandToggle: () -> Unit,
     items: List<SenhaItem>,
-    onItemClick: (SenhaItem) -> Unit
+    onItemClick: (SenhaItem) -> Unit,
+    onDeleteCategory: (String) -> Unit
 ) {
+    Spacer(modifier = Modifier.height(16.dp))
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(5.dp)
@@ -413,26 +474,36 @@ fun CategoryCard(
                     .fillMaxWidth()
                     .clickable { onExpandToggle() }
                     .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
                     text = title,
                     fontSize = 30.sp,
                     fontWeight = FontWeight.Bold
                 )
-                IconButton(
-                    onClick = {
-                        onExpandToggle()
+                Row {
+                    IconButton(
+                        onClick = { onExpandToggle() }
+                    ) {
+                        Icon(
+                            imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                            contentDescription = null
+                        )
                     }
-                ) {
-                    Icon(
-                        imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                        contentDescription = null
-                    )
+                    IconButton(
+                        onClick = { onDeleteCategory(title) },
+                        modifier = Modifier.padding(start = 8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Delete,
+                            contentDescription = "Excluir Categoria",
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
                 }
             }
 
-            // Exibe a lista de itens se expanded = true
             if (expanded) {
                 items.forEach { item ->
                     Text(
@@ -448,6 +519,7 @@ fun CategoryCard(
         }
     }
 }
+
 
 // Função que mostra um pop-up com todos os detalhes de uma senha que o usuário clicou na lista
 @Composable
