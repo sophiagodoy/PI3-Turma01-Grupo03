@@ -17,7 +17,10 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -99,6 +102,7 @@ fun ChangePassword(
     var senha by remember { mutableStateOf(initialSenha) }
     var categoria by remember { mutableStateOf(initialCategoria) }
     var descricao by remember { mutableStateOf(initialDescricao) }
+    var expanded by remember { mutableStateOf(false) }
 
     // Seta que volta para AccessOptionActivity
     // Baseado em: https://developer.android.com/develop/ui/compose/components/app-bars?hl=pt-br#top-app-bar
@@ -160,12 +164,58 @@ fun ChangePassword(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             )
 
-            // Campo de texto para escolher a categoria da nova senha
-            CustomOutlinedTextField(
-                value = categoria,
-                onValueChange = { categoria = it },
-                label ="Categoria"
-            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 10.dp),
+                contentAlignment = Alignment.TopCenter
+            ) {
+                ExposedDropdownMenuBox(
+                    expanded = expanded,
+                    onExpandedChange = {
+
+                        if (!expanded) {
+                            fetchCategoriasUsuario(context)
+                        }
+                        expanded = !expanded },
+                    modifier = Modifier.wrapContentWidth()
+                ) {
+
+                    CustomOutlinedTextField(
+                        value = categoria,
+                        onValueChange = { /* não edita */ },
+                        label = "Categoria",
+                        readOnly = true,
+                        modifier = Modifier
+                            .menuAnchor(),
+                        trailingIcon = {
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded)
+                        }
+                    )
+
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        if (categoriasUsuario.isEmpty()) {
+                            DropdownMenuItem(
+                                text = { Text("Nenhuma categoria") },
+                                onClick = { expanded = false }
+                            )
+                        } else {
+                            categoriasUsuario.forEach { cat ->
+                                DropdownMenuItem(
+                                    text = { Text(cat) },
+                                    onClick = {
+                                        categoria = cat
+                                        expanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+            }
 
             // Campo de texto para digitar a descrição da nova senha
             CustomOutlinedTextField(
