@@ -50,43 +50,69 @@ class AddCategoryActivity : ComponentActivity() {
     }
 }
 
-fun addNewCategory(context: Context, nomeCategoria: String) {
-    val user = Firebase.auth.currentUser
+//Função que adiciona uma nova categoria no Firestore
+fun addNewCategory(context: Context, categoryName: String) {
+    val user = Firebase.auth.currentUser // Obtém o usuário autenticado atual
 
     if (user == null) {
+        // Caso não esteja autenticado, avisa o usuário e retorna sem fazer nada
         Toast.makeText(context, "Usuário não autenticado!", Toast.LENGTH_SHORT).show()
         return
     }
 
     val db = Firebase.firestore
-    val novaCategoria = hashMapOf("nome" to nomeCategoria)
-
-    db.collection("users")
+    val categoriasRef = db.collection("users")
         .document(user.uid)
-        .collection("categorias")
-        .add(novaCategoria)
-        .addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                Toast.makeText(context, "✅ Categoria adicionada com sucesso!", Toast.LENGTH_SHORT).show()
+        .collection("categorias") // Referência à coleção de categorias do usuário atual
+
+    // Verifica se já existe uma categoria com o mesmo nome para evitar duplicatas
+    categoriasRef
+        .whereEqualTo("nome", categoryName)
+        .get()
+        .addOnSuccessListener { documents ->
+            if (!documents.isEmpty) {
+                // Se categoria já existe, informa o usuário
+                Toast.makeText(context, "Categoria já existe!", Toast.LENGTH_SHORT).show()
             } else {
-                Toast.makeText(context, "Erro ao adicionar categoria: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                // Caso contrário, cria uma nova categoria com os campos padrão
+                val novaCategoria = hashMapOf(
+                    "nome" to categoryName,
+                    "isDefault" to false,
+                    "undeletable" to false
+                )
+
+                // Adiciona a nova categoria no Firestore
+                categoriasRef
+                    .add(novaCategoria)
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            Toast.makeText(context, "✅ Categoria adicionada com sucesso!", Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(context, "Erro ao adicionar categoria: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                        }
+                    }
             }
+        }
+        .addOnFailureListener { exception ->
+            // Trata falhas na consulta Firestore (ex: problemas de conexão)
+            Toast.makeText(context, "Erro ao verificar categoria: ${exception.message}", Toast.LENGTH_SHORT).show()
         }
 }
 
-
+//Composable que constrói a UI para adicionar uma categoria
 @Composable
 fun AddCat() {
     val context = LocalContext.current
-    var categoryName by remember { mutableStateOf("") }
+    var categoryName by remember { mutableStateOf("") } // Estado para armazenar o nome da categoria digitada
 
-    Column (modifier = Modifier
-        .fillMaxSize()
-        .background(MaterialTheme.colorScheme.background)) {
-        // Cabeçalho visual personalizado
-        SuperIDHeader()
+    Column (
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background) // Define fundo conforme o tema
+    ) {
+        SuperIDHeader() // Cabeçalho visual customizado da aplicação
 
-        // Botão de voltar
+        // Botão para voltar para a tela principal
         IconButton(
             onClick = {
                 val intent = Intent(context, MainActivity::class.java)
@@ -101,19 +127,21 @@ fun AddCat() {
             )
         }
 
+        // Conteúdo centralizado da tela para adicionar a categoria
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(top = 110.dp),
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
-            ) {
+        ) {
             Text(
                 text = "ADICIONAR CATEGORIA",
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp
             )
 
+            // Campo de texto customizado para o nome da categoria
             CustomOutlinedTextField(
                 value = categoryName,
                 onValueChange = { categoryName = it },
@@ -122,6 +150,7 @@ fun AddCat() {
 
             Spacer(Modifier.height(24.dp))
 
+            // Botão para salvar a categoria
             Button(
                 onClick = {
                     when {
@@ -135,8 +164,9 @@ fun AddCat() {
                             Toast.makeText(context, "Nome da categoria deve ter no máximo 10 caracteres!", Toast.LENGTH_SHORT).show()
 
                         else -> {
+                            // Chama função para adicionar categoria no banco
                             addNewCategory(context, categoryName)
-                            categoryName = ""
+                            categoryName = "" // Limpa o campo após salvar
                         }
                     }
                 },

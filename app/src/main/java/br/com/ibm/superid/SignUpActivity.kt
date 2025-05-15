@@ -2,6 +2,7 @@
 
 package br.com.ibm.superid
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -27,7 +28,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,133 +49,152 @@ import androidx.compose.ui.tooling.preview.Preview
 import br.com.ibm.superid.ui.theme.core.util.CustomOutlinedTextField
 import br.com.ibm.superid.ui.theme.core.util.SuperIDHeader
 
-// Declarando a Activity (signUpActivity)
+// Classe da Activity de cadastro
 class SignUpActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Ativa o modo de tela cheia com suporte à barra de status
         enableEdgeToEdge()
+        // Define o conteúdo da tela
         setContent {
             SuperIDTheme {
-                    SignUp()
-                }
+                SignUp()
             }
         }
     }
+}
 
-
-// Essa função cria uma nova conta no Firebase Authentication
+// Essa função cria a conta do usuário no Firebase Authentication
 fun saveUserToAuth(email: String, password: String, name: String, context: Context) {
-
-    // Obtemos a instância do Firebase Auth
     val auth = Firebase.auth
 
-    // Cria um novo usuário com e-mail e senha
     auth.createUserWithEmailAndPassword(email, password)
         .addOnCompleteListener { task ->
-            // Se a criação da conta for bem-sucedida, obtemos o usuário e seu UID
             if (task.isSuccessful) {
                 val user = task.result?.user!!
+                val uid = user.uid
                 Log.i("AUTH", "Conta criada com sucesso")
 
-                // Enviar email para confirmar a conta
-                // Implementado com base na seção "Gerenciar usuários > Enviar e-mail de verificação" da documentação oficial do Firebase Authentication
-                // Fonte: https://firebase.google.com/docs/auth/web/manage-users?hl=pt-br#web_12
+                // Envia e-mail de verificação para o usuário
                 user.sendEmailVerification()
                     .addOnCompleteListener { verifyTask ->
                         if (verifyTask.isSuccessful) {
                             Log.i("AUTH", "E-mail de verificação enviado com sucesso.")
-
-                            // Exibe uma mensagem Toast para confirmar envio da verificação
-                            // Baseado na documentação oficial do Android: https://developer.android.com/guide/topics/ui/notifiers/toasts?hl=pt-br
                             Toast.makeText(context, "E-mail de verificação enviado!", Toast.LENGTH_LONG).show()
                         } else {
                             Log.i("AUTH", "Erro ao enviar e-mail de verificação.", verifyTask.exception)
                         }
                     }
 
-                // Chama a função para salvar os dados do usuário no Firestore
-                saveUserToFirestore(name, email, context)
+                // Salva os dados no Firestore
+                saveUserToFirestore(uid, name, email, context)
             } else {
-                // Variável que guarda o que causou a falha da criação da conta
-                val exception = task.exception
-
-                // Verificando se o usuário já está cadastrado
-                // Baseado na documentação: https://firebase.google.com/docs/reference/kotlin/com/google/firebase/auth/FirebaseAuthUserCollisionException
-                if (exception is FirebaseAuthUserCollisionException) {
-                    Toast.makeText(context, "Este e-mail já está cadastrado. Tente fazer login.", Toast.LENGTH_LONG).show()
-                }
+                // Exibe erro caso o cadastro falhe
+                Log.i("AUTH", "Falha ao criar conta.", task.exception)
+                Toast.makeText(context, "Erro ao criar conta: ${task.exception?.message}", Toast.LENGTH_LONG).show()
             }
         }
 }
 
-// Função para salvar os dados necessários durante o cadastro no Firestore
-fun saveUserToFirestore(name: String, email: String, context: Context) {
-    // Obtendo a instância do banco de dados Firestore
-    
+// Essa função salva os dados do usuário no Firestore
+@SuppressLint("HardwareIds")
+fun saveUserToFirestore(uid: String, name: String, email: String, context: Context) {
     val db = Firebase.firestore
-    
-    //obtendo o AndroidId
-    val androidId = android.provider.Settings.Secure.getString(context.contentResolver, android.provider.Settings.Secure.ANDROID_ID)
-    
-    // Obtemos a instância do Firebase Auth
-    // todo
-    val auth = Firebase.auth
-    val uid = auth.currentUser?.uid
 
-    // Criando um mapa mutável (hashMap) com informações do cadastro
+    // Obtém o ID do dispositivo Android
+    val androidId = android.provider.Settings.Secure.getString(
+        context.contentResolver,
+        android.provider.Settings.Secure.ANDROID_ID
+    )
+
+    // Monta o mapa com os dados que serão salvos
     val dadosCadastro = hashMapOf(
-        "name"  to name,
+        "name" to name,
         "email" to email,
         "emailVerified" to false,
         "androidId" to androidId
     )
 
-    if (uid != null) {
-        db.collection("users")
-            .document(uid)
-            .set(dadosCadastro)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    Log.i("SaveUserToFirestore", "Usuário salvo com sucesso no Firestore")
-                    Toast.makeText(context, "Usuário Criado com sucesso!", Toast.LENGTH_LONG).show()
-                    // Se salvou com sucesso vai para a EmailVerificationActivity
-                    context.startActivity(Intent(context, EmailVerificationActivity::class.java))
-                } else {
-                    Log.i("SaveUserToFirestore", "Erro ao salvar usuário: ${task.exception?.message}")
+    // Salva os dados no documento com o UID do usuário
+    db.collection("users")
+        .document(uid)
+        .set(dadosCadastro)
+        .addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                // Cria as categorias padrão para o novo usuário
+                createDefaultCategorias(uid, context)
 
-                    Toast.makeText(context, "Erro ao criar usuário", Toast.LENGTH_LONG).show()
-                }
+                Toast.makeText(context, "Cadastro realizado com sucesso!", Toast.LENGTH_LONG).show()
+
+                // Redireciona para a tela de verificação de e-mail
+                context.startActivity(Intent(context, EmailVerificationActivity::class.java))
+            } else {
+                // Exibe erro caso a gravação falhe
+                Toast.makeText(context, "Erro ao salvar dados do usuário", Toast.LENGTH_LONG).show()
             }
-    } else {
-        Log.i("SaveUserToFirestore", "Erro interno: usuário não autenticado")
-        Toast.makeText(context, "Erro interno: usuário não autenticado", Toast.LENGTH_LONG).show()
-        return
+        }
+}
+
+// Essa função cria categorias padrão para novos usuários no Firestore
+fun createDefaultCategorias(userId: String, context: Context) {
+    val db = Firebase.firestore
+
+    // Referência para a subcoleção de categorias do usuário
+    val categoriasRef = db.collection("users").document(userId).collection("categorias")
+
+    // Lista com as categorias iniciais
+    val defaultCategorias = listOf(
+        hashMapOf(
+            "nome" to "Sites Web",
+            "isDefault" to true,
+            "undeletable" to true
+        ),
+        hashMapOf(
+            "nome" to "Aplicativos",
+            "isDefault" to true,
+            "undeletable" to false
+        ),
+        hashMapOf(
+            "nome" to "Teclados de Acesso Físico",
+            "isDefault" to true,
+            "undeletable" to false
+        )
+    )
+
+    // Salva cada categoria no Firestore
+    defaultCategorias.forEach { category ->
+        categoriasRef.add(category)
+            .addOnSuccessListener {
+                Log.d("Category", "Categoria padrão criada: ${category["nome"]}")
+            }
+            .addOnFailureListener { e ->
+                Log.e("Category", "Erro ao criar categoria padrão", e)
+            }
     }
 }
 
-// Função Composable que apresenta o formulário de cadastro do usuário
+// Função Composable responsável pela interface da tela de cadastro
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
-fun SignUp(modifier: Modifier = Modifier) {
-
-    // Cria variável para poder trocar de tela
+fun SignUp() {
     val context = LocalContext.current
 
-    // Variáveis que guardam o valor digitado nos campos do formulário
+    // Armazena os valores inseridos pelo usuário
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
 
-    
-    Column (modifier = Modifier
-        .fillMaxSize()
-        .background(MaterialTheme.colorScheme.background)) {
-        // Cabeçalho visual personalizado
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
+        // Cabeçalho visual da tela
         SuperIDHeader()
 
-        // Botão de voltar
+        // Botão para voltar à tela anterior
         IconButton(
             onClick = {
                 val intent = Intent(context, AccessOptionActivity::class.java)
@@ -189,88 +208,81 @@ fun SignUp(modifier: Modifier = Modifier) {
             )
         }
 
-        // Layout em coluna que ocupa toda a tela e aplica padding de 16dp
+        // Layout principal do formulário de cadastro
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(top = 50.dp),
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
-        )
-        {
+        ) {
 
-            // Define o título da tela em negrito e tamanho 30sp
+            // Título da tela
             Text(
                 text = "CADASTRO",
                 fontSize = 30.sp,
                 fontWeight = FontWeight.Bold
             )
 
-            // Campo de texto para digitar o nome do usuário
+            // Campo de entrada para o nome
             CustomOutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
                 label = "Nome"
             )
 
-            // Campo de texto para digitar o email do usuário
+            // Campo de entrada para o email
             CustomOutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
                 label = "Email"
             )
 
-            // Campo de texto para digitar a senha do usuário
-
+            // Campo de entrada para a senha
             CustomOutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
                 label = "Senha",
-
-                // Esconde os caracteres da senha
-                // Baseado na documentação: https://developer.android.com/develop/ui/compose/text/user-input?hl=pt-br
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
             )
-            // Campo de texto para confirmar a senha do usuário
+
+            // Campo de entrada para confirmar a senha
             CustomOutlinedTextField(
                 value = confirmPassword,
                 onValueChange = { confirmPassword = it },
                 label = "Confirmar Senha",
-
-                // Esconde os caracteres da senha
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Botão que quando clicado salva informações do cadastro no banco Firestore e verifica se tem algo errado
-            // Baseado na documentação: https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.text/is-blank.html
-            // Baseado na documentação: https://developer.android.com/guide/topics/ui/notifiers/toasts?hl=pt-br
-            Button(onClick = {
-                when {
-                    // Verifica se os campos estão em brancos ou apenas com espaços
-                    name.isBlank() || email.isBlank() || password.isBlank() || confirmPassword.isBlank() -> {
-                        Toast.makeText(context, "Preencha todos os campos!", Toast.LENGTH_LONG).show()
-                    }
+            // Botão de ação para cadastrar o usuário
+            Button(
+                onClick = {
+                    when {
+                        // Verifica se há campos vazios
+                        name.isBlank() || email.isBlank() || password.isBlank() || confirmPassword.isBlank() -> {
+                            Toast.makeText(context, "Preencha todos os campos!", Toast.LENGTH_LONG).show()
+                        }
 
-                    //  Verifica se é um email válido
-                    "@" !in email -> {
-                        Toast.makeText(context, "Email inválido!", Toast.LENGTH_LONG).show()
-                    }
+                        // Verifica se o email contém "@"
+                        "@" !in email -> {
+                            Toast.makeText(context, "Email inválido!", Toast.LENGTH_LONG).show()
+                        }
 
-                    // Verifica se as senhas são diferentes
-                    password != confirmPassword -> {
-                        Toast.makeText(context, "As senhas não coincidem!", Toast.LENGTH_LONG).show()
-                    }
+                        // Verifica se as senhas coincidem
+                        password != confirmPassword -> {
+                            Toast.makeText(context, "As senhas não coincidem!", Toast.LENGTH_LONG).show()
+                        }
 
-                    // Caso não tenha erro, salva no banco de dados Firestore
-                    else -> {
-                        saveUserToAuth(email, password, name, context)
+                        // Caso tudo esteja correto, prossegue com o cadastro
+                        else -> {
+                            saveUserToAuth(email, password, name, context)
+                        }
                     }
-                }
-            },
+                },
                 modifier = Modifier
                     .height(60.dp)
                     .width(150.dp)
@@ -280,5 +292,3 @@ fun SignUp(modifier: Modifier = Modifier) {
         }
     }
 }
-
-

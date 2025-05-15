@@ -41,11 +41,13 @@ import com.google.firebase.ktx.Firebase
 import br.com.ibm.superid.ui.theme.core.util.createacesstoken
 import br.com.ibm.superid.ui.theme.core.util.encryptpassword
 
-// Declarando a Activity (AddPasswordActivity)
+// Declarando a Activity que exibe o formulário para adicionar uma nova senha
 class AddPasswordActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Ativa o modo de tela cheia com suporte à barra de status
         enableEdgeToEdge()
+        // Define o conteúdo da tela usando Compose e tema personalizado
         setContent {
             SuperIDTheme {
                 AddPassword()
@@ -54,7 +56,7 @@ class AddPasswordActivity : ComponentActivity() {
     }
 }
 
-// Função para adicionar uma nova senha no Firestore
+// Função que adiciona uma nova senha criptografada no Firestore
 fun addNewPassword(
     context: Context,
     senha: String,
@@ -63,26 +65,28 @@ fun addNewPassword(
     titulo: String
 ) {
 
-    // Obtenho a instância do FirebaseAuth e pego o usuário logado no momento
+    // Obtém o usuário atualmente autenticado no Firebase
     val user = Firebase.auth.currentUser
 
-    // Caso não exista um usuário logado interrompe a execução da função
+    // Se não houver usuário logado, exibe mensagem e interrompe a função
     if (user == null) {
         Toast.makeText(context, "Usuário não autenticado", Toast.LENGTH_LONG).show()
         return
     }
 
-    // Só “try” na criptografia
+    // Tenta criptografar a senha fornecida pelo usuário
     val (encrypted, iv) = try {
         encryptpassword(senha)
     } catch (e: Exception) {
+        // Caso ocorra erro na criptografia, exibe mensagem e interrompe a função
         Toast.makeText(context, "Falha ao criptografar: ${e.message}", Toast.LENGTH_LONG).show()
         return
     }
 
+    // Gera um token de acesso único para essa senha
     val accessToken = createacesstoken()
 
-    // Criando um mapa mutável (hashMap) com informações do que quero salvar no firestore (informações da nova senha e criptografia)
+    // Cria um mapa (hashMap) com os dados que serão salvos no Firestore
     val dadosNovaSenha = hashMapOf(
         "titulo" to titulo,
         "senha" to encrypted,
@@ -92,7 +96,7 @@ fun addNewPassword(
         "iv" to iv
     )
 
-    // Gravando os dados no banco Firestore
+    // Salva o novo documento na coleção "senhas" do usuário no Firestore
     Firebase.firestore
         .collection("users")
         .document(user.uid)
@@ -100,35 +104,37 @@ fun addNewPassword(
         .add(dadosNovaSenha)
         .addOnCompleteListener { task ->
             if (task.isSuccessful) {
+                // Se o salvamento foi bem-sucedido, exibe mensagem de sucesso
                 Toast.makeText(context, "Senha salva com sucesso!", Toast.LENGTH_SHORT).show()
             } else {
+                // Se ocorreu erro, exibe mensagem com o motivo
                 Toast.makeText(context, "Erro ao salvar: ${task.exception?.message}", Toast.LENGTH_LONG).show()
             }
         }
 }
 
-// Crio uma lista mutável que guarda as categorias lidas no Firestore
+// Lista mutável que armazenará as categorias do usuário carregadas do Firestore
 val categoriasUsuario = mutableStateListOf<String>()
 
-// Função que lê as categorias que estão salvas no banco do usuário
+// Função que busca as categorias salvas no Firestore para o usuário atual
 fun fetchCategoriasUsuario(context: Context) {
 
-    // Obtenho a instância do FirebaseAuth e pego o usuário logado no momento
+    // Obtém o usuário atualmente autenticado
     val user = Firebase.auth.currentUser
 
-    // Caso não exista um usuário logado interrompe a execução da função
+    // Se não houver usuário logado, exibe mensagem e interrompe a função
     if (user == null) {
         Toast.makeText(context, "Usuário não autenticado", Toast.LENGTH_LONG).show()
         return
     }
 
-    // Acesso a propriedade uid do objeto user (pego o uid do usuário logado)
+    // Pega o UID do usuário autenticado
     val uid = user.uid
 
-    // Limpo a lista categoriasUsuario
+    // Limpa a lista antes de buscar dados novos para evitar duplicação
     categoriasUsuario.clear()
 
-    // Fazendo a leitura da coleção categorias no Firestore
+    // Realiza a leitura da coleção "categorias" do usuário no Firestore
     Firebase.firestore
         .collection("users")
         .document(uid)
@@ -136,47 +142,47 @@ fun fetchCategoriasUsuario(context: Context) {
         .get()
         .addOnCompleteListener { task ->
             if (task.isSuccessful) {
+                // Se a leitura for bem-sucedida, adiciona cada nome de categoria à lista
                 task.result?.documents?.forEach { doc ->
                     doc.getString("nome")?.let { categoriasUsuario.add(it) }
                 }
             } else {
+                // Em caso de falha, exibe mensagem com o motivo
                 Toast.makeText(context, "Erro ao ler categorias: ${task.exception?.message}", Toast.LENGTH_LONG).show()
             }
         }
 }
 
-
-// Função Composable que apresenta o formulário de adicionar senha
+// Composable que cria o formulário para adicionar uma nova senha
 @Preview
 @Composable
 fun AddPassword(modifier: Modifier = Modifier) {
-
-    // Obtém o Contexto atual da Activity para usar em Toasts, Intents...
     val context = LocalContext.current
 
-    // Declarando variáveis que guardam os valores digitados nos campos
+    // Estados que armazenam os valores dos campos do formulário
     var senha by remember { mutableStateOf("") }
     var confirmarSenha by remember { mutableStateOf("") }
     var categoria by remember { mutableStateOf("") }
     var descricao by remember { mutableStateOf("") }
     var titulo by remember { mutableStateOf("") }
-
-    // Variável que controla se o DropdownMenu está aberto ou fechado
     var expanded by remember { mutableStateOf(false) }
 
-    // Column para definir fundo, posicionar cabeçalho e botão de voltar
+    // Ao iniciar o composable, busca as categorias do usuário no Firestore
+    LaunchedEffect(Unit) {
+        fetchCategoriasUsuario(context)
+    }
+
+    // Container principal que define fundo e organiza os elementos verticalmente
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
 
-        // Cabeçalho visual personalizado
+        // Cabeçalho visual personalizado do aplicativo
         SuperIDHeader()
 
-        // Seta que volta para MainActivity
-        // Baseado na documentação: https://developer.android.com/develop/ui/compose/components/app-bars?hl=pt-br#top-app-bar
-        // Baseado na documentação: https://alexzh.com/visual-guide-to-topappbar-variants-in-jetpack-compose/?utm_source
+        // Botão para voltar para a tela principal (MainActivity)
         IconButton(
             onClick = {
                 val intent = Intent(context, MainActivity::class.java)
@@ -191,7 +197,7 @@ fun AddPassword(modifier: Modifier = Modifier) {
             )
         }
 
-        // Column que organiza os campos que permite o usuário adicionar a nova senha
+        // Coluna que organiza os campos do formulário centralizados e espaçados
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -201,7 +207,7 @@ fun AddPassword(modifier: Modifier = Modifier) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            // Define o título da tela
+            // Título principal da tela
             Text(
                 text = "ADICIONAR SENHA",
                 fontSize = 30.sp,
@@ -210,76 +216,66 @@ fun AddPassword(modifier: Modifier = Modifier) {
 
             Spacer(Modifier.height(24.dp))
 
-            // Campo de texto para escolher a categoria da nova senha
+            // Campo de texto para o título da senha
             CustomOutlinedTextField(
                 value = titulo,
                 onValueChange = { titulo = it },
                 label = "Título"
             )
 
-            // Campo de texto para digitar a nova senha
+            // Campo para inserir a senha com máscara
             CustomOutlinedTextField(
                 value = senha,
                 onValueChange = { senha = it },
                 label = "Senha",
-                // Esconde os caracteres da senha
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             )
 
-            // Campo de texto para confirmar a senha digitada
+            // Campo para confirmar a senha com máscara
             CustomOutlinedTextField(
                 value = confirmarSenha,
                 onValueChange = { confirmarSenha = it },
                 label = "Confirmar senha",
-                // Esconde os caracteres da senha
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             )
 
-            Box(
-                modifier = Modifier
-            ) {
-
-                // Campo que exibe a categoria selecionada
+            // Caixa para seleção de categoria com dropdown
+            Box {
+                // Campo de texto que exibe a categoria selecionada (não editável diretamente)
                 CustomOutlinedTextField(
                     value = categoria,
-                    onValueChange = { /* não edita */ },
+                    onValueChange = {},
                     label = "Categoria"
                 )
 
-                // Ícone do “drop-down”
+                // Botão para abrir o dropdown das categorias
                 IconButton(
-                    onClick = {
-                        fetchCategoriasUsuario(context)
-                        expanded = true
-                    },
+                    onClick = { expanded = true },
                     modifier = Modifier
                         .align(Alignment.CenterEnd)
                         .padding(end = 16.dp)
                 ) {
-                    Icon(
-                        Icons.Filled.ArrowDropDown,
-                        contentDescription = "Escolher categoria"
-                    )
+                    Icon(Icons.Filled.ArrowDropDown, contentDescription = "Escolher categoria")
                 }
 
-                // 3) O DropdownMenu logo abaixo, igual antes:
+                // Dropdown com as categorias carregadas do Firestore
                 DropdownMenu(
                     expanded = expanded,
                     onDismissRequest = { expanded = false },
-
-                    // TODO: ARRUMAR TAMANHO DO DROP DOWN AQUI
                     modifier = Modifier
                         .align(Alignment.CenterEnd)
                         .padding(end = 16.dp)
                 ) {
+                    // Se não houver categorias, mostra mensagem
                     if (categoriasUsuario.isEmpty()) {
                         DropdownMenuItem(
                             text = { Text("Nenhuma categoria") },
                             onClick = { expanded = false }
                         )
                     } else {
+                        // Mapeia cada categoria como item do dropdown
                         categoriasUsuario.forEach { cat ->
                             DropdownMenuItem(
                                 text = { Text(cat) },
@@ -293,7 +289,7 @@ fun AddPassword(modifier: Modifier = Modifier) {
                 }
             }
 
-            // Campo de texto para digitar a descrição da nova senha
+            // Campo para descrição opcional da senha
             CustomOutlinedTextField(
                 value = descricao,
                 onValueChange = { descricao = it },
@@ -302,39 +298,53 @@ fun AddPassword(modifier: Modifier = Modifier) {
 
             Spacer(Modifier.height(24.dp))
 
-            // Botão que quando clicado salva a nova senha no banco Firestore
+            // Botão para salvar a senha, realizando validações antes
             Button(
                 onClick = {
                     when {
-                        // Verfica se titulo, senha e categoria estão em branco
+                        // Verifica se campos obrigatórios estão preenchidos
                         titulo.isBlank() || senha.isBlank() || categoria.isBlank() ->
-                            Toast.makeText(context, "Preencha título, senha e categoria", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                context,
+                                "Preencha título, senha e categoria",
+                                Toast.LENGTH_SHORT
+                            ).show()
 
-                        // Verfica se as senhas são diferentes
+                        // Verifica se as senhas não coincidem
                         confirmarSenha != senha ->
-                            Toast.makeText(context, "As senhas não conferem", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "As senhas não conferem", Toast.LENGTH_SHORT)
+                                .show()
 
-                        // Verfica se senha tem mais de 10 caracteres
-                        // Baseado na documentação: https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/
+                        // Verifica se o título tem mais de 10 caracteres
                         titulo.length > 10 ->
-                            Toast.makeText(context, "Título não pode ter mais de 10 caracteres!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                context,
+                                "Título não pode ter mais de 10 caracteres!",
+                                Toast.LENGTH_SHORT
+                            ).show()
 
-                        // Verfica se descrição está em branco e se tem mais de 15 caracteres
-                        descricao.isNotBlank() && descricao.length > 15 ->
-                            Toast.makeText(context, "Descrição não pode ter mais de 15 caracteres!", Toast.LENGTH_SHORT).show()
+                        // Verifica se a senha tem menos de 8 caracteres
+                        senha.length < 8 ->
+                            Toast.makeText(
+                                context,
+                                "Senha deve ter pelo menos 8 caracteres!",
+                                Toast.LENGTH_SHORT
+                            ).show()
 
+                        // Se tudo válido, adiciona a nova senha e volta à tela principal
                         else -> {
                             addNewPassword(context, senha, categoria, descricao, titulo)
-                            context.startActivity(Intent(context, MainActivity::class.java))
+                            // Abre MainActivity e finaliza esta
+                            val intent = Intent(context, MainActivity::class.java)
+                            context.startActivity(intent)
                         }
                     }
                 },
                 modifier = Modifier
-                    .height(60.dp)
-                    .width(150.dp)
-                    .align(Alignment.CenterHorizontally),
+                    .fillMaxWidth(0.8f)
+                    .height(50.dp)
             ) {
-                Text("Salvar")
+                Text("SALVAR")
             }
         }
     }

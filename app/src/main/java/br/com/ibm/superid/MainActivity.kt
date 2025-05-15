@@ -46,7 +46,6 @@ import br.com.ibm.superid.ui.theme.core.util.decryptPassword
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 
-
 // Classe principal que define a Activity inicial do aplicativo
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -433,25 +432,31 @@ fun Categories(
     items: List<SenhaItem>,
     onDeleteCategory: (String) -> Unit
 ) {
+    // Estado que controla se a lista da categoria está expandida ou recolhida
     var expanded by remember { mutableStateOf(false) }
+
+    // Estado para armazenar qual senha foi selecionada para mostrar o detalhe
     var selectedItem by remember { mutableStateOf<SenhaItem?>(null) }
 
+    // Composable que exibe o card da categoria com seu conteúdo e ações
     CategoryCard(
         title = title,
         expanded = expanded,
-        onExpandToggle = { expanded = !expanded },
+        onExpandToggle = { expanded = !expanded },  // alterna estado expandido/recolhido
         items = items,
-        onItemClick = { selectedItem = it },
-        onDeleteCategory = onDeleteCategory // Passa o callback para CategoryCard
+        onItemClick = { selectedItem = it },        // seta o item selecionado para mostrar detalhes
+        onDeleteCategory = onDeleteCategory          // função para excluir categoria
     )
 
+    // Se um item foi selecionado, mostra o diálogo com detalhes da senha
     selectedItem?.let {
         PasswordDetailDialog(
             item = it,
-            onDismiss = { selectedItem = null }
+            onDismiss = { selectedItem = null }    // fecha o diálogo ao dispensar
         )
     }
 }
+
 
 @Composable
 fun CategoryCard(
@@ -462,21 +467,47 @@ fun CategoryCard(
     onItemClick: (SenhaItem) -> Unit,
     onDeleteCategory: (String) -> Unit
 ) {
-    Spacer(modifier = Modifier.height(16.dp))
+    // Estado para mostrar o diálogo de confirmação de exclusão da categoria
+    var showDeleteConfirmation by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
-    // Define a cor de fundo baseada no estado "expanded"
-    val backgroundColor = if (expanded) {
-        MaterialTheme.colorScheme.surfaceVariant // Cor atual clara
-    } else {
-        MaterialTheme.colorScheme.outlineVariant // Cor mais escura
+    // Diálogo de confirmação de exclusão que aparece se showDeleteConfirmation for true
+    if (showDeleteConfirmation) {
+        ConfirmDeleteCategoryDialog(
+            categoryName = title,
+            onConfirm = {
+                // Só permite deletar se a categoria estiver vazia
+                if (items.isEmpty()) {
+                    onDeleteCategory(title)
+                } else {
+                    // Mensagem de aviso caso tenha senhas na categoria
+                    Toast.makeText(
+                        context,
+                        "Não é possível excluir categoria com senhas",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            },
+            onDismiss = { showDeleteConfirmation = false } // fecha diálogo ao dispensar
+        )
     }
+
+    Spacer(modifier = Modifier.height(16.dp)) // Espaço antes do card
 
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(5.dp),
-        colors = CardDefaults.cardColors(containerColor = backgroundColor) // Define a cor do card
+        colors = CardDefaults.cardColors(
+            // Cor do card muda se estiver expandido para dar destaque visual
+            containerColor = if (expanded) {
+                MaterialTheme.colorScheme.surfaceVariant
+            } else {
+                MaterialTheme.colorScheme.outlineVariant
+            }
+        )
     ) {
         Column {
+            // Cabeçalho da categoria que é clicável para expandir/recolher
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -485,6 +516,7 @@ fun CategoryCard(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
+                // Título da categoria em fonte grande e negrito
                 Text(
                     text = title,
                     fontSize = 32.sp,
@@ -492,27 +524,36 @@ fun CategoryCard(
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Row {
+                    // Ícone para expandir/recolher a lista
                     IconButton(
                         onClick = { onExpandToggle() }
                     ) {
                         Icon(
-                            imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                            imageVector = if (expanded) Icons.Default.KeyboardArrowUp
+                            else Icons.Default.KeyboardArrowDown,
                             contentDescription = null
                         )
                     }
+
+                    // Botão para excluir a categoria
                     IconButton(
-                        onClick = { onDeleteCategory(title) },
+                        onClick = { showDeleteConfirmation = true },
+                        // Desabilita exclusão para a categoria padrão "Sites Web"
+                        enabled = title != "Sites Web",
                         modifier = Modifier.padding(start = 8.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Delete,
                             contentDescription = "Excluir Categoria",
-                            tint = MaterialTheme.colorScheme.error
+                            // Cor do ícone muda se estiver desabilitado para indicar visualmente
+                            tint = if (title != "Sites Web") MaterialTheme.colorScheme.error
+                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                         )
                     }
                 }
             }
 
+            // Se estiver expandido, lista as senhas da categoria como texto clicável
             if (expanded) {
                 items.forEach { item ->
                     Text(
@@ -521,14 +562,13 @@ fun CategoryCard(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 30.dp, vertical = 8.dp)
-                            .clickable { onItemClick(item) }
+                            .clickable { onItemClick(item) } // ao clicar abre detalhe da senha
                     )
                 }
             }
         }
     }
 }
-
 
 // Função que mostra um pop-up com todos os detalhes de uma senha que o usuário clicou na lista
 @Composable
@@ -712,6 +752,39 @@ fun RemovePasswordDialog(
     }
 }
 
+@Composable
+fun ConfirmDeleteCategoryDialog(
+    categoryName: String,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    // Diálogo de alerta para confirmar a exclusão de uma categoria
+    AlertDialog(
+        onDismissRequest = onDismiss, // Ação ao clicar fora do diálogo ou botão voltar
+        title = { Text("Confirmar exclusão") }, // Título do diálogo
+        text = { Text("Tem certeza que deseja excluir a categoria '$categoryName'?") }, // Mensagem de confirmação com o nome da categoria
+        confirmButton = {
+            // Botão para confirmar a exclusão
+            TextButton(
+                onClick = {
+                    onConfirm()  // Executa ação de confirmação (excluir categoria)
+                    onDismiss()  // Fecha o diálogo após confirmar
+                },
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = MaterialTheme.colorScheme.error // Cor vermelha para destacar ação perigosa
+                )
+            ) {
+                Text("Excluir") // Texto do botão
+            }
+        },
+        dismissButton = {
+            // Botão para cancelar e fechar o diálogo
+            TextButton(onClick = onDismiss) {
+                Text("Cancelar")
+            }
+        }
+    )
+}
 
 // Preview da tela principal
 @Preview(
