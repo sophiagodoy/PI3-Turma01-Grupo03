@@ -83,6 +83,7 @@ fun MainScreen() {
 
     // Declarando variáveis
     var passwords by remember { mutableStateOf<List<SenhaItem>>(emptyList()) }
+    var categoriesList by remember { mutableStateOf<List<String>>(emptyList()) }
 
     // Variáveis que controlam a visibilidade de três diálogos (pop-up)
     var showAddPopUp by remember { mutableStateOf(false) }
@@ -93,13 +94,29 @@ fun MainScreen() {
     LaunchedEffect(Unit) {
         val user = Firebase.auth.currentUser
         if (user != null) {
-            Firebase.firestore.collection("users")
+            val db = Firebase.firestore
+
+            // Carrega categorias
+            db.collection("users")
+                .document(user.uid)
+                .collection("categorias")
+                .get()
+                .addOnSuccessListener { catResult ->
+                    val listaCategorias = catResult.documents.mapNotNull { it.getString("nome") }
+                    categoriesList = listaCategorias
+                }
+                .addOnFailureListener {
+                    Log.e("Firestore", "Erro ao carregar categorias: ${it.message}")
+                }
+
+            // Carrega senhas
+            db.collection("users")
                 .document(user.uid)
                 .collection("senhas")
                 .get()
-                .addOnSuccessListener { result ->
+                .addOnSuccessListener { senhaResult ->
                     val tempList = mutableListOf<SenhaItem>()
-                    for (doc in result) {
+                    for (doc in senhaResult) {
                         try {
                             val decrypted = decryptPassword(
                                 encrypted = doc.getString("senha") ?: "",
@@ -126,21 +143,31 @@ fun MainScreen() {
         }
     }
 
-    // Agrupa as senhas por categoria
-    val categorias = passwords.groupBy { it.categoria }
+    val categoriesMap = remember(passwords, categoriesList) {
+        // Começa com um mapa de todas as categorias, incluindo as que podem estar vazias
+        val map = categoriesList.associateWith { mutableListOf<SenhaItem>() }.toMutableMap()
 
+        // Agrupa as senhas em suas categorias
+        passwords.forEach { senha ->
+            val cat = senha.categoria
+            if (map.containsKey(cat)) {
+                map[cat]?.add(senha)
+            } else {
+                // Se senha tem categoria que não está na lista de categorias, adiciona também
+                map[cat] = mutableListOf(senha)
+            }
+        }
+        map
+    }
     // Estrutura do layout principal
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-
         SuperIDHeader()
-
-        // Seta de voltar para a AcessOptionActivity (saindo do aplicativo)
         IconButton(
-            onClick = { showExitDialog = true }, // Altera a variável de estado para ativo
+            onClick = { showExitDialog = true },
             modifier = Modifier
                 .align(Alignment.TopStart)
                 .padding(start = 10.dp, top = 95.dp)
@@ -152,10 +179,9 @@ fun MainScreen() {
             )
         }
 
-        // Column responsável por montar lista de categorias e senha
         Column(modifier = Modifier.padding(16.dp)) {
             Spacer(modifier = Modifier.height(130.dp))
-            categorias.forEach { (categoria, itens) ->
+            categoriesMap.forEach { (categoria, itens) ->
                 Spacer(modifier = Modifier.height(16.dp))
                 Categories(title = categoria, items = itens)
             }
