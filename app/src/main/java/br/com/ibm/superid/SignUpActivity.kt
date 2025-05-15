@@ -155,7 +155,7 @@ fun createDefaultCategorias(userId: String, context: Context) {
             "undeletable" to false
         ),
         hashMapOf(
-            "nome" to "Teclados de Acesso Físico",
+            "nome" to "Teclados Físico",
             "isDefault" to true,
             "undeletable" to false
         )

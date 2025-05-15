@@ -519,7 +519,7 @@ fun CategoryCard(
                 // Título da categoria em fonte grande e negrito
                 Text(
                     text = title,
-                    fontSize = 32.sp,
+                    fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
