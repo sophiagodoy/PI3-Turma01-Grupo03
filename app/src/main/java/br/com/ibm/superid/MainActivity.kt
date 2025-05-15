@@ -464,9 +464,17 @@ fun CategoryCard(
 ) {
     Spacer(modifier = Modifier.height(16.dp))
 
+    // Define a cor de fundo baseada no estado "expanded"
+    val backgroundColor = if (expanded) {
+        MaterialTheme.colorScheme.surfaceVariant // Cor atual clara
+    } else {
+        MaterialTheme.colorScheme.outlineVariant // Cor mais escura
+    }
+
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(5.dp)
+        shape = RoundedCornerShape(5.dp),
+        colors = CardDefaults.cardColors(containerColor = backgroundColor) // Define a cor do card
     ) {
         Column {
             Row(
@@ -480,7 +488,8 @@ fun CategoryCard(
                 Text(
                     text = title,
                     fontSize = 30.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Row {
                     IconButton(
