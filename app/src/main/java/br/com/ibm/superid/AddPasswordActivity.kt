@@ -10,6 +10,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -245,7 +246,13 @@ fun AddPassword(modifier: Modifier = Modifier) {
                 CustomOutlinedTextField(
                     value = categoria,
                     onValueChange = { /* não edita */ },
-                    label = "Categoria"
+                    label = "Categoria",
+                    readOnly = true,
+                    modifier = Modifier
+                        .clickable {
+                            fetchCategoriasUsuario(context)
+                            expanded = true
+                        }
                 )
 
                 // Ícone do “drop-down”
