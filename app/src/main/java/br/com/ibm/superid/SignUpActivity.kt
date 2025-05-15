@@ -111,8 +111,12 @@ fun saveUserToAuth(email: String, password: String, name: String, context: Conte
 // Função para salvar os dados necessários durante o cadastro no Firestore
 fun saveUserToFirestore(name: String, email: String, context: Context) {
     // Obtendo a instância do banco de dados Firestore
+    
     val db = Firebase.firestore
-
+    
+    //obtendo o AndroidId
+    val androidId = android.provider.Settings.Secure.getString(context.contentResolver, android.provider.Settings.Secure.ANDROID_ID)
+    
     // Obtemos a instância do Firebase Auth
     // todo
     val auth = Firebase.auth
@@ -122,7 +126,8 @@ fun saveUserToFirestore(name: String, email: String, context: Context) {
     val dadosCadastro = hashMapOf(
         "name"  to name,
         "email" to email,
-        "emailVerified" to false
+        "emailVerified" to false,
+        "androidId" to androidId
     )
 
     if (uid != null) {
