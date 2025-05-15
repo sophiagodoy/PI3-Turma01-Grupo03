@@ -225,7 +225,8 @@ fun CustomOutlinedTextField(
     enabled: Boolean = true,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    trailingIcon: @Composable (() -> Unit)? = null
 ) {
     OutlinedTextField(
         modifier = modifier.padding(10.dp),
@@ -236,6 +237,7 @@ fun CustomOutlinedTextField(
         label = { Text(text = label) },
         visualTransformation = visualTransformation, // Para transformar a visualização, como senhas
         keyboardOptions = keyboardOptions, // Para configurar o tipo de teclado (como senha)
+        trailingIcon = trailingIcon,
         colors = OutlinedTextFieldDefaults.colors(
             focusedTextColor = MaterialTheme.colorScheme.onSurface, // Cor do texto quando focado
             unfocusedTextColor = MaterialTheme.colorScheme.onSurface, // Cor do texto quando não focado

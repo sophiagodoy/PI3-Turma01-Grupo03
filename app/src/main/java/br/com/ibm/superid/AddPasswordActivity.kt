@@ -18,6 +18,9 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -154,6 +157,7 @@ fun fetchCategoriasUsuario(context: Context) {
 }
 
 // Composable que cria o formulário para adicionar uma nova senha
+@OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
 fun AddPassword(modifier: Modifier = Modifier) {
@@ -241,49 +245,54 @@ fun AddPassword(modifier: Modifier = Modifier) {
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             )
 
-            // Caixa para seleção de categoria com dropdown
-            Box {
-                // Campo de texto que exibe a categoria selecionada (não editável diretamente)
-                CustomOutlinedTextField(
-                    value = categoria,
-                    onValueChange = {},
-                    label = "Categoria"
-                )
-
-                // Botão para abrir o dropdown das categorias
-                IconButton(
-                    onClick = { expanded = true },
-                    modifier = Modifier
-                        .align(Alignment.CenterEnd)
-                        .padding(end = 16.dp)
-                ) {
-                    Icon(Icons.Filled.ArrowDropDown, contentDescription = "Escolher categoria")
-                }
-
-                // Dropdown com as categorias carregadas do Firestore
-                DropdownMenu(
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 10.dp),
+                contentAlignment = Alignment.TopCenter
+            ) {
+                ExposedDropdownMenuBox(
                     expanded = expanded,
-                    onDismissRequest = { expanded = false },
-                    modifier = Modifier
-                        .align(Alignment.CenterEnd)
-                        .padding(end = 16.dp)
+                    onExpandedChange = {
+
+                        if (!expanded) {
+                            fetchCategoriasUsuario(context)
+                        }
+                        expanded = !expanded },
+                    modifier = Modifier.wrapContentWidth()
                 ) {
-                    // Se não houver categorias, mostra mensagem
-                    if (categoriasUsuario.isEmpty()) {
-                        DropdownMenuItem(
-                            text = { Text("Nenhuma categoria") },
-                            onClick = { expanded = false }
-                        )
-                    } else {
-                        // Mapeia cada categoria como item do dropdown
-                        categoriasUsuario.forEach { cat ->
+
+                    CustomOutlinedTextField(
+                        value = categoria,
+                        onValueChange = { /* não edita */ },
+                        label = "Categoria",
+                        readOnly = true,
+                        modifier = Modifier
+                            .menuAnchor(),
+                        trailingIcon = {
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded)
+                        }
+                    )
+
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        if (categoriasUsuario.isEmpty()) {
                             DropdownMenuItem(
-                                text = { Text(cat) },
-                                onClick = {
-                                    categoria = cat
-                                    expanded = false
-                                }
+                                text = { Text("Nenhuma categoria") },
+                                onClick = { expanded = false }
                             )
+                        } else {
+                            categoriasUsuario.forEach { cat ->
+                                DropdownMenuItem(
+                                    text = { Text(cat) },
+                                    onClick = {
+                                        categoria = cat
+                                        expanded = false
+                                    }
+                                )
+                            }
                         }
                     }
                 }
