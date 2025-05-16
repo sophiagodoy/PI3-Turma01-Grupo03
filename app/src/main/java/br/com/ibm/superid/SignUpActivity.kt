@@ -19,7 +19,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
@@ -48,6 +50,10 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import br.com.ibm.superid.ui.theme.core.util.CustomOutlinedTextField
 import br.com.ibm.superid.ui.theme.core.util.SuperIDHeader
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.navigationBars
 
 // Classe da Activity de cadastro
 class SignUpActivity : ComponentActivity() {
@@ -173,6 +179,38 @@ fun createDefaultCategorias(userId: String, context: Context) {
     }
 }
 
+data class PasswordCriteria(
+    val hasUppercase: Boolean,
+    val hasLowercase: Boolean,
+    val hasDigit: Boolean,
+    val hasSpecialChar: Boolean,
+    val hasMinLength: Boolean
+)
+
+// Função que valida a senha com base em critérios
+fun checkPasswordCriteria(password: String): PasswordCriteria {
+    return PasswordCriteria(
+        hasUppercase = password.any { it.isUpperCase() },
+        hasLowercase = password.any { it.isLowerCase() },
+        hasDigit = password.any { it.isDigit() },
+        hasSpecialChar = password.any { "!@#\$%^&*()_+-=[]|,.<>?".contains(it) },
+        hasMinLength = password.length >= 8
+    )
+}
+
+// Composable que exibe cada regra com ✅ ou ❌
+@Composable
+fun PasswordRequirementItem(text: String, isMet: Boolean) {
+    Text(
+        text = (if (isMet) "✅ " else "❌ ") + text,
+        color = if (isMet) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+        fontSize = 12.sp,  // Fonte menor para ocupar menos espaço
+        modifier = Modifier.padding(vertical = 2.dp) // Pequeno espaçamento vertical
+    )
+}
+
+
+
 // Função Composable responsável pela interface da tela de cadastro
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
@@ -180,11 +218,15 @@ fun createDefaultCategorias(userId: String, context: Context) {
 fun SignUp() {
     val context = LocalContext.current
 
+
     // Armazena os valores inseridos pelo usuário
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
+    // Verifica os critérios da senha
+    val passwordCriteria = checkPasswordCriteria(password)
+
 
     Column(
         modifier = Modifier
@@ -209,10 +251,17 @@ fun SignUp() {
         }
 
         // Layout principal do formulário de cadastro
+
+        val scrollState = rememberScrollState()
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 50.dp),
+                .padding(
+                    top = 50.dp,
+                    bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 16.dp // já inclui espaço extra
+                )
+                .verticalScroll(scrollState),
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -247,6 +296,29 @@ fun SignUp() {
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
             )
 
+            Column(
+                modifier = Modifier
+                    .padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 8.dp)
+            ) {
+                Text(
+                    "A senha deve conter:",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                PasswordRequirementItem("Pelo menos 8 caracteres", passwordCriteria.hasMinLength)
+                Spacer(modifier = Modifier.height(2.dp))
+                PasswordRequirementItem("Letra maiúscula (A-Z)", passwordCriteria.hasUppercase)
+                Spacer(modifier = Modifier.height(2.dp))
+                PasswordRequirementItem("Letra minúscula (a-z)", passwordCriteria.hasLowercase)
+                Spacer(modifier = Modifier.height(2.dp))
+                PasswordRequirementItem("Número (0-9)", passwordCriteria.hasDigit)
+                Spacer(modifier = Modifier.height(2.dp))
+                PasswordRequirementItem("Caractere especial (!@#...)", passwordCriteria.hasSpecialChar)
+            }
+
+
             // Campo de entrada para confirmar a senha
             CustomOutlinedTextField(
                 value = confirmPassword,
@@ -256,7 +328,7 @@ fun SignUp() {
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
             // Botão de ação para cadastrar o usuário
             Button(
@@ -277,12 +349,23 @@ fun SignUp() {
                             Toast.makeText(context, "As senhas não coincidem!", Toast.LENGTH_LONG).show()
                         }
 
+                        // Verifica se a senha atende a todos os critérios
+                        !passwordCriteria.hasMinLength ||
+                                !passwordCriteria.hasUppercase ||
+                                !passwordCriteria.hasLowercase ||
+                                !passwordCriteria.hasDigit ||
+                                !passwordCriteria.hasSpecialChar -> {
+                            Toast.makeText(context, "A senha não atende aos requisitos mínimos!", Toast.LENGTH_LONG).show()
+                        }
+
+
                         // Caso tudo esteja correto, prossegue com o cadastro
                         else -> {
                             saveUserToAuth(email, password, name, context)
                         }
                     }
                 },
+
                 modifier = Modifier
                     .height(60.dp)
                     .width(150.dp)
