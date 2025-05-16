@@ -209,11 +209,16 @@ fun PasswordRequirementItem(text: String, isMet: Boolean) {
     )
 }
 
-
+@Preview
+@Composable
+fun SignUpPreview(){
+    SuperIDTheme {
+        SignUp()
+    }
+}
 
 // Função Composable responsável pela interface da tela de cadastro
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview
 @Composable
 fun SignUp() {
     val context = LocalContext.current
@@ -296,6 +301,16 @@ fun SignUp() {
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
             )
 
+
+            // Campo de entrada para confirmar a senha
+            CustomOutlinedTextField(
+                value = confirmPassword,
+                onValueChange = { confirmPassword = it },
+                label = "Confirmar Senha",
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+            )
+
             Column(
                 modifier = Modifier
                     .padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 8.dp)
@@ -317,16 +332,6 @@ fun SignUp() {
                 Spacer(modifier = Modifier.height(2.dp))
                 PasswordRequirementItem("Caractere especial (!@#...)", passwordCriteria.hasSpecialChar)
             }
-
-
-            // Campo de entrada para confirmar a senha
-            CustomOutlinedTextField(
-                value = confirmPassword,
-                onValueChange = { confirmPassword = it },
-                label = "Confirmar Senha",
-                visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
-            )
 
             Spacer(modifier = Modifier.height(32.dp))
 
