@@ -606,7 +606,7 @@ fun PasswordDetailDialog(item: SenhaItem, onDismiss: () -> Unit) {
                     )
 
                     // Exibo a senha
-                    Text("login:", fontWeight = FontWeight.Bold)
+                    Text("Login:", fontWeight = FontWeight.Bold)
                     StandardBoxPopUp {
                         Text(item.login)
                     }

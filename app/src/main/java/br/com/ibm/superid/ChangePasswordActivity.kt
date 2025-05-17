@@ -60,6 +60,7 @@ class ChangePasswordActivity : ComponentActivity() {
         val initialCategoria = intent.getStringExtra("PASSWORD_CATEGORY") ?: ""
         val initialDescricao = intent.getStringExtra("PASSWORD_DESCRIPTION") ?: ""
         val initialTitulo    = intent.getStringExtra("PASSWORD_TITLE")    ?: ""
+        val initialLogin     = intent.getStringExtra("PASSWORD_LOGIN")    ?: ""
 
         setContent {
             SuperIDTheme {
@@ -70,6 +71,7 @@ class ChangePasswordActivity : ComponentActivity() {
                         // Passa os valores iniciais
                         passwordId       = passwordId,
                         initialTitulo    = initialTitulo,
+                        initialLogin     = initialLogin,
                         initialSenha     = initialSenha,
                         initialDescricao = initialDescricao,
                         initialCategoria = initialCategoria,
@@ -89,6 +91,7 @@ class ChangePasswordActivity : ComponentActivity() {
 fun ChangePassword(
     passwordId: String,
     initialTitulo: String,
+    initialLogin: String,
     initialSenha: String,
     initialCategoria: String,
     initialDescricao: String,
@@ -99,6 +102,7 @@ fun ChangePassword(
 
     // Variáveis que guardam o valor digitado nos campos do formulário
     var titulo by remember { mutableStateOf(initialTitulo) }
+    var login by remember { mutableStateOf(initialLogin) }
     var senha by remember { mutableStateOf(initialSenha) }
     var categoria by remember { mutableStateOf(initialCategoria) }
     var descricao by remember { mutableStateOf(initialDescricao) }
@@ -152,6 +156,12 @@ fun ChangePassword(
                 value = titulo,
                 onValueChange = { titulo = it },
                 label ="Titulo"
+            )
+
+            CustomOutlinedTextField(
+                value = login,
+                onValueChange = { login = it },
+                label ="Login"
             )
 
             // Campo de texto para digitar a nova senha
@@ -235,6 +245,7 @@ fun ChangePassword(
                         context      = context,
                         documentId   = passwordId,
                         newTitulo    = titulo,
+                        newLogin     = login,
                         newPassword  = senha,
                         newCategory  = categoria,
                         newDesc      = descricao
@@ -288,6 +299,7 @@ fun updatePassword(
     context: Context,
     documentId: String,
     newTitulo:  String,
+    newLogin:  String,
     newPassword: String,
     newCategory: String,
     newDesc: String
@@ -310,6 +322,7 @@ fun updatePassword(
         "senha" to encrypted,
         "iv" to iv,
         "titulo" to newTitulo,
+        "login" to newLogin,
         "categoria" to newCategory,
         "descricao" to newDesc
     )
@@ -340,6 +353,7 @@ fun ChangePasswordPreview() {
         ChangePassword(
             passwordId = "id_teste",
             initialTitulo = "Minha Conta",
+            initialLogin = "teste@gmail.com",
             initialSenha = "123456",
             initialCategoria = "Email",
             initialDescricao = "Conta pessoal do Gmail"
