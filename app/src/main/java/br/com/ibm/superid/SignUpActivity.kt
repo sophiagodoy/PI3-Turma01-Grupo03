@@ -54,6 +54,9 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.ui.text.input.VisualTransformation
 
 // Classe da Activity de cadastro
 class SignUpActivity : ComponentActivity() {
@@ -209,14 +212,6 @@ fun PasswordRequirementItem(text: String, isMet: Boolean) {
     )
 }
 
-@Preview
-@Composable
-fun SignUpPreview(){
-    SuperIDTheme {
-        SignUp()
-    }
-}
-
 // Função Composable responsável pela interface da tela de cadastro
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -231,6 +226,10 @@ fun SignUp() {
     var confirmPassword by remember { mutableStateOf("") }
     // Verifica os critérios da senha
     val passwordCriteria = checkPasswordCriteria(password)
+
+    // "olho" da senha
+    var passwordVisible by remember { mutableStateOf(false) }
+    var confirmPasswordVisible by remember { mutableStateOf(false) }
 
 
     Column(
@@ -297,9 +296,30 @@ fun SignUp() {
                 value = password,
                 onValueChange = { password = it },
                 label = "Senha",
-                visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+                //define se o texto vai ser visivel ou oculto
+                visualTransformation = if (passwordVisible) {
+                    VisualTransformation.None }
+                else {
+                    PasswordVisualTransformation() },
+                // Define o tipo de teclado (neste caso, teclado para senha)
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                trailingIcon = {
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(
+                            // Alterna entre o ícone de "visível" e "não visível"
+                            imageVector = if (passwordVisible){
+                                Icons.Default.VisibilityOff } // Icone do "olho cortado"}
+                            else{
+                                Icons.Default.Visibility }, // Icone do olho
+                            contentDescription = if (passwordVisible){
+                                "Ocultar senha" }
+                            else {
+                                "Mostrar senha"}
+                        )
+                    }
+                }
             )
+
 
 
             // Campo de entrada para confirmar a senha
@@ -307,8 +327,25 @@ fun SignUp() {
                 value = confirmPassword,
                 onValueChange = { confirmPassword = it },
                 label = "Confirmar Senha",
-                visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+                visualTransformation = if (confirmPasswordVisible)
+                { VisualTransformation.None }
+                else
+                {PasswordVisualTransformation()},
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                trailingIcon = {
+                    IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
+                        Icon(
+                            imageVector = if (confirmPasswordVisible)
+                            {Icons.Default.VisibilityOff}
+                            else
+                            { Icons.Default.Visibility},
+                            contentDescription = if (confirmPasswordVisible)
+                            {"Ocultar senha"}
+                            else
+                            {"Mostrar senha"}
+                        )
+                    }
+                }
             )
 
             Column(
@@ -378,5 +415,13 @@ fun SignUp() {
                 Text("Cadastrar")
             }
         }
+    }
+}
+
+@Preview
+@Composable
+fun SignUpPreview(){
+    SuperIDTheme {
+        SignUp()
     }
 }
