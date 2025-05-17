@@ -14,9 +14,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -68,7 +66,8 @@ fun addNewPassword(
     senha: String,
     categoria: String,
     descricao: String,
-    titulo: String
+    titulo: String,
+    login: String
 ) {
 
     // Obtém o usuário atualmente autenticado no Firebase
@@ -95,6 +94,7 @@ fun addNewPassword(
     // Cria um mapa (hashMap) com os dados que serão salvos no Firestore
     val dadosNovaSenha = hashMapOf(
         "titulo" to titulo,
+        "login" to login,
         "senha" to encrypted,
         "categoria" to categoria,
         "descricao" to descricao,
@@ -166,6 +166,7 @@ fun AddPassword(modifier: Modifier = Modifier) {
     val context = LocalContext.current
 
     // Estados que armazenam os valores dos campos do formulário
+    var login by remember { mutableStateOf("") }
     var senha by remember { mutableStateOf("") }
     var confirmarSenha by remember { mutableStateOf("") }
     var categoria by remember { mutableStateOf("") }
@@ -225,11 +226,19 @@ fun AddPassword(modifier: Modifier = Modifier) {
 
             Spacer(Modifier.height(24.dp))
 
+
             // Campo de texto para o título da senha
             CustomOutlinedTextField(
                 value = titulo,
                 onValueChange = { titulo = it },
                 label = "Título"
+            )
+
+            // Campo de texto para o login da senha
+            CustomOutlinedTextField(
+                value = login,
+                onValueChange = { login = it },
+                label = "Login (opcional)"
             )
 
             // Campo de entrada para a senha
@@ -386,7 +395,7 @@ fun AddPassword(modifier: Modifier = Modifier) {
 
                         // Se tudo válido, adiciona a nova senha e volta à tela principal
                         else -> {
-                            addNewPassword(context, senha, categoria, descricao, titulo)
+                            addNewPassword(context, senha, categoria, descricao, titulo, login)
                             // Abre MainActivity e finaliza esta
                             val intent = Intent(context, MainActivity::class.java)
                             context.startActivity(intent)
