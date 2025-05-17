@@ -43,6 +43,9 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import br.com.ibm.superid.ui.theme.core.util.createacesstoken
 import br.com.ibm.superid.ui.theme.core.util.encryptpassword
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.ui.text.input.VisualTransformation
 
 // Declarando a Activity que exibe o formulário para adicionar uma nova senha
 class AddPasswordActivity : ComponentActivity() {
@@ -158,7 +161,6 @@ fun fetchCategoriasUsuario(context: Context) {
 
 // Composable que cria o formulário para adicionar uma nova senha
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview
 @Composable
 fun AddPassword(modifier: Modifier = Modifier) {
     val context = LocalContext.current
@@ -170,6 +172,9 @@ fun AddPassword(modifier: Modifier = Modifier) {
     var descricao by remember { mutableStateOf("") }
     var titulo by remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }
+
+    var passwordVisible by remember { mutableStateOf(false) }
+    var confirmPasswordVisible by remember { mutableStateOf(false) }
 
     // Ao iniciar o composable, busca as categorias do usuário no Firestore
     LaunchedEffect(Unit) {
@@ -227,22 +232,61 @@ fun AddPassword(modifier: Modifier = Modifier) {
                 label = "Título"
             )
 
-            // Campo para inserir a senha com máscara
+            // Campo de entrada para a senha
             CustomOutlinedTextField(
                 value = senha,
                 onValueChange = { senha = it },
                 label = "Senha",
-                visualTransformation = PasswordVisualTransformation(),
+                //define se o texto vai ser visivel ou oculto
+                visualTransformation = if (passwordVisible) {
+                    VisualTransformation.None }
+                else {
+                    PasswordVisualTransformation() },
+                // Define o tipo de teclado (neste caso, teclado para senha)
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                trailingIcon = {
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(
+                            // Alterna entre o ícone de "visível" e "não visível"
+                            imageVector = if (passwordVisible){
+                                Icons.Default.VisibilityOff } // Icone do "olho cortado"}
+                            else{
+                                Icons.Default.Visibility }, // Icone do olho
+                            contentDescription = if (passwordVisible){
+                                "Ocultar senha" }
+                            else {
+                                "Mostrar senha"}
+                        )
+                    }
+                }
             )
 
-            // Campo para confirmar a senha com máscara
+
+
+            // Campo de entrada para confirmar a senha
             CustomOutlinedTextField(
                 value = confirmarSenha,
                 onValueChange = { confirmarSenha = it },
-                label = "Confirmar senha",
-                visualTransformation = PasswordVisualTransformation(),
+                label = "Confirmar Senha",
+                visualTransformation = if (confirmPasswordVisible)
+                { VisualTransformation.None }
+                else
+                {PasswordVisualTransformation()},
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                trailingIcon = {
+                    IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
+                        Icon(
+                            imageVector = if (confirmPasswordVisible)
+                            {Icons.Default.VisibilityOff}
+                            else
+                            { Icons.Default.Visibility},
+                            contentDescription = if (confirmPasswordVisible)
+                            {"Ocultar senha"}
+                            else
+                            {"Mostrar senha"}
+                        )
+                    }
+                }
             )
 
             Box(
@@ -358,3 +402,12 @@ fun AddPassword(modifier: Modifier = Modifier) {
         }
     }
 }
+
+@Composable
+@Preview
+fun PreviewAddPassword(){
+    SuperIDTheme {
+        AddPassword()
+    }
+}
+
