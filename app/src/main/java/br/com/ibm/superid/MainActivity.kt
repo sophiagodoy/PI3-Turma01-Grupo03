@@ -69,6 +69,7 @@ class MainActivity : ComponentActivity() {
 data class SenhaItem(
     val id: String,
     val titulo: String,
+    val login: String,
     val senha: String,
     val descricao: String,
     val categoria: String
@@ -126,6 +127,7 @@ fun MainScreen() {
                             tempList.add(
                                 SenhaItem(
                                     titulo = doc.getString("titulo") ?: "",
+                                    login = doc.getString("login") ?: "",
                                     senha = decrypted,
                                     descricao = doc.getString("descricao") ?: "",
                                     categoria = doc.getString("categoria") ?: "",
@@ -604,6 +606,12 @@ fun PasswordDetailDialog(item: SenhaItem, onDismiss: () -> Unit) {
                     )
 
                     // Exibo a senha
+                    Text("login:", fontWeight = FontWeight.Bold)
+                    StandardBoxPopUp {
+                        Text(item.login)
+                    }
+
+                    // Exibo a senha
                     Text("Senha:", fontWeight = FontWeight.Bold)
                     StandardBoxPopUp {
                         Text(item.senha)
@@ -638,6 +646,7 @@ fun PasswordDetailDialog(item: SenhaItem, onDismiss: () -> Unit) {
                                     putExtra("PASSWORD_VALUE", item.senha)
                                     putExtra("PASSWORD_DESCRIPTION", item.descricao)
                                     putExtra("PASSWORD_CATEGORY", item.categoria)
+                                    putExtra("PASSWORD_LOGIN", item.login)
                                 }
                                 context.startActivity(intent)
                             },
