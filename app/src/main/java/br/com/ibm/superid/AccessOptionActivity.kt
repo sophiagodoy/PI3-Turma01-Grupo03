@@ -1,4 +1,4 @@
-// TELA QUE O USUÁRIO ESCOLHE QUAL ACESSO DESEJA (LOGIN, CADASTRO, ENTRAR SEM SENHA)
+// TELA QUE O USUÁRIO ESCOLHE QUAL ACESSO DESEJA (LOGIN, CADASTRO)
 
 package br.com.ibm.superid
 
@@ -109,26 +109,6 @@ fun AccessOptions(modifier: Modifier = Modifier) {
                     text = "Cadastro",
                     fontSize = 18.sp,
                     style = MaterialTheme.typography.titleMedium
-                )
-            }
-
-            Spacer(Modifier.height(8.dp))
-
-            // Botão estilo link que permite entrar sem criar conta (leva à MainActivity)
-            TextButton(
-                onClick = {
-                    val intent = Intent(context, MainActivity::class.java)
-                    context.startActivity(intent)
-                }
-            ) {
-                Text(
-                    text = "Continuar sem conta",
-                    color = MaterialTheme.colorScheme.tertiary,
-                    style = TextStyle(
-                        textDecoration = TextDecoration.Underline,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Normal
-                    )
                 )
             }
         }

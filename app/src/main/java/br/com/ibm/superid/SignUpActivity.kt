@@ -290,7 +290,7 @@ fun SignUp() {
             CustomOutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
-                label = "Nome"
+                label = "Nome Completo"
             )
 
             // Campo de entrada para o email

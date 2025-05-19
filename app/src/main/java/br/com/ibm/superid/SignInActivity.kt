@@ -43,10 +43,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import br.com.ibm.superid.ui.theme.SuperIDTheme
@@ -61,12 +64,7 @@ class SignInActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             SuperIDTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    // Chama a função composable SignIn e aplica o padding interno do Scaffold
-                    SignIn(
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                PreviewSignIn()
             }
         }
     }
@@ -99,7 +97,6 @@ fun signInWithFirebaseAuth(email: String, password: String, context: Context) {
 
 // Função Composable que apresenta o formulário de login do usuário
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview(showBackground = true)
 @Composable
 fun SignIn(modifier: Modifier = Modifier) {
 
@@ -109,6 +106,10 @@ fun SignIn(modifier: Modifier = Modifier) {
     // Variáveis que guardam o valor digitado nos campos do formulário
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+
+    // "olho" da senha
+    var passwordVisible by remember { mutableStateOf(false) }
+    var confirmPasswordVisible by remember { mutableStateOf(false) }
 
 
 
@@ -159,15 +160,33 @@ fun SignIn(modifier: Modifier = Modifier) {
                 label = "Email"
             )
 
-            // Campo de texto para digitar a senha do usuário
+            // Campo de entrada para a senha
             CustomOutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
                 label = "Senha",
-
-                // Esconde os caracteres da senha
-                visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+                //define se o texto vai ser visivel ou oculto
+                visualTransformation = if (passwordVisible) {
+                    VisualTransformation.None }
+                else {
+                    PasswordVisualTransformation() },
+                // Define o tipo de teclado (neste caso, teclado para senha)
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                trailingIcon = {
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(
+                            // Alterna entre o ícone de "visível" e "não visível"
+                            imageVector = if (passwordVisible){
+                                Icons.Default.VisibilityOff } // Icone do "olho cortado"}
+                            else{
+                                Icons.Default.Visibility }, // Icone do olho
+                            contentDescription = if (passwordVisible){
+                                "Ocultar senha" }
+                            else {
+                                "Mostrar senha"}
+                        )
+                    }
+                }
             )
 
             // Recuperação de senha do usuário
@@ -214,6 +233,20 @@ fun SignIn(modifier: Modifier = Modifier) {
                 // Define o texto que está dentro do botão
                 Text("Entrar")
             }
+        }
+    }
+}
+
+
+@Composable
+@Preview
+fun PreviewSignIn(){
+    SuperIDTheme {
+        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+            // Chama a função composable SignIn e aplica o padding interno do Scaffold
+            SignIn(
+                modifier = Modifier.padding(innerPadding)
+            )
         }
     }
 }

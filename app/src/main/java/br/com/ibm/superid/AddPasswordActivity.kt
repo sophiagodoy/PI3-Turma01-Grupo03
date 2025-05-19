@@ -11,7 +11,9 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
@@ -183,10 +185,15 @@ fun AddPassword(modifier: Modifier = Modifier) {
     }
 
     // Container principal que define fundo e organiza os elementos verticalmente
+
+    val scrollState = rememberScrollState() //rolagem de tela
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
+            .padding(bottom = 100.dp)
+            .verticalScroll(scrollState)
     ) {
 
         // Cabeçalho visual personalizado do aplicativo
@@ -378,18 +385,18 @@ fun AddPassword(modifier: Modifier = Modifier) {
                                 .show()
 
                         // Verifica se o título tem mais de 10 caracteres
-                        titulo.length > 10 ->
+                        titulo.length > 30 ->
                             Toast.makeText(
                                 context,
-                                "Título não pode ter mais de 10 caracteres!",
+                                "Título não pode ter mais de 30 caracteres!",
                                 Toast.LENGTH_SHORT
                             ).show()
 
                         // Verifica se a senha tem menos de 8 caracteres
-                        senha.length < 8 ->
+                        senha.length < 4 ->
                             Toast.makeText(
                                 context,
-                                "Senha deve ter pelo menos 8 caracteres!",
+                                "Senha deve ter pelo menos 4 caracteres!",
                                 Toast.LENGTH_SHORT
                             ).show()
 
@@ -403,9 +410,12 @@ fun AddPassword(modifier: Modifier = Modifier) {
                     }
                 },
                 modifier = Modifier
-                    .fillMaxWidth(0.8f)
-                    .height(50.dp)
-            ) {
+                    .padding(
+                        bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 16.dp // faz com que o botão apareca na tela do celular
+                    )
+                    .height(60.dp)
+                    .width(150.dp)
+            ){
                 Text("SALVAR")
             }
         }
