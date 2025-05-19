@@ -52,19 +52,16 @@ import br.com.ibm.superid.ui.theme.core.util.CustomOutlinedTextField
 import br.com.ibm.superid.ui.theme.core.util.SuperIDHeader
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.ui.text.input.VisualTransformation
 
-// Classe da Activity de cadastro
+// Declarando a Activity que o usuário usa para realizar o cadastro
 class SignUpActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Ativa o modo de tela cheia com suporte à barra de status
         enableEdgeToEdge()
-        // Define o conteúdo da tela
         setContent {
             SuperIDTheme {
                 SignUp()
@@ -75,32 +72,48 @@ class SignUpActivity : ComponentActivity() {
 
 // Essa função cria a conta do usuário no Firebase Authentication
 fun saveUserToAuth(email: String, password: String, name: String, context: Context) {
+
     val auth = Firebase.auth
 
     auth.createUserWithEmailAndPassword(email, password)
         .addOnCompleteListener { task ->
             if (task.isSuccessful) {
-                val user = task.result?.user!!
-                val uid = user.uid
-                Log.i("AUTH", "Conta criada com sucesso")
+                val user = auth.currentUser
 
-                // Envia e-mail de verificação para o usuário
-                user.sendEmailVerification()
-                    .addOnCompleteListener { verifyTask ->
-                        if (verifyTask.isSuccessful) {
-                            Log.i("AUTH", "E-mail de verificação enviado com sucesso.")
-                            Toast.makeText(context, "E-mail de verificação enviado!", Toast.LENGTH_LONG).show()
-                        } else {
-                            Log.i("AUTH", "Erro ao enviar e-mail de verificação.", verifyTask.exception)
+                if (user != null) {
+                    val uid = user.uid
+                    Log.i("AUTH", "Conta criada com sucesso")
+
+                    // Envia e-mail de verificação para o usuário
+                    user.sendEmailVerification()
+                        .addOnCompleteListener { verifyTask ->
+                            if (verifyTask.isSuccessful) {
+                                Log.i("AUTH", "E-mail de verificação enviado com sucesso.")
+                                Toast.makeText(
+                                    context,
+                                    "E-mail de verificação enviado!",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            } else {
+                                Log.i(
+                                    "AUTH",
+                                    "Erro ao enviar e-mail de verificação.",
+                                    verifyTask.exception
+                                )
+                            }
                         }
-                    }
 
-                // Salva os dados no Firestore
-                saveUserToFirestore(uid, name, email, context)
-            } else {
-                // Exibe erro caso o cadastro falhe
-                Log.i("AUTH", "Falha ao criar conta.", task.exception)
-                Toast.makeText(context, "Erro ao criar conta: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                    // Salva os dados no Firestore
+                    saveUserToFirestore(uid, name, email, context)
+                } else {
+                    // Exibe erro caso o cadastro falhe
+                    Log.i("AUTH", "Falha ao criar conta.", task.exception)
+                    Toast.makeText(
+                        context,
+                        "Erro ao criar conta: ${task.exception?.message}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
             }
         }
 }
