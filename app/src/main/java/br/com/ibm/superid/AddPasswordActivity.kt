@@ -72,28 +72,28 @@ fun addNewPassword(
     login: String
 ) {
 
-    // Obtém o usuário atualmente autenticado no Firebase
-    val user = Firebase.auth.currentUser
+    // Obtém a instância de autenticação do Firebase
+    val auth = Firebase.auth
+    val user = auth.currentUser
 
-    // Se não houver usuário logado, exibe mensagem e interrompe a função
+    // Verifica se o usuário está logado
     if (user == null) {
         Toast.makeText(context, "Usuário não autenticado", Toast.LENGTH_LONG).show()
         return
     }
 
-    // Tenta criptografar a senha fornecida pelo usuário
+    // Criptografa a nova senha
     val (encrypted, iv) = try {
         encryptpassword(senha)
     } catch (e: Exception) {
-        // Caso ocorra erro na criptografia, exibe mensagem e interrompe a função
         Toast.makeText(context, "Falha ao criptografar: ${e.message}", Toast.LENGTH_LONG).show()
         return
     }
 
-    // Gera um token de acesso único para essa senha
+    // Gera um token de acesso exclusivo para essa senha
     val accessToken = createacesstoken()
 
-    // Cria um mapa (hashMap) com os dados que serão salvos no Firestore
+    // Cria um mapa com os dados que serão salvos no Firestore
     val dadosNovaSenha = hashMapOf(
         "titulo" to titulo,
         "login" to login,
@@ -104,20 +104,37 @@ fun addNewPassword(
         "iv" to iv
     )
 
-    // Salva o novo documento na coleção "senhas" do usuário no Firestore
-    Firebase.firestore
+    // Referência para a subcoleção "senhas" dentro do usuário logado
+    val senhasRef = Firebase.firestore
         .collection("users")
         .document(user.uid)
         .collection("senhas")
-        .add(dadosNovaSenha)
-        .addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                // Se o salvamento foi bem-sucedido, exibe mensagem de sucesso
-                Toast.makeText(context, "Senha salva com sucesso!", Toast.LENGTH_SHORT).show()
+
+    // Verifica se já existe uma senha com o mesmo título e categoria
+    senhasRef
+        .whereEqualTo("titulo", titulo)
+        .whereEqualTo("categoria", categoria)
+        .get()
+        .addOnSuccessListener { document ->
+            if (!document.isEmpty) {
+                Toast.makeText(context, "Já existe uma senha com esse título nessa categoria!", Toast.LENGTH_LONG).show()
             } else {
-                // Se ocorreu erro, exibe mensagem com o motivo
-                Toast.makeText(context, "Erro ao salvar: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                senhasRef
+                    .add(dadosNovaSenha)
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            Toast.makeText(context, "Senha salva com sucesso!", Toast.LENGTH_SHORT).show()
+
+                            val intent = Intent(context, MainActivity::class.java)
+                            context.startActivity(intent)
+                        } else {
+                            Toast.makeText(context, "Erro ao salvar: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                        }
+                    }
             }
+        }
+        .addOnFailureListener { exception ->
+            Toast.makeText(context, "Erro ao verificar duplicidade: ${exception.message}", Toast.LENGTH_LONG).show()
         }
 }
 
@@ -403,9 +420,6 @@ fun AddPassword(modifier: Modifier = Modifier) {
                         // Se tudo válido, adiciona a nova senha e volta à tela principal
                         else -> {
                             addNewPassword(context, senha, categoria, descricao, titulo, login)
-                            // Abre MainActivity e finaliza esta
-                            val intent = Intent(context, MainActivity::class.java)
-                            context.startActivity(intent)
                         }
                     }
                 },
