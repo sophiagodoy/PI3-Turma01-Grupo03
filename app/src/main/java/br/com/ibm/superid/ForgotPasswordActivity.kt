@@ -63,12 +63,7 @@ class ForgotPasswordActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             SuperIDTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    // Chama a função composable SignIn e aplica o padding interno do Scaffold
-                    ForgotPasswordScreen(
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                PreviewForgorPasswordActivity()
             }
         }
     }
@@ -129,7 +124,6 @@ fun sendEmail(email: String, context: Context ){
 // Função Composable que apresenta o formulário de recuperação de senha
 @SuppressLint("SuspiciousIndentation")
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview(showBackground = true)
 @Composable
 fun ForgotPasswordScreen(modifier: Modifier = Modifier) {
     // Cria variável para poder trocar de tela
@@ -222,6 +216,19 @@ fun ForgotPasswordScreen(modifier: Modifier = Modifier) {
                 // Texto exibido no botão
                 Text("Enviar Link de Redefinição")
             }
+        }
+    }
+}
+
+@Composable
+@Preview
+fun PreviewForgorPasswordActivity(){
+    SuperIDTheme {
+        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+            // Chama a função composable SignIn e aplica o padding interno do Scaffold
+            ForgotPasswordScreen(
+                modifier = Modifier.padding(innerPadding)
+            )
         }
     }
 }

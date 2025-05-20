@@ -44,7 +44,7 @@ class AddCategoryActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             SuperIDTheme {
-                AddCat()
+               PreviewAddCat()
             }
         }
     }
@@ -161,7 +161,7 @@ fun AddCat() {
                             Toast.makeText(context, "Nome da categoria deve ter pelo menos 3 caracteres!", Toast.LENGTH_SHORT).show()
 
                         categoryName.length > 10 ->
-                            Toast.makeText(context, "Nome da categoria deve ter no máximo 10 caracteres!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Nome da categoria deve ter no máximo 30 caracteres!", Toast.LENGTH_SHORT).show()
 
                         else -> {
                             // Chama função para adicionar categoria no banco
@@ -183,5 +183,7 @@ fun AddCat() {
 @Preview
 @Composable
 fun PreviewAddCat() {
-    AddCat()
+    SuperIDTheme {
+        AddCat()
+    }
 }

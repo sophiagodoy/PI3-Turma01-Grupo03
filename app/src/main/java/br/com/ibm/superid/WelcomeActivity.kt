@@ -33,11 +33,7 @@ class WelcomeActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             SuperIDTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Welcome(
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                Welcome()
             }
         }
     }
@@ -349,5 +345,11 @@ fun Welcome(modifier: Modifier = Modifier) {
 @Preview
 @Composable
 fun PreviewWelcome() {
-    Welcome()
+    SuperIDTheme {
+        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+            Welcome(
+                modifier = Modifier.padding(innerPadding)
+            )
+        }
+    }
 }

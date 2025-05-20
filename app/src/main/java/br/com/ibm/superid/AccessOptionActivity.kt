@@ -41,21 +41,12 @@ class AccessOptionActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            SuperIDTheme {
-                // Scaffold provê a estrutura básica da tela, garantindo consistência de layout
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    // Chama a função composable AccessOptions e aplica o padding interno do Scaffold
-                    AccessOptions(
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
-            }
+                PreviewAcessOption()
         }
     }
 }
 
 // AccessOptions - Função composable que exibe os botões de acesso: Login, Cadastro e Continuar sem conta
-@Preview
 @Composable
 fun AccessOptions(modifier: Modifier = Modifier) {
     val context = LocalContext.current
@@ -111,6 +102,20 @@ fun AccessOptions(modifier: Modifier = Modifier) {
                     style = MaterialTheme.typography.titleMedium
                 )
             }
+        }
+    }
+}
+
+@Composable
+@Preview
+fun PreviewAcessOption(){
+    SuperIDTheme {
+        // Scaffold provê a estrutura básica da tela, garantindo consistência de layout
+        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+            // Chama a função composable AccessOptions e aplica o padding interno do Scaffold
+            AccessOptions(
+                modifier = Modifier.padding(innerPadding)
+            )
         }
     }
 }

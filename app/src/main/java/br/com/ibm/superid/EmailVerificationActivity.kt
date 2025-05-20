@@ -43,19 +43,13 @@ class EmailVerificationActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             SuperIDTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    // Chama a função composable EmailVerification e aplica o padding interno do Scaffold
-                    EmailVerification(
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                EmailVerificationPreview()
             }
         }
     }
 }
 
 // Função Composable que apresenta as informações sobre a confirmação do email
-@Preview
 @Composable
 fun EmailVerification(modifier: Modifier = Modifier) {
 
@@ -155,3 +149,5 @@ fun EmailVerificationPreview() {
         EmailVerification()
     }
 }
+
+
