@@ -10,6 +10,8 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
@@ -76,6 +78,22 @@ data class SenhaItem(
     val descricao: String,
     val categoria: String
 )
+
+
+
+fun deletePasswordById(senhaId: String) {
+    val auth = FirebaseAuth.getInstance()
+    val user = auth.currentUser
+
+    if (user != null) {
+        val db = FirebaseFirestore.getInstance()
+        db.collection("users")
+            .document(user.uid)
+            .collection("senhas")
+            .document(senhaId)
+            .delete()
+    }
+}
 
 // função que representa a tela principal do app
 @Composable
@@ -704,7 +722,6 @@ fun RemovePasswordDialog(
     onSuccess: () -> Unit,
     onError: (Exception) -> Unit
 ) {
-
     Dialog(onDismissRequest = onDismiss) {
         Surface(
             shape = RoundedCornerShape(16.dp),
@@ -732,7 +749,7 @@ fun RemovePasswordDialog(
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
 
-                        // Botão cancelar (penas decha o diálogo)
+                        // Botão cancelar (apenas fecha o diálogo)
                         Button(
                             onClick = onDismiss
                         ) {
@@ -742,17 +759,7 @@ fun RemovePasswordDialog(
                         // Botão remover (executa a exclusão no Firestore)
                         Button(
                             onClick = {
-                                val user = Firebase.auth.currentUser
-                                user?.uid?.let { uid ->
-                                    Firebase.firestore
-                                        .collection("users")
-                                        .document(uid)
-                                        .collection("senhas")
-                                        .document(item.id)
-                                        .delete()
-                                        .addOnSuccessListener { onSuccess() }
-                                        .addOnFailureListener { e -> onError(e) }
-                                }
+                                deletePasswordById(item.id)
                             },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.error
@@ -766,6 +773,8 @@ fun RemovePasswordDialog(
         }
     }
 }
+
+
 
 @Composable
 fun ConfirmDeleteCategoryDialog(
