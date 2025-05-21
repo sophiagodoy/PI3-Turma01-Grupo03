@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -30,6 +31,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -51,6 +53,11 @@ import com.google.firebase.ktx.Firebase
 import br.com.ibm.superid.ui.theme.core.util.decryptPassword
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
+import br.com.ibm.superid.ui.theme.core.util.CustomOutlinedTextField
+import br.com.ibm.superid.ui.theme.core.util.reauthenticateUser
 
 // Classe principal que define a Activity inicial do aplicativo
 class MainActivity : ComponentActivity() {
@@ -111,9 +118,10 @@ fun MainScreen() {
 
     // Variáveis que controlam a visibilidade de três diálogos (pop-up)
     var showAddPopUp by remember { mutableStateOf(false) }
-    var showQRCodePopUp by remember { mutableStateOf(false) }
     var showExitDialog by remember { mutableStateOf(false) }
     var showQRInstructionDialog by remember { mutableStateOf(false) }
+    var showConfirmPasswordDialog by remember { mutableStateOf(false) }
+
 
 
     // Carrega as senhas do Firestore assim que a tela iniciar
@@ -291,7 +299,7 @@ fun MainScreen() {
         // Botão flutuante do QR Code
         FloatingActionButton(
             onClick = {
-                showQRInstructionDialog = true
+                showConfirmPasswordDialog = true
             },
             modifier = Modifier
                 .size(120.dp)
@@ -429,6 +437,15 @@ fun MainScreen() {
                             color = MaterialTheme.colorScheme.onBackground
                         )
                     }
+                }
+            )
+        }
+
+        if (showConfirmPasswordDialog) {
+            ConfirmPasswordDialog(
+                onDismiss = { showConfirmPasswordDialog = false },
+                onConfirmed = {
+                    showQRInstructionDialog = true // ativa o segundo popup
                 }
             )
         }
@@ -834,6 +851,75 @@ fun ConfirmDeleteCategoryDialog(
         }
     )
 }
+
+@Composable
+fun ConfirmPasswordDialog(
+    onDismiss: () -> Unit,
+    onConfirmed: () -> Unit
+) {
+    val context = LocalContext.current
+    var senha by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
+
+    // Obtém o email do usuário logado
+    val email = Firebase.auth.currentUser?.email ?: "Email não disponível"
+
+    // Caixa de diálogo com campos personalizados
+    AlertDialog(
+        onDismissRequest = { onDismiss() },
+        confirmButton = {
+            TextButton(onClick = {
+                reauthenticateUser(senha, context, onSuccess = {
+                    onConfirmed()    // <- ativa o popup do QR Code
+                    onDismiss()      // <- fecha o popup atual
+                }, onFailure = {
+                    senha = ""       // limpa o campo de senha
+                })
+            }) {
+                Text("Confirmar")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = { onDismiss() }) {
+                Text("Cancelar")
+            }
+        },
+        title = { Text("Confirmação de senha") },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                // Campo de exibição do email (desabilitado apenas para mostrar o valor)
+                CustomOutlinedTextField(
+                    value = email,
+                    onValueChange = {},
+                    label = "Email",
+                    enabled = false // campo somente leitura
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Campo de entrada de senha com ícone de visibilidade
+                CustomOutlinedTextField(
+                    value = senha,
+                    onValueChange = { senha = it },
+                    label = "Senha",
+                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    trailingIcon = {
+                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                            Icon(
+                                imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                contentDescription = if (passwordVisible) "Ocultar senha" else "Mostrar senha"
+                            )
+                        }
+                    }
+                )
+            }
+        }
+    )
+}
+
 
 // Preview da tela principal
 @Preview(

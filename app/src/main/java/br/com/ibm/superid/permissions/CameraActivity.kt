@@ -45,7 +45,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.LifecycleOwner
-import br.com.ibm.superid.ui.theme.core.util.ui.theme.SuperIDTheme
+import br.com.ibm.superid.ui.theme.SuperIDTheme
+
 import java.io.File
 
 class MainActivity : ComponentActivity() {
