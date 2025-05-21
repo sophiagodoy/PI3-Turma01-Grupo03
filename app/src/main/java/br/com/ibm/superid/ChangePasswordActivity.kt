@@ -161,7 +161,7 @@ fun ChangePassword(
             CustomOutlinedTextField(
                 value = login,
                 onValueChange = { login = it },
-                label ="Login"
+                label ="Login (opcional)"
             )
 
             // Campo de texto para digitar a nova senha
@@ -231,7 +231,7 @@ fun ChangePassword(
             CustomOutlinedTextField(
                 value = descricao,
                 onValueChange = { descricao = it },
-                label ="Descrição"
+                label ="Descrição (opcional)"
             )
 
             // Espaço de 24dp antes do botão
@@ -250,9 +250,6 @@ fun ChangePassword(
                         newCategory  = categoria,
                         newDesc      = descricao
                     )
-
-                    if(senha.isNotBlank() && titulo.isNotBlank() && categoria.isNotBlank() && descricao.isNotBlank())// volta para a Main
-                    context.startActivity(Intent(context, MainActivity::class.java))
                 },
                 modifier = Modifier
                     .height(60.dp)    
@@ -309,8 +306,8 @@ fun updatePassword(
         Toast.makeText(context, "Usuário não autenticado!", Toast.LENGTH_SHORT).show()
         return
     }
-    if (newPassword.isBlank() || newTitulo.isBlank() || newCategory.isBlank() || newDesc.isBlank()) {
-        Toast.makeText(context, "Preencha todos os dados!", Toast.LENGTH_SHORT).show()
+    if (newPassword.isBlank() || newTitulo.isBlank() || newCategory.isBlank()) {
+        Toast.makeText(context, "Título, senha e categoria são obrigatórios!", Toast.LENGTH_SHORT).show()
         return
     }
 
@@ -328,7 +325,7 @@ fun updatePassword(
     )
 
 
-    if (newTitulo.isNotBlank() && newPassword.isNotBlank() && newCategory.isNotBlank() && newDesc.isNotBlank()) {
+    if (newTitulo.isNotBlank() && newPassword.isNotBlank() && newCategory.isNotBlank()) {
         // Executa o update no Firestore
         Firebase.firestore
             .collection("users")
@@ -338,7 +335,9 @@ fun updatePassword(
             .update(updates)
             .addOnSuccessListener {
                 Toast.makeText(context, "Senha atualizada com sucesso!", Toast.LENGTH_SHORT).show()
+                context.startActivity(Intent(context, MainActivity::class.java))
             }
+
             .addOnFailureListener { e ->
                 Toast.makeText(context, "Erro ao atualizar: ${e.message}", Toast.LENGTH_LONG).show()
             }
