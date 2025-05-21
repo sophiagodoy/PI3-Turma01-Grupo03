@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -32,6 +34,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -104,10 +108,11 @@ fun ChangePassword(
     // Variáveis que guardam o valor digitado nos campos do formulário
     var titulo by remember { mutableStateOf(initialTitulo) }
     var login by remember { mutableStateOf(initialLogin) }
-    var senha by remember { mutableStateOf(initialSenha) }
+    var password by remember { mutableStateOf(initialSenha) }
     var categoria by remember { mutableStateOf(initialCategoria) }
     var descricao by remember { mutableStateOf(initialDescricao) }
     var expanded by remember { mutableStateOf(false) }
+    var passwordVisible by remember { mutableStateOf(false) }
 
     // Seta que volta para AccessOptionActivity
     // Baseado em: https://developer.android.com/develop/ui/compose/components/app-bars?hl=pt-br#top-app-bar
@@ -165,16 +170,34 @@ fun ChangePassword(
                 label ="Login (opcional)"
             )
 
-            // Campo de texto para digitar a nova senha
+            // Campo de entrada para a senha
             CustomOutlinedTextField(
-                value = senha,
-                onValueChange = { senha = it },
+                value = password,
+                onValueChange = { password = it },
                 label = "Senha",
-                /*// Esconde os caracteres da senha
-                visualTransformation = PasswordVisualTransformation(),*/
+                //define se o texto vai ser visivel ou oculto
+                visualTransformation = if (passwordVisible) {
+                    VisualTransformation.None }
+                else {
+                    PasswordVisualTransformation() },
+                // Define o tipo de teclado (neste caso, teclado para senha)
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                trailingIcon = {
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(
+                            // Alterna entre o ícone de "visível" e "não visível"
+                            imageVector = if (passwordVisible){
+                                Icons.Default.VisibilityOff } // Icone do "olho cortado"}
+                            else{
+                                Icons.Default.Visibility }, // Icone do olho
+                            contentDescription = if (passwordVisible){
+                                "Ocultar senha" }
+                            else {
+                                "Mostrar senha"}
+                        )
+                    }
+                }
             )
-
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -247,7 +270,7 @@ fun ChangePassword(
                         documentId   = passwordId,
                         newTitulo    = titulo,
                         newLogin     = login,
-                        newPassword  = senha,
+                        newPassword  = password,
                         newCategory  = categoria,
                         newDesc      = descricao
                     )
