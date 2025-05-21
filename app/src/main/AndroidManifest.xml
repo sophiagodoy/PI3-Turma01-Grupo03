@@ -2,6 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-feature android:name="android.hardware.camera.any"/>
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <!--usa iternet para fazer o compartilhamento da foto se necessario -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+
     <application
         android:name=".EmailVerificationSyncApplication"
         android:allowBackup="true"
@@ -13,11 +18,18 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SuperID"
         tools:targetApi="31">
-        <activity
-            android:name=".ProfileActivity"
-            android:exported="true"
-            android:label="@string/title_activity_profile"
-            android:theme="@style/Theme.SuperID" />
+
+        <provider
+            android:authorities="br.com.ibm.superid"
+            android:name="androidx.core.content.FileProvider"
+            android:grantUriPermissions="true"
+            android:exported="false">
+
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/filepaths"/>
+        </provider>
+
         <activity
             android:name=".EmailVerificationActivity"
             android:exported="true"
@@ -83,5 +95,6 @@
             android:label="@string/title_activity_forgot_password"
             android:theme="@style/Theme.SuperID" />
     </application>
+
 
 </manifest>
