@@ -24,10 +24,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -233,7 +235,7 @@ fun MainScreen() {
                 .padding(start = 10.dp, top = 95.dp)
         ) {
             Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                imageVector = Icons.AutoMirrored.Filled.Logout,
                 contentDescription = "Sair do aplicativo",
                 modifier = Modifier.size(35.dp)
             )
@@ -596,16 +598,26 @@ fun CategoryCard(
             // Se estiver expandido, lista as senhas da categoria como texto clicável
             if (expanded) {
                 items.forEach { item ->
-                    Text(
-                        text = item.titulo,
-                        fontSize = 26.sp,
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 30.dp, vertical = 8.dp)
                             .clickable { onItemClick(item) } // ao clicar abre detalhe da senha
-                    )
+                            .padding(horizontal = 30.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = item.titulo,
+                            fontSize = 23.sp,
+                            modifier = Modifier.weight(1f) // ocupa o espaço restante
+                        )
+                        Icon(
+                            imageVector = Icons.Default.Visibility,
+                            contentDescription = "Ver senha"
+                        )
+                    }
                 }
             }
+
         }
     }
 }
