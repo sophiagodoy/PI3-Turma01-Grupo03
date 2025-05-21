@@ -617,7 +617,6 @@ fun CategoryCard(
                     }
                 }
             }
-
         }
     }
 }
