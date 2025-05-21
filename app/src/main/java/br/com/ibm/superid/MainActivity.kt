@@ -111,6 +111,8 @@ fun MainScreen() {
     var showAddPopUp by remember { mutableStateOf(false) }
     var showQRCodePopUp by remember { mutableStateOf(false) }
     var showExitDialog by remember { mutableStateOf(false) }
+    var showQRInstructionDialog by remember { mutableStateOf(false) }
+
 
     // Carrega as senhas do Firestore assim que a tela iniciar
     fun loadDataFireBase() {
@@ -284,10 +286,11 @@ fun MainScreen() {
             )
         }
 
-
         // Botão flutuante do QR Code
         FloatingActionButton(
-            onClick = { showQRCodePopUp = true }, // showQRCodePopUp é ativada
+            onClick = {
+                showQRInstructionDialog = true
+            },
             modifier = Modifier
                 .size(120.dp)
                 .align(Alignment.BottomEnd)
@@ -384,28 +387,6 @@ fun MainScreen() {
             }
         }
 
-        /*TODO: Mudar o POP-UP para abir a camera*/
-
-        // Popup de leitura do QR Code
-        if (showQRCodePopUp) {
-            AlertDialog(
-                onDismissRequest = { showQRCodePopUp = false },
-                title = {
-                    // Faixa verde com o botão de voltar
-                    BackButtonBar(onBackClick = {
-                        showAddPopUp = false
-                    })
-                },
-                confirmButton = {
-                    TextButton(onClick = {
-                        showQRCodePopUp = false
-                    }) {
-                        Text("Esse pop-up nao vai existir, ele abre a camera direto.")
-                    }
-                }
-            )
-        }
-
         // Baseado em: https://www.geeksforgeeks.org/alertdialog-in-android-using-jetpack-compose/?utm_source
         // Se a showExitDialog estiver como true (ativa)
         if (showExitDialog) {
@@ -449,6 +430,36 @@ fun MainScreen() {
                 }
             )
         }
+
+        if (showQRInstructionDialog) {
+            AlertDialog(
+                onDismissRequest = { showQRInstructionDialog = false },
+                title = { Text("Instrução para Leitura") },
+                text = { Text("Aponte a câmera do celular para o QR Code exibido no site para realizar o login.") },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            showQRInstructionDialog = false
+                            val intent = Intent(
+                                context,
+                                br.com.ibm.superid.permissions.MainActivity::class.java
+                            )
+                            context.startActivity(intent)
+                        }
+                    ) {
+                        Text("OK")
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = { showQRInstructionDialog = false }
+                    ) {
+                        Text("Cancelar")
+                    }
+                }
+            )
+        }
+
     }
 }
 
@@ -495,6 +506,9 @@ fun CategoryCard(
 ) {
     // Estado para mostrar o diálogo de confirmação de exclusão da categoria
     var showDeleteConfirmation by remember { mutableStateOf(false) }
+    var showQRInstructionDialog by remember { mutableStateOf(false) }
+
+
     val context = LocalContext.current
 
     // Diálogo de confirmação de exclusão que aparece se showDeleteConfirmation for true

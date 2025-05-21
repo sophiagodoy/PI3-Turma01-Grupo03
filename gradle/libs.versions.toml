@@ -9,6 +9,8 @@ lifecycleRuntimeKtx = "2.8.7"
 activityCompose = "1.10.1"
 composeBom = "2024.04.01"
 lifecycleProcess = "2.8.7"
+
+# Para funcionar a camera
 camerax = "1.4.1"
 
 [libraries]
@@ -28,11 +30,11 @@ androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-lifecycle-process = { group = "androidx.lifecycle", name = "lifecycle-process", version.ref = "lifecycleProcess" }
 
-# camerax
+# Camerax
 androidx-camera-core = {group="androidx.camera", name="camera-core", version.ref="camerax"}
 androidx-camera-camera2 = {group="androidx.camera", name="camera-camera2", version.ref="camerax"}
 androidx-camera-lifecycle = {group="androidx.camera", name="camera-lifecycle", version.ref="camerax"}
-androidx-camera-video = {group="androidx.camera",name="camera-video", version.ref="camerax"}
+androidx-camera-video = { group = "androidx.camera", name = "camera-video", version.ref = "camerax"}
 androidx-camera-view = {group="androidx.camera", name="camera-view", version.ref="camerax"}
 androidx-camera-extensions = {group="androidx.camera", name="camera-extensions", version.ref="camerax"}
 
