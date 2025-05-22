@@ -7,16 +7,21 @@ import android.content.Intent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
@@ -49,6 +54,7 @@ fun Welcome(modifier: Modifier = Modifier) {
     // Declarando variáveis que controlam o comportamento da tela
     var termosAceitos by remember { mutableStateOf(false) }  // Armazena se o usuário aceitou os termos
     var mostrarDialogo by remember { mutableStateOf(false) } // Controla visibilidade do pop-up
+    var imagemSelecionada: Int? by remember { mutableStateOf(null) } //controla a ampliação das imagens de tour
 
     // Layout principal: uma coluna que ocupa toda a tela e pinta o fundo
     Column(
@@ -64,10 +70,102 @@ fun Welcome(modifier: Modifier = Modifier) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 150.dp),
+                .padding(top = 50.dp),
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Text(
+                text = "Descrição",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp)
+                    .align(Alignment.Start) //arrumo para que ele fique na esquerda apesar de ser uma column
+            )
+
+            //box da descrição
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .padding(horizontal = 16.dp)
+                    .verticalScroll(rememberScrollState())
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .padding(16.dp)
+            ) {
+                Column {
+                    // Descrição breve do app
+                    Text(
+                        text = "Bem-vindo(a) ao SuperID!\n" +
+                                "Organize suas senhas com segurança e praticidade. Aqui você pode:\n" +
+                                "•\u2060  \u2060Criar categorias personalizadas para agrupar suas senhas do jeito que preferir.\n" +
+                                "•\u2060  \u2060Adicionar senhas com títulos fáceis de lembrar, mantendo tudo acessível e protegido.\n" +
+                                "•\u2060  \u2060Navegar por categorias para encontrar rapidamente o que precisa.\n" +
+                                "•\u2060  \u2060Usar o Login Sem Senha: acesse sites parceiros com um simples escaneamento de QR Code — sem precisar digitar nada!\n" +
+                                "\n" +
+                                "Faça o breve tour abaixo, por meio de imagens, para conhecer um pouco mais do SuperID!",
+                        style = MaterialTheme.typography.bodyMedium,
+                        textAlign = TextAlign.Justify //expande o texto
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Text(
+                        text = "Veja como funciona:",
+                        style = MaterialTheme.typography.titleSmall
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Linha horizontal com miniaturas clicáveis
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()) //permite arrastar para os lados
+                    ) {
+                        // Lista de imagens
+                        val imagensTour = listOf(
+                            R.drawable.accessoption_description,
+                            R.drawable.signup_description,
+                            R.drawable.signin_description,
+                            R.drawable.main_description
+                        )
+
+                        //deixa cada imagem no padrão para aparecer em miniatura
+                        imagensTour.forEach { imagemRes ->
+                            Image(
+                                painter = painterResource(id = imagemRes),
+                                contentDescription = "Imagem do tour",
+                                modifier = Modifier
+                                    .size(100.dp)
+                                    .clickable { imagemSelecionada = imagemRes } // Quando clica, ativa o pop-up
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Dialogo para exibir imagem selecionada em tela cheia (um pop-up com a imagem em tamanho real)
+            if (imagemSelecionada != null) {
+                AlertDialog(
+                    onDismissRequest = { imagemSelecionada = null },
+                    confirmButton = {
+                        TextButton(onClick = { imagemSelecionada = null }) {
+                            Text("Fechar")
+                        }
+                    },
+                    text = {
+                        Image(
+                            painter = painterResource(id = imagemSelecionada!!),
+                            contentDescription = "Imagem em tela cheia",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(max = 500.dp)
+                        )
+                    }
+                )
+            }
+
 
             // Linha que agrupa checkbox + texto
             Row(
