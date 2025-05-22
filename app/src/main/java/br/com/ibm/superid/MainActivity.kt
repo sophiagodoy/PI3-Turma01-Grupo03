@@ -79,32 +79,6 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-// Modelo de dados para representar uma senha
-data class SenhaItem(
-    val id: String,
-    val titulo: String,
-    val login: String,
-    val senha: String,
-    val descricao: String,
-    val categoria: String
-)
-
-
-
-fun deletePasswordById(senhaId: String) {
-    val auth = FirebaseAuth.getInstance()
-    val user = auth.currentUser
-
-    if (user != null) {
-        val db = FirebaseFirestore.getInstance()
-        db.collection("users")
-            .document(user.uid)
-            .collection("senhas")
-            .document(senhaId)
-            .delete()
-    }
-}
-
 // função que representa a tela principal do app
 @Composable
 fun MainScreen() {
@@ -594,21 +568,20 @@ fun CategoryCard(
                             contentDescription = null
                         )
                     }
-
-                    // Botão para excluir a categoria
-                    IconButton(
-                        onClick = { showDeleteConfirmation = true },
-                        // Desabilita exclusão para a categoria padrão "Sites Web"
-                        enabled = title != "Sites Web",
-                        modifier = Modifier.padding(start = 8.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Delete,
-                            contentDescription = "Excluir Categoria",
-                            // Cor do ícone muda se estiver desabilitado para indicar visualmente
-                            tint = if (title != "Sites Web") MaterialTheme.colorScheme.error
-                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                        )
+                    if (title != "Sites Web") {
+                        IconButton(
+                            onClick = { showDeleteConfirmation = true },
+                            // Desabilita exclusão para a categoria padrão "Sites Web"
+                            enabled = title != "Sites Web",
+                            modifier = Modifier.padding(start = 8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Delete,
+                                contentDescription = "Excluir Categoria",
+                                // Cor do ícone muda se estiver desabilitado para indicar visualmente
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                        }
                     }
                 }
             }
@@ -956,6 +929,29 @@ fun ConfirmPasswordDialog(
     )
 }
 
+// Modelo de dados para representar uma senha
+data class SenhaItem(
+    val id: String,
+    val titulo: String,
+    val login: String,
+    val senha: String,
+    val descricao: String,
+    val categoria: String
+)
+
+fun deletePasswordById(senhaId: String) {
+    val auth = FirebaseAuth.getInstance()
+    val user = auth.currentUser
+
+    if (user != null) {
+        val db = FirebaseFirestore.getInstance()
+        db.collection("users")
+            .document(user.uid)
+            .collection("senhas")
+            .document(senhaId)
+            .delete()
+    }
+}
 
 // Preview da tela principal
 @Preview(
