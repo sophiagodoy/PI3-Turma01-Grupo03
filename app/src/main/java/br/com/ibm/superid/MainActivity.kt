@@ -621,6 +621,9 @@ fun PasswordDetailDialog(item: SenhaItem, onDismiss: () -> Unit) {
     // Variável que controla se vai aparecer o diálogo interno de confirmação de remoção da senha
     var showRemovePopUp by remember { mutableStateOf(false) }
 
+    // Estado que controla se a senha está visível ou oculta
+    var passwordVisible by remember { mutableStateOf(false) }
+
     // Exibe o diálogo (pop-up)
     Dialog(onDismissRequest = onDismiss) {
 
@@ -645,16 +648,52 @@ fun PasswordDetailDialog(item: SenhaItem, onDismiss: () -> Unit) {
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
 
-                    // Exibo a senha
+                    // Exibo o Login
                     Text("Login:", fontWeight = FontWeight.Bold)
                     StandardBoxPopUp {
                         Text(item.login)
                     }
 
                     // Exibo a senha
+                    // Text("Senha:", fontWeight = FontWeight.Bold)
+                    // StandardBoxPopUp {
+                    // Text(item.senha)
+                    // }
+
+                    // Exibo a senha
                     Text("Senha:", fontWeight = FontWeight.Bold)
                     StandardBoxPopUp {
-                        Text(item.senha)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                // Se passwordVisible for true, mostra a senha real, senão mostra bullets (•)
+                                text = if (passwordVisible) item.senha else "•".repeat(item.senha.length),
+                                // Ocupa o espaço disponível na Row (exceto o espaço do ícone)
+                                modifier = Modifier.weight(1f)
+                            )
+                            // Botão com ícone para alternar a visibilidade da senha
+                            IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                                // OBSERVAÇÃO: Há um IconButton duplicado aqui (erro que deve ser removido)
+                                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                                    // Ícone que muda conforme o estado da senha
+                                    Icon(
+                                        // Escolhe o ícone baseado no passwordVisible
+                                        imageVector = if (passwordVisible) {
+                                            Icons.Default.VisibilityOff  // Ícone de "olho cortado" (senha visível)
+                                        } else {
+                                            Icons.Default.Visibility     // Ícone de "olho aberto" (senha oculta)
+                                        },
+                                        // Texto descritivo para acessibilidade
+                                        contentDescription = if (passwordVisible) {
+                                            "Ocultar senha"  // Descrição quando senha está visível
+                                        } else {
+                                            "Mostrar senha"  // Descrição quando senha está oculta
+                                        }
+                                    )
+                                }
+                            }
+                        }
                     }
 
                     // Exibo a descrição da senha
