@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
@@ -526,7 +527,6 @@ fun CategoryCard(
 ) {
     // Estado para mostrar o diálogo de confirmação de exclusão da categoria
     var showDeleteConfirmation by remember { mutableStateOf(false) }
-    var showQRInstructionDialog by remember { mutableStateOf(false) }
 
 
     val context = LocalContext.current
@@ -629,8 +629,8 @@ fun CategoryCard(
                             modifier = Modifier.weight(1f) // ocupa o espaço restante
                         )
                         Icon(
-                            imageVector = Icons.Default.Visibility,
-                            contentDescription = "Ver senha"
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = "Mais opções de senha"
                         )
                     }
                 }
