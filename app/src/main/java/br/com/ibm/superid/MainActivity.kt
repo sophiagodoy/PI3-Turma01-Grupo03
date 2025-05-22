@@ -251,7 +251,8 @@ fun MainScreen() {
 
         val scrollState = rememberScrollState()
 
-        Column(modifier = Modifier.padding(16.dp)
+        Column(modifier = Modifier
+            .padding(16.dp)
             .verticalScroll(scrollState)
         ) {
             Spacer(modifier = Modifier.height(130.dp))
@@ -852,6 +853,27 @@ fun ConfirmDeleteCategoryDialog(
     )
 }
 
+
+fun checkEmailVerified(
+    uid: String,
+    onResult: (Boolean) -> Unit
+) {
+    //  faz a consulta no Firestore
+    Firebase.firestore
+        .collection("users")
+        .document(uid)
+        .get()
+        .addOnSuccessListener { doc ->
+            val verified = doc?.getBoolean("emailVerified") == true
+            onResult(verified) // callback passa true ou false
+        }
+        .addOnFailureListener {
+            onResult(false) // em caso de erro
+        }
+}
+
+
+
 @Composable
 fun ConfirmPasswordDialog(
     onDismiss: () -> Unit,
@@ -868,14 +890,28 @@ fun ConfirmPasswordDialog(
     AlertDialog(
         onDismissRequest = { onDismiss() },
         confirmButton = {
-            TextButton(onClick = {
-                reauthenticateUser(senha, context, onSuccess = {
-                    onConfirmed()    // <- ativa o popup do QR Code
-                    onDismiss()      // <- fecha o popup atual
-                }, onFailure = {
-                    senha = ""       // limpa o campo de senha
-                })
-            }) {
+            TextButton(
+                onClick = {
+                    val uid = Firebase.auth.currentUser?.uid
+                    if (uid != null) {
+                        checkEmailVerified(uid) { isVerified -> // passo uma lambda para onResult de checkEmailVerified
+                            if (isVerified) { reauthenticateUser(senha, context, onSuccess = {
+                                onConfirmed() // <- ativa o popup do QR Code
+                                onDismiss()  // <- fecha o popup atual
+                                    }, onFailure = {
+                                        senha = ""// limpa o campo de senha
+                                    })
+                            } else {
+                                Toast
+                                    .makeText(
+                                        context, "E-mail não confirmado. Verifique sua caixa de entrada.",
+                                        Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                }
+            ) {
+
                 Text("Confirmar")
             }
         },
