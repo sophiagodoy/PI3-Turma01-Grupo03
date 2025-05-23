@@ -202,6 +202,9 @@ fun ForgotPasswordScreen(modifier: Modifier = Modifier) {
 
                         checkEmailVerification(email, context)
 
+                        val intent = Intent(context, EmailResetPasswordActivity::class.java)
+                        context.startActivity(intent)
+
                     } else{
                         // Mostra uma mensagem de erro ou feedback visual
                         Toast.makeText(context, "Por favor, insira seu email", Toast.LENGTH_SHORT).show()

@@ -1,6 +1,3 @@
-// TELA PARA O USUÁRIO SER INFORMADO SOBRE A VERIFICAÇÃO DO EMAIL E SUAS CONDIÇÕES
-
-
 package br.com.ibm.superid
 
 import android.content.Intent
@@ -37,13 +34,13 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 
 // Declarando a Activity (EmailVerificationActivity)
-class EmailVerificationActivity : ComponentActivity() {
+class EmailResetPasswordActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             SuperIDTheme {
-                EmailVerificationPreview()
+                PasswordResetVerificationPreview()
             }
         }
     }
@@ -51,7 +48,7 @@ class EmailVerificationActivity : ComponentActivity() {
 
 // Função Composable que apresenta as informações sobre a confirmação do email
 @Composable
-fun EmailVerification(modifier: Modifier = Modifier) {
+fun PasswordResetVerification(modifier: Modifier = Modifier) {
 
     // Cria variável para poder trocar de tela e mostrar toast
     val context = LocalContext.current
@@ -62,6 +59,20 @@ fun EmailVerification(modifier: Modifier = Modifier) {
         .background(MaterialTheme.colorScheme.background)) {
         // Cabeçalho visual personalizado
         SuperIDHeader()
+
+        // Botão de voltar
+        IconButton(
+            onClick = {
+                val intent = Intent(context, ForgotPasswordActivity::class.java)
+                context.startActivity(intent)
+            },
+            modifier = Modifier.padding(start = 8.dp, top = 8.dp)
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Voltar"
+            )
+        }
 
         // Layout em coluna que ocupa toda a tela e aplica padding de 16dp
         Column(
@@ -74,29 +85,13 @@ fun EmailVerification(modifier: Modifier = Modifier) {
         {
             // Exibe um texto na tela sobre as informações do email
             Text(
-                text = "Verifique sua caixa de e-mail e confirme o endereço fornecido.\n\n" +
-                        "Sem a confirmação, não será possível utilizar o login sem senha nem redefinir sua senha no aplicativo.\n\n" +
-                        "Caso já tenha confirmado, por favor, feche e abra novamente o aplicativo para que as atualizações sejam aplicadas.",
+                text = "Verifique sua caixa de e-mail altere sua senha se ainda desejar!",
                 textAlign = TextAlign.Center,
                 fontSize = 16.sp,
                 modifier = Modifier
                     .padding(horizontal = 24.dp)
                     .fillMaxWidth()
             )
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // Botão para continuar para o login
-            Button(onClick = {
-                context.startActivity(Intent(context, SignInActivity::class.java))
-            },
-                modifier = Modifier
-                    .height(60.dp)    // altura maior
-                    .width(150.dp)
-            ) {
-                // Define o texto que está dentro do botão
-                Text("Continuar")
-            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -131,10 +126,8 @@ fun EmailVerification(modifier: Modifier = Modifier) {
 
 @Preview
 @Composable
-fun EmailVerificationPreview() {
+fun PasswordResetVerificationPreview() {
     SuperIDTheme {
-        EmailVerification()
+        PasswordResetVerification()
     }
 }
-
-
