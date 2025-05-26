@@ -3,6 +3,7 @@
 // TODO: Decidir se vai remover a categoria pelo X ou se, removendo todas as senhas da categoria, ela e removida tambem
 package br.com.ibm.superid
 
+import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
@@ -865,6 +866,14 @@ fun ConfirmDeleteCategoryDialog(
     )
 }
 
+fun resendVerificationEmail(context: Context) {
+    val user = Firebase.auth.currentUser
+    if (user != null && !user.isEmailVerified) {
+        user.sendEmailVerification()
+    }
+}
+
+
 
 fun checkEmailVerified(
     uid: String,
@@ -914,6 +923,9 @@ fun ConfirmPasswordDialog(
                                         senha = ""// limpa o campo de senha
                                     })
                             } else {
+
+                                resendVerificationEmail(context)
+
                                 Toast
                                     .makeText(
                                         context, "E-mail não confirmado. Verifique sua caixa de entrada.",
