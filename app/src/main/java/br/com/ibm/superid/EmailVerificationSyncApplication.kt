@@ -57,6 +57,9 @@ class EmailVerificationSyncApplication : Application(), DefaultLifecycleObserver
                             .addOnFailureListener { e ->
                                 Log.e("EmailSync", "Falha ao atualizar campo emailVerified no Firestore", e)
                             }
+                    } else{
+                        // Se ainda não estiver, envia o e-mail de verificação
+                        user.sendEmailVerification()
                     }
                 }
                 .addOnFailureListener { e ->
