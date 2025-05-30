@@ -3,6 +3,7 @@
 // TODO: Decidir se vai remover a categoria pelo X ou se, removendo todas as senhas da categoria, ela e removida tambem
 package br.com.ibm.superid
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration.UI_MODE_NIGHT_NO
@@ -386,9 +387,17 @@ fun MainScreen() {
                     TextButton(
                         // Define showExistDialog como inativo e muda de página
                         onClick = {
+                            // 1) Desloga do Firebase
+                            Firebase.auth.signOut()
+
+                            // 2) Vai pra tela de login
+
                             showExitDialog = false
                             val intent = Intent(context, AccessOptionActivity::class.java)
                             context.startActivity(intent)
+
+                            // 3) Fecha esta Activity pra não voltar ao apertar "voltar"
+                            (context as? Activity)?.finish()
                         }
                     ) {
                         Text(

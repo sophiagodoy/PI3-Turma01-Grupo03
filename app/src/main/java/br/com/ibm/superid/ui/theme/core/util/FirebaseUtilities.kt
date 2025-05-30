@@ -7,7 +7,7 @@ import android.util.Log
 import android.widget.Toast
 import br.com.ibm.superid.EmailVerificationActivity
 import br.com.ibm.superid.MainActivity
-import br.com.ibm.superid.createDefaultCategorias
+import br.com.ibm.superid.ui.theme.core.util.createDefaultCategorias
 import br.com.ibm.superid.ui.theme.core.util.saveUserToFirestore
 import com.google.firebase.Firebase
 import com.google.firebase.auth.EmailAuthProvider
@@ -156,3 +156,51 @@ fun saveUserToFirestore(uid: String, name: String, email: String, context: Conte
         }
 }
 
+// Cria categorias padrão para novos usuários no Firestore
+fun createDefaultCategorias(userId: String, context: Context) {
+
+    // Obtém a instância do Firestore
+    val db = Firebase.firestore
+
+    val categoriasRef =
+        db.collection("users") // Acesso a coleção users
+            .document(userId) // Acesso o documento com o ID do usuário
+            .collection("categorias") // Acesso a coleção categorias
+
+    // Crio uma lista com três categorias
+    val defaultCategorias = listOf(
+
+        hashMapOf(
+            "nome" to "Sites Web",
+            "isDefault" to true,
+            "undeletable" to true
+        ),
+
+        hashMapOf(
+            "nome" to "Aplicativos",
+            "isDefault" to true,
+            "undeletable" to false
+        ),
+
+        hashMapOf(
+            "nome" to "Teclados Físico",
+            "isDefault" to true,
+            "undeletable" to false
+        )
+    )
+
+    // Para cada mapa de categoria na lista...
+    defaultCategorias.forEach { category ->
+
+        // Adiciona um novo documento em categorias
+        categoriasRef.add(category)
+            .addOnSuccessListener {
+                Log.i("Category", "Categoria padrão criada: ${category["nome"]}")
+            }
+
+            // Se ocorrer algum erro
+            .addOnFailureListener { e ->
+                Log.i("Category", "Erro ao criar categoria padrão", e)
+            }
+    }
+}
