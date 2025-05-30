@@ -46,6 +46,7 @@ import br.com.ibm.superid.ui.theme.core.util.encryptpassword
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.ui.text.input.VisualTransformation
+import br.com.ibm.superid.ui.theme.core.util.addNewPassword
 
 // Declarando a Activity que exibe o formulário para adicionar uma nova senha
 class AddPasswordActivity : ComponentActivity() {
@@ -60,82 +61,6 @@ class AddPasswordActivity : ComponentActivity() {
             }
         }
     }
-}
-
-// Função que adiciona uma nova senha criptografada no Firestore
-fun addNewPassword(
-    context: Context,
-    senha: String,
-    categoria: String,
-    descricao: String,
-    titulo: String,
-    login: String
-) {
-
-    // Obtém a instância de autenticação do Firebase
-    val auth = Firebase.auth
-    val user = auth.currentUser
-
-    // Verifica se o usuário está logado
-    if (user == null) {
-        Toast.makeText(context, "Usuário não autenticado", Toast.LENGTH_LONG).show()
-        return
-    }
-
-    // Criptografa a nova senha
-    val (encrypted, iv) = try {
-        encryptpassword(senha)
-    } catch (e: Exception) {
-        Toast.makeText(context, "Falha ao criptografar: ${e.message}", Toast.LENGTH_LONG).show()
-        return
-    }
-
-    // Gera um token de acesso exclusivo para essa senha
-    val accessToken = createacesstoken()
-
-    // Cria um mapa com os dados que serão salvos no Firestore
-    val dadosNovaSenha = hashMapOf(
-        "titulo" to titulo,
-        "login" to login,
-        "senha" to encrypted,
-        "categoria" to categoria,
-        "descricao" to descricao,
-        "accessToken" to accessToken,
-        "iv" to iv
-    )
-
-    // Referência para a subcoleção "senhas" dentro do usuário logado
-    val senhasRef = Firebase.firestore
-        .collection("users")
-        .document(user.uid)
-        .collection("senhas")
-
-    // Verifica se já existe uma senha com o mesmo título e categoria
-    senhasRef
-        .whereEqualTo("titulo", titulo)
-        .whereEqualTo("categoria", categoria)
-        .get()
-        .addOnSuccessListener { document ->
-            if (!document.isEmpty) {
-                Toast.makeText(context, "Já existe uma senha com esse título nessa categoria!", Toast.LENGTH_LONG).show()
-            } else {
-                senhasRef
-                    .add(dadosNovaSenha)
-                    .addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            Toast.makeText(context, "Senha salva com sucesso!", Toast.LENGTH_SHORT).show()
-
-                            val intent = Intent(context, MainActivity::class.java)
-                            context.startActivity(intent)
-                        } else {
-                            Toast.makeText(context, "Erro ao salvar: ${task.exception?.message}", Toast.LENGTH_LONG).show()
-                        }
-                    }
-            }
-        }
-        .addOnFailureListener { exception ->
-            Toast.makeText(context, "Erro ao verificar duplicidade: ${exception.message}", Toast.LENGTH_LONG).show()
-        }
 }
 
 // Lista mutável que armazenará as categorias do usuário carregadas do Firestore

@@ -44,6 +44,7 @@ import br.com.ibm.superid.ui.theme.SuperIDTheme
 import br.com.ibm.superid.ui.theme.core.util.CustomOutlinedTextField
 import br.com.ibm.superid.ui.theme.core.util.SuperIDHeader
 import br.com.ibm.superid.ui.theme.core.util.encryptpassword
+import br.com.ibm.superid.ui.theme.core.util.fetchCategoriasUsuario
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
