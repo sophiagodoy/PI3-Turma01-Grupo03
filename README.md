@@ -67,8 +67,12 @@ O **SuperID** é um aplicativo Android nativo, desenvolvido em Kotlin, cujo obje
 
 ## Site Parceiro para demonstração 
 
-1. Clone o repositório
+1. Clone o primeiro repositório
       ```bash
-   git clone https://github.com/sophiagodoy/Intent-In-Jetpack-Compose.git
+   git@github.com:HenriqueMartins2502/Site-parceiro-PI.git
+
+2. Clone o segundo repositório
+      ```bash
+   git@github.com:HenriqueMartins2502/Firebase-functions-PI.git
       
-3. Abra no VSCode
+4. Abra no VSCode
