@@ -3,10 +3,6 @@
 package br.com.ibm.superid
 
 // Importações necessárias para a Activity, Jetpack Compose e componentes visuais
-import androidx.compose.material3.TextButton
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.sp
 import android.content.Intent
 import android.os.Bundle
