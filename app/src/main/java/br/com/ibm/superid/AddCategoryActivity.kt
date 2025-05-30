@@ -36,6 +36,7 @@ import com.google.firebase.auth.auth
 import com.google.firebase.firestore.firestore
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import br.com.ibm.superid.ui.theme.core.util.addNewCategory
 
 
 class AddCategoryActivity : ComponentActivity() {
@@ -48,55 +49,6 @@ class AddCategoryActivity : ComponentActivity() {
             }
         }
     }
-}
-
-//Função que adiciona uma nova categoria no Firestore
-fun addNewCategory(context: Context, categoryName: String) {
-    val user = Firebase.auth.currentUser // Obtém o usuário autenticado atual
-
-    if (user == null) {
-        // Caso não esteja autenticado, avisa o usuário e retorna sem fazer nada
-        Toast.makeText(context, "Usuário não autenticado!", Toast.LENGTH_SHORT).show()
-        return
-    }
-
-    val db = Firebase.firestore
-    val categoriasRef = db.collection("users")
-        .document(user.uid)
-        .collection("categorias") // Referência à coleção de categorias do usuário atual
-
-    // Verifica se já existe uma categoria com o mesmo nome para evitar duplicatas
-    categoriasRef
-        .whereEqualTo("nome", categoryName)
-        .get()
-        .addOnSuccessListener { documents ->
-            if (!documents.isEmpty) {
-                // Se categoria já existe, informa o usuário
-                Toast.makeText(context, "Categoria já existe!", Toast.LENGTH_SHORT).show()
-            } else {
-                // Caso contrário, cria uma nova categoria com os campos padrão
-                val novaCategoria = hashMapOf(
-                    "nome" to categoryName,
-                    "isDefault" to false,
-                    "undeletable" to false
-                )
-
-                // Adiciona a nova categoria no Firestore
-                categoriasRef
-                    .add(novaCategoria)
-                    .addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            Toast.makeText(context, "✅ Categoria adicionada com sucesso!", Toast.LENGTH_SHORT).show()
-                        } else {
-                            Toast.makeText(context, "Erro ao adicionar categoria: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-            }
-        }
-        .addOnFailureListener { exception ->
-            // Trata falhas na consulta Firestore (ex: problemas de conexão)
-            Toast.makeText(context, "Erro ao verificar categoria: ${exception.message}", Toast.LENGTH_SHORT).show()
-        }
 }
 
 //Composable que constrói a UI para adicionar uma categoria
@@ -160,7 +112,7 @@ fun AddCat() {
                         categoryName.length < 3 ->
                             Toast.makeText(context, "Nome da categoria deve ter pelo menos 3 caracteres!", Toast.LENGTH_SHORT).show()
 
-                        categoryName.length > 10 ->
+                        categoryName.length > 31 ->
                             Toast.makeText(context, "Nome da categoria deve ter no máximo 30 caracteres!", Toast.LENGTH_SHORT).show()
 
                         else -> {

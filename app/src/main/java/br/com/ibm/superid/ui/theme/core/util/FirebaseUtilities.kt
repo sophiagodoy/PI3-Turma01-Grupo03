@@ -204,3 +204,59 @@ fun createDefaultCategorias(userId: String, context: Context) {
             }
     }
 }
+
+// Adiciona uma nova categoria no Firestore
+fun addNewCategory(context: Context, categoryName: String) {
+
+    // Obtém o usuário autenticado
+    val user = Firebase.auth.currentUser
+
+    if (user == null) {
+        Toast.makeText(context, "Usuário não autenticado!", Toast.LENGTH_SHORT).show()
+        return
+    }
+
+    // Obtém a instância do Firestore
+    val db = Firebase.firestore
+
+    val categoriasRef =
+        db.collection("users") // Acessa a coleção users
+        .document(user.uid) // Dentro de users seleciona o documento que contém o usuário atual
+        .collection("categorias") // Aponta para a coleção categorias
+
+    // Verifica se já existe uma categoria com o mesmo nome
+    categoriasRef
+        .whereEqualTo("nome", categoryName) // Filtrando documentos cujo campo "nome" seja igual ao texto informado
+        .get() // Executa essa consulta
+
+        .addOnSuccessListener { documents ->
+
+            if (!documents.isEmpty) {
+                Toast.makeText(context, "Categoria já existe!", Toast.LENGTH_SHORT).show()
+            }
+
+            else {
+                // Cria uma nova categoria com os campos padrão
+                val novaCategoria = hashMapOf(
+                    "nome" to categoryName,
+                    "isDefault" to false,
+                    "undeletable" to false
+                )
+
+                // Adiciona a nova categoria no Firestore
+                categoriasRef
+                    .add(novaCategoria)
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            Toast.makeText(context, "✅ Categoria adicionada com sucesso!", Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(context, "Erro ao adicionar categoria: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+            }
+        }
+
+        .addOnFailureListener { exception ->
+            Toast.makeText(context, "Erro ao verificar categoria: ${exception.message}", Toast.LENGTH_SHORT).show()
+        }
+}
