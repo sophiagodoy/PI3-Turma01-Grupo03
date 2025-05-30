@@ -38,20 +38,22 @@ O **SuperID** é um aplicativo Android nativo, desenvolvido em Kotlin, cujo obje
 ## Como Abrir e Rodar no Android Studio
 
 1. **Clone o Repositório**
+      ```bash
+   git clone https://github.com/sophiagodoy/Intent-In-Jetpack-Compose.git
 
-2. **Abra o Android Studio**  
+3. **Abra o Android Studio**  
    - Inicie o Android Studio e abra a pasta que foi clonada
 
-3. **Configurar o Firebase (Firestore + Authentication)**  
+4. **Configurar o Firebase (Firestore + Authentication)**  
    - No Console [Firebase](https://console.firebase.google.com/), crie um novo projeto. 
    - Ative o **Firestore** e o **Authentication**.  
    - Baixe o arquivo de configuração `google-services.json` e copie para a pasta `app/`.
 
-4. **Sincronize o Gradle**  
+5. **Sincronize o Gradle**  
    - No Android Studio, clique em **Sync Now** quando for solicitado.  
    - Certifique-se de que não há erros de dependências.
 
-5. **Execute no emulador**  
+6. **Execute no emulador**  
    - Dentro do Android Studio, selecione um emulador existente ou crie um novo.  
    - Clique em **Run** para instalar e iniciar o app no emulador.  
 
@@ -66,4 +68,7 @@ O **SuperID** é um aplicativo Android nativo, desenvolvido em Kotlin, cujo obje
 ## Site Parceiro para demonstração 
 
 1. Clone o repositório
-2. Abra no VSCode
+      ```bash
+   git clone https://github.com/sophiagodoy/Intent-In-Jetpack-Compose.git
+      
+3. Abra no VSCode
