@@ -72,44 +72,6 @@ class SignUpActivity : ComponentActivity() {
     }
 }
 
-// Essa função cria categorias padrão para novos usuários no Firestore
-fun createDefaultCategorias(userId: String, context: Context) {
-    val db = Firebase.firestore
-
-    // Referência para a subcoleção de categorias do usuário
-    val categoriasRef = db.collection("users").document(userId).collection("categorias")
-
-    // Lista com as categorias iniciais
-    val defaultCategorias = listOf(
-        hashMapOf(
-            "nome" to "Sites Web",
-            "isDefault" to true,
-            "undeletable" to true
-        ),
-        hashMapOf(
-            "nome" to "Aplicativos",
-            "isDefault" to true,
-            "undeletable" to false
-        ),
-        hashMapOf(
-            "nome" to "Teclados Físico",
-            "isDefault" to true,
-            "undeletable" to false
-        )
-    )
-
-    // Salva cada categoria no Firestore
-    defaultCategorias.forEach { category ->
-        categoriasRef.add(category)
-            .addOnSuccessListener {
-                Log.d("Category", "Categoria padrão criada: ${category["nome"]}")
-            }
-            .addOnFailureListener { e ->
-                Log.e("Category", "Erro ao criar categoria padrão", e)
-            }
-    }
-}
-
 data class PasswordCriteria(
     val hasUppercase: Boolean,
     val hasLowercase: Boolean,
