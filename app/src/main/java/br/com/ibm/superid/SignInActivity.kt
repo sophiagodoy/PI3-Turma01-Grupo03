@@ -4,7 +4,6 @@
 package br.com.ibm.superid
 
 // Importações necessárias
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
@@ -36,8 +35,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -85,9 +82,6 @@ fun SignIn(modifier: Modifier = Modifier) {
 
     // "olho" da senha
     var passwordVisible by remember { mutableStateOf(false) }
-    var confirmPasswordVisible by remember { mutableStateOf(false) }
-
-
 
     // Seta que volta para AccessOptionActivity
     // Baseado em: https://developer.android.com/develop/ui/compose/components/app-bars?hl=pt-br#top-app-bar
@@ -153,9 +147,9 @@ fun SignIn(modifier: Modifier = Modifier) {
                         Icon(
                             // Alterna entre o ícone de "visível" e "não visível"
                             imageVector = if (passwordVisible){
-                                Icons.Default.VisibilityOff } // Icone do "olho cortado"}
+                                Icons.Default.Visibility } // Icone do "olho cortado"}
                             else{
-                                Icons.Default.Visibility }, // Icone do olho
+                                Icons.Default.VisibilityOff }, // Icone do olho
                             contentDescription = if (passwordVisible){
                                 "Ocultar senha" }
                             else {

@@ -282,9 +282,9 @@ fun AddPassword(modifier: Modifier = Modifier) {
                         Icon(
                             // Alterna entre o ícone de "visível" e "não visível"
                             imageVector = if (passwordVisible){
-                                Icons.Default.VisibilityOff } // Icone do "olho cortado"}
+                                Icons.Default.Visibility } // Icone do "olho cortado"}
                             else{
-                                Icons.Default.Visibility }, // Icone do olho
+                                Icons.Default.VisibilityOff }, // Icone do olho
                             contentDescription = if (passwordVisible){
                                 "Ocultar senha" }
                             else {
@@ -310,9 +310,9 @@ fun AddPassword(modifier: Modifier = Modifier) {
                     IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
                         Icon(
                             imageVector = if (confirmPasswordVisible)
-                            {Icons.Default.VisibilityOff}
+                            {Icons.Default.Visibility}
                             else
-                            { Icons.Default.Visibility},
+                            { Icons.Default.VisibilityOff},
                             contentDescription = if (confirmPasswordVisible)
                             {"Ocultar senha"}
                             else

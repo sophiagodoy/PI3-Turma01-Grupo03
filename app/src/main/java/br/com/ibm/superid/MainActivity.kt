@@ -25,7 +25,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -91,14 +90,11 @@ fun MainScreen() {
     var passwords by remember { mutableStateOf<List<SenhaItem>>(emptyList()) }
     var categoriesList by remember { mutableStateOf<List<String>>(emptyList()) }
 
-
     // Variáveis que controlam a visibilidade de três diálogos (pop-up)
     var showAddPopUp by remember { mutableStateOf(false) }
     var showExitDialog by remember { mutableStateOf(false) }
     var showQRInstructionDialog by remember { mutableStateOf(false) }
     var showConfirmPasswordDialog by remember { mutableStateOf(false) }
-
-
 
     // Carrega as senhas do Firestore assim que a tela iniciar
     fun loadDataFireBase() {
@@ -227,8 +223,6 @@ fun MainScreen() {
                 modifier = Modifier.size(35.dp)
             )
         }
-
-
 
         Column(modifier = Modifier
             .padding(16.dp)
@@ -685,9 +679,9 @@ fun PasswordDetailDialog(item: SenhaItem, onDismiss: () -> Unit) {
                                     Icon(
                                         // Escolhe o ícone baseado no passwordVisible
                                         imageVector = if (passwordVisible) {
-                                            Icons.Default.VisibilityOff  // Ícone de "olho cortado" (senha visível)
+                                            Icons.Default.Visibility // Ícone de "olho cortado" (senha visível)
                                         } else {
-                                            Icons.Default.Visibility     // Ícone de "olho aberto" (senha oculta)
+                                            Icons.Default.VisibilityOff // Ícone de "olho aberto" (senha oculta)
                                         },
                                         // Texto descritivo para acessibilidade
                                         contentDescription = if (passwordVisible) {
@@ -973,7 +967,7 @@ fun ConfirmPasswordDialog(
                     trailingIcon = {
                         IconButton(onClick = { passwordVisible = !passwordVisible }) {
                             Icon(
-                                imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
                                 contentDescription = if (passwordVisible) "Ocultar senha" else "Mostrar senha"
                             )
                         }

@@ -47,13 +47,6 @@ import br.com.ibm.superid.ui.theme.core.util.encryptpassword
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import androidx.compose.foundation.verticalScroll
-import java.security.SecureRandom
-import javax.crypto.Cipher
-import javax.crypto.spec.IvParameterSpec
-import javax.crypto.spec.SecretKeySpec
-import kotlin.io.encoding.Base64
-import kotlin.io.encoding.ExperimentalEncodingApi
 
 // Declarando a Activity (ChangePasswordActivity)
 class ChangePasswordActivity : ComponentActivity() {
@@ -190,9 +183,9 @@ fun ChangePassword(
                         Icon(
                             // Alterna entre o ícone de "visível" e "não visível"
                             imageVector = if (passwordVisible){
-                                Icons.Default.VisibilityOff } // Icone do "olho cortado"}
+                                Icons.Default.Visibility } // Icone do "olho cortado"}
                             else{
-                                Icons.Default.Visibility }, // Icone do olho
+                                Icons.Default.VisibilityOff }, // Icone do olho
                             contentDescription = if (passwordVisible){
                                 "Ocultar senha" }
                             else {

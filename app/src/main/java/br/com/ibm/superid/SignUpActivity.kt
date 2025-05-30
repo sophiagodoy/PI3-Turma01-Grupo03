@@ -2,7 +2,6 @@
 
 package br.com.ibm.superid
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -39,7 +38,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import br.com.ibm.superid.ui.theme.SuperIDTheme
-import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import androidx.compose.runtime.getValue
@@ -57,7 +55,6 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.ui.text.input.VisualTransformation
 import br.com.ibm.superid.ui.theme.core.util.saveUserToAuth
-import com.google.firebase.auth.FirebaseAuthUserCollisionException
 
 // Declarando a Activity que o usuário usa para realizar o cadastro
 class SignUpActivity : ComponentActivity() {
@@ -236,9 +233,9 @@ fun SignUp() {
                         Icon(
                             // Alterna entre o ícone de "visível" e "não visível"
                             imageVector = if (passwordVisible){
-                                Icons.Default.VisibilityOff } // Icone do "olho cortado"}
+                                Icons.Default.Visibility } // Icone do "olho cortado"}
                             else{
-                                Icons.Default.Visibility }, // Icone do olho
+                                Icons.Default.VisibilityOff }, // Icone do olho
                             contentDescription = if (passwordVisible){
                                 "Ocultar senha" }
                             else {
@@ -264,9 +261,9 @@ fun SignUp() {
                     IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
                         Icon(
                             imageVector = if (confirmPasswordVisible)
-                            {Icons.Default.VisibilityOff}
+                            {Icons.Default.Visibility}
                             else
-                            { Icons.Default.Visibility},
+                            { Icons.Default.VisibilityOff},
                             contentDescription = if (confirmPasswordVisible)
                             {"Ocultar senha"}
                             else
