@@ -69,7 +69,7 @@ class ForgotPasswordActivity : ComponentActivity() {
     }
 }
 
-fun checkEmailVerification(email: String, context: Context){
+fun checkEmailVerification(email: String, context: Context, onSuccess: () -> Unit){
     val db = Firebase.firestore
 
     db.collection("users")
@@ -85,6 +85,7 @@ fun checkEmailVerification(email: String, context: Context){
                 if (isVerified) {
                     // E-mail verificado: prossegue com o envio do link
                     sendEmail(email, context)
+                    onSuccess()
                 } else {
                     // Ainda não confirmou o e-mail
                     Toast.makeText(
@@ -200,10 +201,13 @@ fun ForgotPasswordScreen(modifier: Modifier = Modifier) {
 
                     if (email.isNotBlank() && email.contains("@")){
 
-                        checkEmailVerification(email, context)
+                        checkEmailVerification(email, context){
+                            // Essa parte só executa se o email estiver verificado
+                            val intent = Intent(context, EmailResetPasswordActivity::class.java)
+                            context.startActivity(intent)
+                        }
 
-                        val intent = Intent(context, EmailResetPasswordActivity::class.java)
-                        context.startActivity(intent)
+
 
                     } else{
                         // Mostra uma mensagem de erro ou feedback visual

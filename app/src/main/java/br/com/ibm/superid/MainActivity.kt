@@ -205,10 +205,13 @@ fun MainScreen() {
         }
     }
 
+    val scrollState = rememberScrollState()
+
     // Estrutura do layout principal
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(scrollState)
             .background(MaterialTheme.colorScheme.background)
     ) {
         SuperIDHeader()
@@ -225,11 +228,10 @@ fun MainScreen() {
             )
         }
 
-        val scrollState = rememberScrollState()
+
 
         Column(modifier = Modifier
             .padding(16.dp)
-            .verticalScroll(scrollState)
         ) {
             Spacer(modifier = Modifier.height(130.dp))
             categoriasMap.forEach { (categoria, itens) ->
@@ -255,6 +257,8 @@ fun MainScreen() {
                     }
                 )
             }
+            // Adiciona espaçamento no fim para o botão de QR Code não sobrepor
+            Spacer(modifier = Modifier.height(110.dp))
         }
 
         // Botão flutuante de adicionar senha e categoria
