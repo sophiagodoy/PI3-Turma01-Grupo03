@@ -39,7 +39,7 @@ O **SuperID** é um aplicativo Android nativo, desenvolvido em Kotlin, cujo obje
 
 1. **Clone o Repositório**
       ```bash
-   git clone https://github.com/sophiagodoy/Intent-In-Jetpack-Compose.git
+   git@github.com:sophiagodoy/PI3-Turma01-Grupo03.git
 
 3. **Abra o Android Studio**  
    - Inicie o Android Studio e abra a pasta que foi clonada
