@@ -56,6 +56,7 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.ui.text.input.VisualTransformation
+import br.com.ibm.superid.ui.theme.core.util.saveUserToAuth
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 
 // Declarando a Activity que o usuário usa para realizar o cadastro
@@ -69,88 +70,6 @@ class SignUpActivity : ComponentActivity() {
             }
         }
     }
-}
-
-// Essa função cria a conta do usuário no Firebase Authentication
-fun saveUserToAuth(email: String, password: String, name: String, context: Context) {
-    val auth = Firebase.auth
-
-    auth.createUserWithEmailAndPassword(email, password)
-        .addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                val user = auth.currentUser
-
-                if (user != null) {
-                    val uid = user.uid
-                    Log.i("AUTH", "Conta criada com sucesso")
-
-                    // Envia e-mail de verificação
-                    user.sendEmailVerification()
-                        .addOnCompleteListener { verifyTask ->
-                            if (verifyTask.isSuccessful) {
-                                Log.i("AUTH", "E-mail de verificação enviado com sucesso.")
-                                Toast.makeText(context, "E-mail de verificação enviado!", Toast.LENGTH_LONG).show()
-                            } else {
-                                Log.i("AUTH", "Erro ao enviar e-mail de verificação.", verifyTask.exception)
-                            }
-                        }
-
-                    // Salva os dados no Firestore
-                    saveUserToFirestore(uid, name, email, context)
-                }
-
-            } else {
-                // Baseado na documentação: https://firebase.google.com/docs/reference/kotlin/com/google/firebase/auth/FirebaseAuthUserCollisionException
-                // Verificando se o email do usuário já está cadastrado
-
-                // Pegando o erro que aconteceu durante o cadastro
-                val exception = task.exception
-
-                // Verficando se o erro é porque o email já está cadastrado no banco
-                if (exception is FirebaseAuthUserCollisionException) {
-                    Toast.makeText(context, "Este e-mail já está em uso, faça login!", Toast.LENGTH_LONG).show()
-                }
-            }
-        }
-}
-
-// Essa função salva os dados do usuário no Firestore
-@SuppressLint("HardwareIds")
-fun saveUserToFirestore(uid: String, name: String, email: String, context: Context) {
-    val db = Firebase.firestore
-
-    // Obtém o ID do dispositivo Android
-    val androidId = android.provider.Settings.Secure.getString(
-        context.contentResolver,
-        android.provider.Settings.Secure.ANDROID_ID
-    )
-
-    // Monta o mapa com os dados que serão salvos
-    val dadosCadastro = hashMapOf(
-        "name" to name,
-        "email" to email,
-        "emailVerified" to false,
-        "androidId" to androidId
-    )
-
-    // Salva os dados no documento com o UID do usuário
-    db.collection("users")
-        .document(uid)
-        .set(dadosCadastro)
-        .addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                // Cria as categorias padrão para o novo usuário
-                createDefaultCategorias(uid, context)
-
-                Toast.makeText(context, "Cadastro realizado com sucesso!", Toast.LENGTH_LONG).show()
-
-                // Redireciona para a tela de verificação de e-mail
-                context.startActivity(Intent(context, EmailVerificationActivity::class.java))
-            } else {
-                // Exibe erro caso a gravação falhe
-                Toast.makeText(context, "Erro ao salvar dados do usuário", Toast.LENGTH_LONG).show()
-            }
-        }
 }
 
 // Essa função cria categorias padrão para novos usuários no Firestore
