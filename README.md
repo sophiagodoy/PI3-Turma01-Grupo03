@@ -18,6 +18,8 @@ O **SuperID** é um aplicativo Android nativo, desenvolvido em Kotlin, cujo obje
 - Recuperar sua “senha mestre” em caso de esquecimento, via e-mail.  
 - Realizar “login sem senha” em sites parceiros por meio da leitura de um QR Code.  
 
+Para demonstrar o fluxo de **login sem senha**, criamos um **site parceiro de demonstração** que gera o QR Code necessário e recebe o resultado da autenticação, facilitando testes e validação do processo.
+
 ## Tecnologias e Ferramentas
 
 ## SuperID - Android Studio 
