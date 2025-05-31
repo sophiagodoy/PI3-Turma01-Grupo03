@@ -48,15 +48,13 @@ class WelcomeActivity : ComponentActivity() {
 @Composable
 fun Welcome(modifier: Modifier = Modifier) {
 
-    // Defino o contexto atual da Activity para usar Intents
     val context = LocalContext.current
 
-    // Declarando variáveis que controlam o comportamento da tela
-    var termosAceitos by remember { mutableStateOf(false) }  // Armazena se o usuário aceitou os termos
-    var mostrarDialogo by remember { mutableStateOf(false) } // Controla visibilidade do pop-up
+    var termosAceitos by remember { mutableStateOf(false) }
+    var mostrarDialogo by remember { mutableStateOf(false) }
     var imagemSelecionada: Int? by remember { mutableStateOf(null) } //controla a ampliação das imagens de tour
 
-    // Layout principal: uma coluna que ocupa toda a tela e pinta o fundo
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -74,12 +72,13 @@ fun Welcome(modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+
             Text(
                 text = "Descrição",
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = 16.dp)
-                    .align(Alignment.Start) //arrumo para que ele fique na esquerda apesar de ser uma column
+                    .align(Alignment.Start)
             )
 
             //box da descrição
@@ -123,6 +122,7 @@ fun Welcome(modifier: Modifier = Modifier) {
                             .fillMaxWidth()
                             .horizontalScroll(rememberScrollState()) //permite arrastar para os lados
                     ) {
+
                         // Lista de imagens
                         val imagensTour = listOf(
                             R.drawable.accessoption_description,
@@ -176,7 +176,7 @@ fun Welcome(modifier: Modifier = Modifier) {
                 // Definindo o Checkbox
                 Checkbox(
                     checked = termosAceitos,
-                    onCheckedChange = { termosAceitos = it } // controla o estado do chechbox
+                    onCheckedChange = { termosAceitos = it } // Controla o estado do chechbox
                 )
                 Text(
                     text = "Aceito os termos de uso",
@@ -192,7 +192,7 @@ fun Welcome(modifier: Modifier = Modifier) {
                 style = TextStyle(textDecoration = TextDecoration.Underline),
                 modifier = Modifier
                     .padding(bottom = 16.dp)
-                    .clickable { mostrarDialogo = true } // define mostrarDialogo como ativo
+                    .clickable { mostrarDialogo = true } // Define mostrarDialogo como ativo
             )
 
             // Se mostrarDialogo == true, exibe o diálogo com termos
@@ -314,6 +314,7 @@ fun Welcome(modifier: Modifier = Modifier) {
                                 text = "5. Autenticação em Sites Parceiros",
                                 style = MaterialTheme.typography.titleSmall
                             )
+
                             Text(
                                 text = "Você poderá autenticar-se em sites parceiros via leitura de QR Codes. " +
                                         "O processo ocorre da seguinte forma:\n" +
@@ -403,7 +404,7 @@ fun Welcome(modifier: Modifier = Modifier) {
                     confirmButton = {
                         TextButton(
                             onClick = {
-                                mostrarDialogo = false // define mostrarDialogo como inativo
+                                mostrarDialogo = false // Define mostrarDialogo como inativo
                             }
                         ) {
                             Text(
@@ -425,12 +426,14 @@ fun Welcome(modifier: Modifier = Modifier) {
                         context.startActivity(intent)
                     }
                 },
-                // Ajustando o botão
+
+
                 modifier = Modifier
                     .height(60.dp)
                     .width(150.dp),
-                enabled = termosAceitos // controla se o botão está ativo ou não
+                enabled = termosAceitos // Controla se o botão está ativo ou não
             ) {
+
                 Text(
                     text = "Continuar",
                     style = MaterialTheme.typography.titleMedium
@@ -444,10 +447,6 @@ fun Welcome(modifier: Modifier = Modifier) {
 @Composable
 fun PreviewWelcome() {
     SuperIDTheme {
-        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            Welcome(
-                modifier = Modifier.padding(innerPadding)
-            )
-        }
+        Welcome()
     }
 }

@@ -2,10 +2,8 @@
 
 package br.com.ibm.superid
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -38,8 +36,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import br.com.ibm.superid.ui.theme.SuperIDTheme
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
@@ -56,7 +52,7 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.ui.text.input.VisualTransformation
 import br.com.ibm.superid.ui.theme.core.util.saveUserToAuth
 
-// Declarando a Activity que o usuário usa para realizar o cadastro
+// Declarando a Activity para realizar o cadastro do usuário
 class SignUpActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,12 +65,13 @@ class SignUpActivity : ComponentActivity() {
     }
 }
 
+// Classe de dados que reúne os resultados da validação de senha
 data class PasswordCriteria(
-    val hasUppercase: Boolean,
-    val hasLowercase: Boolean,
-    val hasDigit: Boolean,
-    val hasSpecialChar: Boolean,
-    val hasMinLength: Boolean
+    val hasUppercase: Boolean, // contém pelo menos uma letra maiúscula?
+    val hasLowercase: Boolean, // contém pelo menos uma letra minúscula?
+    val hasDigit: Boolean, // contém ao menos um dígito numérico?
+    val hasSpecialChar: Boolean, // contém ao menos um caractere especial?
+    val hasMinLength: Boolean // possui tamanho mínimo de 8 caracteres?
 )
 
 // Função que valida a senha com base em critérios
@@ -93,28 +90,31 @@ fun checkPasswordCriteria(password: String): PasswordCriteria {
 fun PasswordRequirementItem(text: String, isMet: Boolean) {
     Text(
         text = (if (isMet) "✅ " else "❌ ") + text,
-        color = if (isMet) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
-        fontSize = 12.sp,  // Fonte menor para ocupar menos espaço
-        modifier = Modifier.padding(vertical = 2.dp) // Pequeno espaçamento vertical
+
+        color = if (isMet) {
+            MaterialTheme.colorScheme.primary
+        } else {
+            MaterialTheme.colorScheme.error
+        },
+
+        fontSize = 12.sp,
+        modifier = Modifier.padding(vertical = 2.dp)
     )
 }
 
-// Função Composable responsável pela interface da tela de cadastro
-@OptIn(ExperimentalMaterial3Api::class)
+// Função responsável pela interface da tela de cadastro
 @Composable
 fun SignUp() {
+
     val context = LocalContext.current
 
-
-    // Armazena os valores inseridos pelo usuário
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
-    // Verifica os critérios da senha
+
     val passwordCriteria = checkPasswordCriteria(password)
 
-    // "olho" da senha
     var passwordVisible by remember { mutableStateOf(false) }
     var confirmPasswordVisible by remember { mutableStateOf(false) }
 
@@ -124,10 +124,11 @@ fun SignUp() {
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // Cabeçalho visual da tela
+
+        // Cabeçalho visual personalizado
         SuperIDHeader()
 
-        // Botão para voltar à tela anterior
+        // Seta de voltar
         IconButton(
             onClick = {
                 val intent = Intent(context, AccessOptionActivity::class.java)
@@ -141,8 +142,7 @@ fun SignUp() {
             )
         }
 
-        // Layout principal do formulário de cadastro
-
+        // Estado que controla a rolagem vertical da tela
         val scrollState = rememberScrollState()
 
         Column(
@@ -157,47 +157,58 @@ fun SignUp() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            // Título da tela
+            // Define o título da tela
             Text(
                 text = "CADASTRO",
                 fontSize = 30.sp,
                 fontWeight = FontWeight.Bold
             )
 
-            // Campo de entrada para o nome
+            // Campo para digitar o nome
             CustomOutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
                 label = "Nome Completo"
             )
 
-            // Campo de entrada para o email
+            // Campo para digitar o email
             CustomOutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
                 label = "Email"
             )
 
-            // Campo de entrada para a senha
+            // Campo para digitar a senha
             CustomOutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
                 label = "Senha",
-                //define se o texto vai ser visivel ou oculto
+
+                // Ocultação e exibição de senha
                 visualTransformation = if (passwordVisible) {
-                    VisualTransformation.None }
+                    VisualTransformation.None // Exibe o texto normalmente
+                }
                 else {
-                    PasswordVisualTransformation() },
-                // Define o tipo de teclado (neste caso, teclado para senha)
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    PasswordVisualTransformation() // Substitui cada caracter por "."
+                },
+
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Password
+                ),
+
+                // Alterando a visibilidade da imagem
                 trailingIcon = {
-                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                    IconButton(
+                        onClick = {
+                            passwordVisible = !passwordVisible
+                        }
+                    ) {
                         Icon(
-                            // Alterna entre o ícone de "visível" e "não visível"
                             imageVector = if (passwordVisible){
-                                Icons.Default.Visibility } // Icone do "olho cortado"}
-                            else{
-                                Icons.Default.VisibilityOff }, // Icone do olho
+                                Icons.Default.Visibility // Olho aberto
+                            } else {
+                                Icons.Default.VisibilityOff // Olho fechado
+                            },
                             contentDescription = if (passwordVisible){
                                 "Ocultar senha" }
                             else {
@@ -207,29 +218,41 @@ fun SignUp() {
                 }
             )
 
-
-
-            // Campo de entrada para confirmar a senha
+            // Campo para digitar a confirmação de senha
             CustomOutlinedTextField(
                 value = confirmPassword,
                 onValueChange = { confirmPassword = it },
                 label = "Confirmar Senha",
-                visualTransformation = if (confirmPasswordVisible)
-                { VisualTransformation.None }
-                else
-                {PasswordVisualTransformation()},
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+
+                // Ocultação e exibição de senha
+                visualTransformation = if (confirmPasswordVisible) {
+                    VisualTransformation.None
+                } else {
+                    PasswordVisualTransformation()
+                },
+
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Password
+                ),
+
+                // Alterando a visibilidade da imagem
                 trailingIcon = {
-                    IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
+                    IconButton(
+                        onClick = {
+                            confirmPasswordVisible = !confirmPasswordVisible
+                        }
+                    ) {
                         Icon(
-                            imageVector = if (confirmPasswordVisible)
-                            {Icons.Default.Visibility}
-                            else
-                            { Icons.Default.VisibilityOff},
-                            contentDescription = if (confirmPasswordVisible)
-                            {"Ocultar senha"}
-                            else
-                            {"Mostrar senha"}
+                            imageVector = if (confirmPasswordVisible) {
+                                Icons.Default.Visibility // Olho aberto
+                            } else {
+                                Icons.Default.VisibilityOff // Olho fechado
+                            },
+                            contentDescription = if (confirmPasswordVisible) {
+                                "Ocultar senha"
+                            } else {
+                                "Mostrar senha"
+                            }
                         )
                     }
                 }
@@ -239,6 +262,7 @@ fun SignUp() {
                 modifier = Modifier
                     .padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 8.dp)
             ) {
+
                 Text(
                     "A senha deve conter:",
                     fontWeight = FontWeight.Bold,
@@ -246,14 +270,19 @@ fun SignUp() {
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
 
+                // Exibir cada critério de validação de senha na tela
                 PasswordRequirementItem("Pelo menos 8 caracteres", passwordCriteria.hasMinLength)
                 Spacer(modifier = Modifier.height(2.dp))
+
                 PasswordRequirementItem("Letra maiúscula (A-Z)", passwordCriteria.hasUppercase)
                 Spacer(modifier = Modifier.height(2.dp))
+
                 PasswordRequirementItem("Letra minúscula (a-z)", passwordCriteria.hasLowercase)
                 Spacer(modifier = Modifier.height(2.dp))
+
                 PasswordRequirementItem("Número (0-9)", passwordCriteria.hasDigit)
                 Spacer(modifier = Modifier.height(2.dp))
+
                 PasswordRequirementItem("Caractere especial (!@#...)", passwordCriteria.hasSpecialChar)
             }
 
@@ -263,7 +292,7 @@ fun SignUp() {
             Button(
                 onClick = {
                     when {
-                        // Verifica se há campos vazios
+                        // Verifica se algum campo está em branco (se está vazio ou apenas com espaços)
                         name.isBlank() || email.isBlank() || password.isBlank() || confirmPassword.isBlank() -> {
                             Toast.makeText(context, "Preencha todos os campos!", Toast.LENGTH_LONG).show()
                         }
@@ -287,8 +316,6 @@ fun SignUp() {
                             Toast.makeText(context, "A senha não atende aos requisitos mínimos!", Toast.LENGTH_LONG).show()
                         }
 
-
-                        // Caso tudo esteja correto, prossegue com o cadastro
                         else -> {
                             saveUserToAuth(email, password, name, context)
                         }

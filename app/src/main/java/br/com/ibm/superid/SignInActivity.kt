@@ -1,9 +1,7 @@
 // TELA PARA O USUÁRIO REALIZAR O LOGIN
 
-// Definição do pacote aplicativo
 package br.com.ibm.superid
 
-// Importações necessárias
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
@@ -19,10 +17,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -55,45 +51,42 @@ import br.com.ibm.superid.ui.theme.core.util.SuperIDHeader
 import br.com.ibm.superid.ui.theme.core.util.signInWithFirebaseAuth
 import kotlin.jvm.java
 
-// Declarando a Activity (signInActivity)
+// Declarando a Activity para realizar o login do usuário
 class SignInActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             SuperIDTheme {
-                PreviewSignIn()
+                SignIn()
             }
         }
     }
 }
 
-// Função Composable que apresenta o formulário de login do usuário
-@OptIn(ExperimentalMaterial3Api::class)
+// Função responsável pela interface da tela de login
 @Composable
 fun SignIn(modifier: Modifier = Modifier) {
 
-    // Cria variável para poder trocar de tela
     val context = LocalContext.current
 
-    // Variáveis que guardam o valor digitado nos campos do formulário
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) } // Variável para ver a senha
 
-    // "olho" da senha
-    var passwordVisible by remember { mutableStateOf(false) }
-
-    // Seta que volta para AccessOptionActivity
-    // Baseado em: https://developer.android.com/develop/ui/compose/components/app-bars?hl=pt-br#top-app-bar
-    // Baseado em: https://alexzh.com/visual-guide-to-topappbar-variants-in-jetpack-compose/?utm_source=chatgpt.com
-
-    Column (modifier = Modifier
+    Column (
+        modifier = Modifier
         .fillMaxSize()
-        .background(MaterialTheme.colorScheme.background)) {
+        .background(MaterialTheme.colorScheme.background
+        )
+    ) {
+
         // Cabeçalho visual personalizado
         SuperIDHeader()
 
-        // Botão de voltar
+        // Seta de voltar
+        // Baseado em: https://developer.android.com/develop/ui/compose/components/app-bars?hl=pt-br#top-app-bar
+        // Baseado em: https://alexzh.com/visual-guide-to-topappbar-variants-in-jetpack-compose/
         IconButton(
             onClick = {
                 val intent = Intent(context, AccessOptionActivity::class.java)
@@ -107,7 +100,6 @@ fun SignIn(modifier: Modifier = Modifier) {
             )
         }
 
-        // Layout em coluna que ocupa toda a tela e aplica padding de 16dp
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -116,63 +108,73 @@ fun SignIn(modifier: Modifier = Modifier) {
             horizontalAlignment = Alignment.CenterHorizontally
         ){
 
-            // Define o título da tela em negrito e tamanho 30sp
+            // Define o título da tela
             Text(
                 text = "LOGIN",
                 fontSize = 30.sp,
                 fontWeight = FontWeight.Bold
             )
 
-            // Campo de texto para digitar o email do usuário
+            // Campo para digitar o email
             CustomOutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
                 label = "Email"
             )
 
-            // Campo de entrada para a senha
+            // Campo para digitar a senha
             CustomOutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
                 label = "Senha",
-                //define se o texto vai ser visivel ou oculto
+
+                // Ocultação e exibição de senha
                 visualTransformation = if (passwordVisible) {
-                    VisualTransformation.None }
-                else {
-                    PasswordVisualTransformation() },
-                // Define o tipo de teclado (neste caso, teclado para senha)
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    VisualTransformation.None // Exibe o texto normalmente
+                } else {
+                    PasswordVisualTransformation() // Substitui cada caracter por "."
+                },
+
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Password
+                ),
+
+                // Alterando a visibilidade da imagem
                 trailingIcon = {
-                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                    IconButton(
+                        onClick = {
+                            passwordVisible = !passwordVisible
+                        }
+                    ) {
                         Icon(
-                            // Alterna entre o ícone de "visível" e "não visível"
                             imageVector = if (passwordVisible){
-                                Icons.Default.Visibility } // Icone do "olho cortado"}
-                            else{
-                                Icons.Default.VisibilityOff }, // Icone do olho
+                                Icons.Default.Visibility // Olho aberto
+                            } else {
+                                Icons.Default.VisibilityOff // Olho fechado
+                            },
                             contentDescription = if (passwordVisible){
-                                "Ocultar senha" }
-                            else {
-                                "Mostrar senha"}
+                                "Ocultar senha"
+                            } else {
+                                "Mostrar senha"
+                            }
                         )
                     }
                 }
             )
 
-            // Recuperação de senha do usuário
+            // Texto clicável para a recuperação de senha do usuário
             Text(
                 text = "Esqueceu a senha?",
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.tertiary,
                 fontSize = 16.sp,
-                style = TextStyle(
-                    textDecoration = TextDecoration.Underline),
+                style = TextStyle(textDecoration = TextDecoration.Underline),
                 modifier = Modifier
                     .padding(top = 8.dp)
+
                     // Torna o texto clicável
-                    // Baseado na documentação: https://developer.android.com/develop/ui/compose/touch-input/pointer-input/tap-and-press?utm_source=chatgpt.com&hl=pt-br
+                    // Baseado na documentação: https://developer.android.com/develop/ui/compose/touch-input/pointer-input/tap-and-press?hl=pt-br
                     .clickable {
-                        // Ao clicar vai para a tela ForgotPasswordActivity
                         val intent = Intent(context, ForgotPasswordActivity::class.java)
                         context.startActivity(intent)
                     }
@@ -180,43 +182,34 @@ fun SignIn(modifier: Modifier = Modifier) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Botão que quando clicado salva no FirebaseAuth
+            // Botão de ação para logar o usuário
             Button(
                 onClick = {
                     // Verifica se algum campo está em branco (se está vazio ou apenas com espaços)
                     if (email.isBlank() || password.isBlank()) {
                         Log.i("SIGN IN", "Preencha todos os campos")
-
-                        // Toast para avisar que precisa preencher todos os dados
                         Toast.makeText(context, "Preencha todos os campos!", Toast.LENGTH_LONG).show()
 
                     } else {
-                        // Salva no Firebase Auth
                         signInWithFirebaseAuth(email, password, context)
                         Log.i("SIGN IN", "Usuário logado com sucesso")
                     }
                 },
                 modifier = Modifier
-                    .height(60.dp)    // altura maior
-                    .width(150.dp)  // largura maior
+                    .height(60.dp)
+                    .width(150.dp)
             ) {
-                // Define o texto que está dentro do botão
                 Text("Entrar")
             }
         }
     }
 }
 
-
-@Composable
 @Preview
-fun PreviewSignIn(){
+@Composable
+fun SignInPreview(){
     SuperIDTheme {
-        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            // Chama a função composable SignIn e aplica o padding interno do Scaffold
-            SignIn(
-                modifier = Modifier.padding(innerPadding)
-            )
-        }
+        SignIn()
     }
 }
+

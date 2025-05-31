@@ -2,7 +2,6 @@
 
 package br.com.ibm.superid
 
-// Importações necessárias para a Activity, Jetpack Compose e componentes visuais
 import androidx.compose.ui.unit.sp
 import android.content.Intent
 import android.os.Bundle
@@ -31,29 +30,31 @@ import androidx.compose.ui.unit.dp
 import br.com.ibm.superid.ui.theme.SuperIDTheme
 import br.com.ibm.superid.ui.theme.core.util.SuperIDHeaderImage
 
-// AccessOptionActivity - Tela base do app que permite ao usuário fazer cadastro, login ou entrar sem conta
+// Declaração da Activity que permite que o usuário escolha qual acesso deseja
 class AccessOptionActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-                PreviewAcessOption()
+            PreviewAcessOption()
         }
     }
 }
 
-// AccessOptions - Função composable que exibe os botões de acesso: Login, Cadastro e Continuar sem conta
+// Função responsável pela interface da tela de escolher opção de acesso
 @Composable
 fun AccessOptions(modifier: Modifier = Modifier) {
+
     val context = LocalContext.current
 
     Column (modifier = Modifier
         .fillMaxSize()
-        .background(MaterialTheme.colorScheme.background)) {
+        .background(MaterialTheme.colorScheme.background)
+    ) {
+
         // Cabeçalho visual personalizado
         SuperIDHeaderImage()
 
-        // Layout em coluna que ocupa toda a tela e aplica padding de 16dp
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -61,13 +62,15 @@ fun AccessOptions(modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+
             // Botão que leva para a tela de Login
-            Button(onClick = {
-                val intent = Intent(context, SignInActivity::class.java)
-                context.startActivity(intent)
+            Button(
+                onClick = {
+                    val intent = Intent(context, SignInActivity::class.java)
+                    context.startActivity(intent)
             },
                 modifier = Modifier
-                    .height(60.dp)    // altura maior
+                    .height(60.dp)
                     .width(150.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.secondary)
@@ -82,12 +85,13 @@ fun AccessOptions(modifier: Modifier = Modifier) {
             Spacer(Modifier.height(18.dp))
 
             // Botão que leva para a tela de Cadastro
-            Button(onClick = {
-                val intent = Intent(context, SignUpActivity::class.java)
-                context.startActivity(intent)
+            Button(
+                onClick = {
+                    val intent = Intent(context, SignUpActivity::class.java)
+                    context.startActivity(intent)
             },
                 modifier = Modifier
-                    .height(60.dp)    // altura maior
+                    .height(60.dp)
                     .width(150.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.secondary)
@@ -102,6 +106,7 @@ fun AccessOptions(modifier: Modifier = Modifier) {
     }
 }
 
+
 @Composable
 @Preview
 fun PreviewAcessOption(){
@@ -115,3 +120,4 @@ fun PreviewAcessOption(){
         }
     }
 }
+

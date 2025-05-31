@@ -2,7 +2,6 @@
 
 package br.com.ibm.superid
 
-import android.content.Context
 import android.content.Intent
 import androidx.compose.ui.platform.LocalContext
 import android.os.Bundle
@@ -31,40 +30,41 @@ import androidx.compose.material3.MaterialTheme
 import br.com.ibm.superid.ui.theme.SuperIDTheme
 import br.com.ibm.superid.ui.theme.core.util.CustomOutlinedTextField
 import br.com.ibm.superid.ui.theme.core.util.SuperIDHeader
-import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
-import com.google.firebase.firestore.firestore
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import br.com.ibm.superid.ui.theme.core.util.addNewCategory
 
-
+// Declaração da Activity que permite que o usuário adicionar uma nova categoria
 class AddCategoryActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             SuperIDTheme {
-               PreviewAddCat()
+               AddCat()
             }
         }
     }
 }
 
-//Composable que constrói a UI para adicionar uma categoria
+// Função responsável pela interface da tela de adicionar categoria
 @Composable
 fun AddCat() {
+
     val context = LocalContext.current
-    var categoryName by remember { mutableStateOf("") } // Estado para armazenar o nome da categoria digitada
+
+    var categoryName by remember { mutableStateOf("") } // Variável para armazenar o nome da categoria digitada
 
     Column (
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background) // Define fundo conforme o tema
+            .background(MaterialTheme.colorScheme.background)
     ) {
-        SuperIDHeader() // Cabeçalho visual customizado da aplicação
 
-        // Botão para voltar para a tela principal
+        // Cabeçalho visual personalizado
+        SuperIDHeader()
+
+        // Seta de voltar
         IconButton(
             onClick = {
                 val intent = Intent(context, MainActivity::class.java)
@@ -79,7 +79,6 @@ fun AddCat() {
             )
         }
 
-        // Conteúdo centralizado da tela para adicionar a categoria
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -87,13 +86,15 @@ fun AddCat() {
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+
+            // Titulo da tela
             Text(
                 text = "ADICIONAR CATEGORIA",
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp
             )
 
-            // Campo de texto customizado para o nome da categoria
+            // Campo para digitar a nova categoria
             CustomOutlinedTextField(
                 value = categoryName,
                 onValueChange = { categoryName = it },
@@ -102,23 +103,25 @@ fun AddCat() {
 
             Spacer(Modifier.height(24.dp))
 
-            // Botão para salvar a categoria
+            // Botão que salva a nova categoria no banco
             Button(
                 onClick = {
                     when {
+                        // Verifica se o campo está em branco (se está vazio ou apenas com espaços)
                         categoryName.isBlank() ->
                             Toast.makeText(context, "Preencha o nome da categoria!", Toast.LENGTH_SHORT).show()
 
+                        // Verifica se o nome da categoria tem menos de 3 caracteres
                         categoryName.length < 3 ->
                             Toast.makeText(context, "Nome da categoria deve ter pelo menos 3 caracteres!", Toast.LENGTH_SHORT).show()
 
+                        // Verifica se a categoria tem mais de 31 caracteres
                         categoryName.length > 31 ->
                             Toast.makeText(context, "Nome da categoria deve ter no máximo 30 caracteres!", Toast.LENGTH_SHORT).show()
 
                         else -> {
-                            // Chama função para adicionar categoria no banco
                             addNewCategory(context, categoryName)
-                            categoryName = "" // Limpa o campo após salvar
+                            categoryName = "" // Limpa o campo após salvar, para não continuar sendo exibido na tela
                         }
                     }
                 },

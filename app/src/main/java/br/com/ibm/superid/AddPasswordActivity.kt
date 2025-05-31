@@ -52,9 +52,7 @@ import br.com.ibm.superid.ui.theme.core.util.addNewPassword
 class AddPasswordActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Ativa o modo de tela cheia com suporte à barra de status
         enableEdgeToEdge()
-        // Define o conteúdo da tela usando Compose e tema personalizado
         setContent {
             SuperIDTheme {
                 AddPassword()
@@ -195,53 +193,76 @@ fun AddPassword(modifier: Modifier = Modifier) {
                 value = senha,
                 onValueChange = { senha = it },
                 label = "Senha",
-                //define se o texto vai ser visivel ou oculto
+
+                // Ocultação e exibição de senha
                 visualTransformation = if (passwordVisible) {
-                    VisualTransformation.None }
-                else {
-                    PasswordVisualTransformation() },
-                // Define o tipo de teclado (neste caso, teclado para senha)
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    VisualTransformation.None // Exibe o texto normalmente
+                } else {
+                    PasswordVisualTransformation() // Substitui cada caracter por "."
+                },
+
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Password
+                ),
+
+                // Alterando a visibilidade da imagem
                 trailingIcon = {
-                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                    IconButton(
+                        onClick = {
+                            passwordVisible = !passwordVisible
+                        }
+                    ) {
                         Icon(
-                            // Alterna entre o ícone de "visível" e "não visível"
                             imageVector = if (passwordVisible){
-                                Icons.Default.Visibility } // Icone do "olho cortado"}
-                            else{
-                                Icons.Default.VisibilityOff }, // Icone do olho
+                                Icons.Default.Visibility // Olho aberto
+                            } else {
+                                Icons.Default.VisibilityOff // Olho fechado
+                            },
                             contentDescription = if (passwordVisible){
-                                "Ocultar senha" }
-                            else {
-                                "Mostrar senha"}
+                                "Ocultar senha"
+                            } else {
+                                "Mostrar senha"
+                            }
                         )
                     }
                 }
             )
 
-
-
-            // Campo de entrada para confirmar a senha
+            // Campo para digitar a confirmação de senha
             CustomOutlinedTextField(
                 value = confirmarSenha,
                 onValueChange = { confirmarSenha = it },
                 label = "Confirmar Senha",
-                visualTransformation = if (confirmPasswordVisible)
-                { VisualTransformation.None }
-                else
-                {PasswordVisualTransformation()},
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+
+                // Ocultação e exibição de senha
+                visualTransformation = if (confirmPasswordVisible) {
+                    VisualTransformation.None // Exibe o texto normalmente
+                } else {
+                    PasswordVisualTransformation() // Substitui cada caracter por "."
+                },
+
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Password
+                ),
+
+                // Alterando a visibilidade da imagem
                 trailingIcon = {
-                    IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
+                    IconButton(
+                        onClick = {
+                            confirmPasswordVisible = !confirmPasswordVisible
+                        }
+                    ) {
                         Icon(
-                            imageVector = if (confirmPasswordVisible)
-                            {Icons.Default.Visibility}
-                            else
-                            { Icons.Default.VisibilityOff},
-                            contentDescription = if (confirmPasswordVisible)
-                            {"Ocultar senha"}
-                            else
-                            {"Mostrar senha"}
+                            imageVector = if (confirmPasswordVisible) {
+                                Icons.Default.Visibility // Olho aberto
+                            } else {
+                                Icons.Default.VisibilityOff // Olho fechado
+                            },
+                            contentDescription = if (confirmPasswordVisible) {
+                                "Ocultar senha"
+                            } else {
+                                "Mostrar senha"
+                            }
                         )
                     }
                 }
@@ -300,7 +321,7 @@ fun AddPassword(modifier: Modifier = Modifier) {
                 }
             }
 
-            // Campo para descrição opcional da senha
+            // Campo para digitar a descrição
             CustomOutlinedTextField(
                 value = descricao,
                 onValueChange = { descricao = it },
@@ -309,40 +330,26 @@ fun AddPassword(modifier: Modifier = Modifier) {
 
             Spacer(Modifier.height(24.dp))
 
-            // Botão para salvar a senha, realizando validações antes
+            // Botão para salvar a nova senha no banco
             Button(
                 onClick = {
                     when {
-                        // Verifica se campos obrigatórios estão preenchidos
+                        // Verifica se algum dos campos está em branco (se está vazio ou apenas com espaços)
                         titulo.isBlank() || senha.isBlank() || categoria.isBlank() ->
-                            Toast.makeText(
-                                context,
-                                "Preencha título, senha e categoria",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            Toast.makeText(context, "Preencha título, senha e categoria", Toast.LENGTH_SHORT).show()
 
                         // Verifica se as senhas não coincidem
                         confirmarSenha != senha ->
-                            Toast.makeText(context, "As senhas não conferem", Toast.LENGTH_SHORT)
-                                .show()
+                            Toast.makeText(context, "As senhas não conferem", Toast.LENGTH_SHORT).show()
 
-                        // Verifica se o título tem mais de 10 caracteres
+                        // Verifica se o título tem mais de 30 caracteres
                         titulo.length > 30 ->
-                            Toast.makeText(
-                                context,
-                                "Título não pode ter mais de 30 caracteres!",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            Toast.makeText(context, "Título não pode ter mais de 30 caracteres!", Toast.LENGTH_SHORT).show()
 
-                        // Verifica se a senha tem menos de 8 caracteres
+                        // Verifica se a senha tem menos de 4 caracteres
                         senha.length < 4 ->
-                            Toast.makeText(
-                                context,
-                                "Senha deve ter pelo menos 4 caracteres!",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            Toast.makeText(context, "Senha deve ter pelo menos 4 caracteres!", Toast.LENGTH_SHORT).show()
 
-                        // Se tudo válido, adiciona a nova senha e volta à tela principal
                         else -> {
                             addNewPassword(context, senha, categoria, descricao, titulo, login)
                         }
