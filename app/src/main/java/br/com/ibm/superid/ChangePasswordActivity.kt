@@ -11,6 +11,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Visibility
@@ -101,6 +102,9 @@ fun ChangePassword(
     var expanded by remember { mutableStateOf(false) }
     var passwordVisible by remember { mutableStateOf(false) }
 
+    // ScrollState para a área de formulário
+    val scrollState = rememberScrollState()
+
     // Seta que volta para AccessOptionActivity
     // Baseado em: https://developer.android.com/develop/ui/compose/components/app-bars?hl=pt-br#top-app-bar
     // Baseado em: https://alexzh.com/visual-guide-to-topappbar-variants-in-jetpack-compose/?utm_source=chatgpt.com
@@ -111,7 +115,7 @@ fun ChangePassword(
         // Cabeçalho visual personalizado
         SuperIDHeader()
 
-        val scrollState = rememberScrollState()
+
         // Botão de voltar
         IconButton(
             onClick = {
@@ -127,151 +131,171 @@ fun ChangePassword(
             )
         }
 
-        // Layout em coluna que ocupa toda a tela e aplica padding de 16dp
-        Column(
+
+        Box(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 70.dp),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally
+                .weight(1f) // ocupa o espaço restante abaixo do cabeçalho
+                .verticalScroll(scrollState) // permite rolar o conteúdo se ultrapassar a tela
+                .padding( // aplica margens internas
+
+                    //“lê” exatamente quanto espaço a barra de navegação está ocupando naquela tela. Depois,
+                    // somamos mais 16dp, garante uma folga extra para o usuário não sentir que o botão
+                    // “Cadastrar” ou outro item fica apertado junto à base do celular.
+                    bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 16.dp
+                )
         ) {
-
-            // Define o título da tela em negrito e tamanho 30sp
-            Text(
-                text = "ALTERAR: ${initialTitulo.uppercase()}",
-                fontSize = 30.sp,
-                fontWeight = FontWeight.Bold
-            )
-
-            // Espaço de 24dp abaixo do título
-            Spacer(Modifier.height(24.dp))
-
-            CustomOutlinedTextField(
-                value = titulo,
-                onValueChange = { titulo = it },
-                label ="Titulo"
-            )
-
-            CustomOutlinedTextField(
-                value = login,
-                onValueChange = { login = it },
-                label ="Login (opcional)"
-            )
-
-            // Campo de entrada para a senha
-            CustomOutlinedTextField(
-                value = password,
-                onValueChange = { password = it },
-                label = "Senha",
-                //define se o texto vai ser visivel ou oculto
-                visualTransformation = if (passwordVisible) {
-                    VisualTransformation.None }
-                else {
-                    PasswordVisualTransformation() },
-                // Define o tipo de teclado (neste caso, teclado para senha)
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                trailingIcon = {
-                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                        Icon(
-                            // Alterna entre o ícone de "visível" e "não visível"
-                            imageVector = if (passwordVisible){
-                                Icons.Default.Visibility } // Icone do "olho cortado"}
-                            else{
-                                Icons.Default.VisibilityOff }, // Icone do olho
-                            contentDescription = if (passwordVisible){
-                                "Ocultar senha" }
-                            else {
-                                "Mostrar senha"}
-                        )
-                    }
-                }
-            )
-            Box(
+            // Layout em coluna que ocupa toda a tela e aplica padding de 16dp
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 10.dp),
-                contentAlignment = Alignment.TopCenter
+                    .fillMaxSize()
+                    .padding(top = 70.dp),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                ExposedDropdownMenuBox(
-                    expanded = expanded,
-                    onExpandedChange = {
 
-                        if (!expanded) {
-                            fetchCategoriasUsuario(context)
-                        }
-                        expanded = !expanded },
-                    modifier = Modifier.wrapContentWidth()
-                ) {
+                // Define o título da tela em negrito e tamanho 30sp
+                Text(
+                    text = "ALTERAR: ${initialTitulo.uppercase()}",
+                    fontSize = 30.sp,
+                    fontWeight = FontWeight.Bold
+                )
 
-                    CustomOutlinedTextField(
-                        value = categoria,
-                        onValueChange = { /* não edita */ },
-                        label = "Categoria",
-                        readOnly = true,
-                        modifier = Modifier
-                            .menuAnchor(),
-                        trailingIcon = {
-                            ExposedDropdownMenuDefaults.TrailingIcon(expanded)
-                        }
-                    )
+                // Espaço de 24dp abaixo do título
+                Spacer(Modifier.height(24.dp))
 
-                    ExposedDropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
-                    ) {
-                        if (categoriasUsuario.isEmpty()) {
-                            DropdownMenuItem(
-                                text = { Text("Nenhuma categoria") },
-                                onClick = { expanded = false }
+                CustomOutlinedTextField(
+                    value = titulo,
+                    onValueChange = { titulo = it },
+                    label = "Titulo"
+                )
+
+                CustomOutlinedTextField(
+                    value = login,
+                    onValueChange = { login = it },
+                    label = "Login (opcional)"
+                )
+
+                // Campo de entrada para a senha
+                CustomOutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = "Senha",
+                    //define se o texto vai ser visivel ou oculto
+                    visualTransformation = if (passwordVisible) {
+                        VisualTransformation.None
+                    } else {
+                        PasswordVisualTransformation()
+                    },
+                    // Define o tipo de teclado (neste caso, teclado para senha)
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    trailingIcon = {
+                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                            Icon(
+                                // Alterna entre o ícone de "visível" e "não visível"
+                                imageVector = if (passwordVisible) {
+                                    Icons.Default.Visibility
+                                } // Icone do "olho cortado"}
+                                else {
+                                    Icons.Default.VisibilityOff
+                                }, // Icone do olho
+                                contentDescription = if (passwordVisible) {
+                                    "Ocultar senha"
+                                } else {
+                                    "Mostrar senha"
+                                }
                             )
-                        } else {
-                            categoriasUsuario.forEach { cat ->
+                        }
+                    }
+                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 10.dp),
+                    contentAlignment = Alignment.TopCenter
+                ) {
+                    ExposedDropdownMenuBox(
+                        expanded = expanded,
+                        onExpandedChange = {
+
+                            if (!expanded) {
+                                fetchCategoriasUsuario(context)
+                            }
+                            expanded = !expanded
+                        },
+                        modifier = Modifier.wrapContentWidth()
+                    ) {
+
+                        CustomOutlinedTextField(
+                            value = categoria,
+                            onValueChange = { /* não edita */ },
+                            label = "Categoria",
+                            readOnly = true,
+                            modifier = Modifier
+                                .menuAnchor(),
+                            trailingIcon = {
+                                ExposedDropdownMenuDefaults.TrailingIcon(expanded)
+                            }
+                        )
+
+                        ExposedDropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false }
+                        ) {
+                            if (categoriasUsuario.isEmpty()) {
                                 DropdownMenuItem(
-                                    text = { Text(cat) },
-                                    onClick = {
-                                        categoria = cat
-                                        expanded = false
-                                    }
+                                    text = { Text("Nenhuma categoria") },
+                                    onClick = { expanded = false }
                                 )
+                            } else {
+                                categoriasUsuario.forEach { cat ->
+                                    DropdownMenuItem(
+                                        text = { Text(cat) },
+                                        onClick = {
+                                            categoria = cat
+                                            expanded = false
+                                        }
+                                    )
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            // Campo de texto para digitar a descrição da nova senha
-            CustomOutlinedTextField(
-                value = descricao,
-                onValueChange = { descricao = it },
-                label ="Descrição (opcional)"
-            )
+                // Campo de texto para digitar a descrição da nova senha
+                CustomOutlinedTextField(
+                    value = descricao,
+                    onValueChange = { descricao = it },
+                    label = "Descrição (opcional)"
+                )
 
-            // Espaço de 24dp antes do botão
-            Spacer(Modifier.height(24.dp))
+                // Espaço de 24dp antes do botão
+                Spacer(Modifier.height(24.dp))
 
-            // Botão que quando clicado salva a nova senha no banco Firestore
-            Button(
-                onClick = {
-                    // Chama nossa função de atualização
-                    updatePassword(
-                        context      = context,
-                        documentId   = passwordId,
-                        newTitulo    = titulo,
-                        newLogin     = login,
-                        newPassword  = password,
-                        newCategory  = categoria,
-                        newDesc      = descricao
-                    )
-                },
-                modifier = Modifier
-                    .height(60.dp)    
-                    .width(150.dp)
-            ) {
-                // Define o texto que está dentro do botão
-                Text("Salvar")
+                // Botão que quando clicado salva a nova senha no banco Firestore
+                Button(
+                    onClick = {
+                        // Chama nossa função de atualização
+                        updatePassword(
+                            context = context,
+                            documentId = passwordId,
+                            newTitulo = titulo,
+                            newLogin = login,
+                            newPassword = password,
+                            newCategory = categoria,
+                            newDesc = descricao
+                        )
+                    },
+                    modifier = Modifier
+                        .height(60.dp)
+                        .width(150.dp)
+                ) {
+                    // Define o texto que está dentro do botão
+                    Text("Salvar")
+                }
             }
         }
     }
+
 }
 
 @Preview(showSystemUi = true, showBackground = true)

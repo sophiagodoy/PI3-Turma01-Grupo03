@@ -155,9 +155,6 @@ fun SignUp() {
                     // somamos mais 16dp, garante uma folga extra para o usuário não sentir que o botão
                     // “Cadastrar” ou outro item fica apertado junto à base do celular.
                     bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 16.dp,
-
-                    start = 24.dp, // margem interna à esquerda
-                    end = 24.dp // margem interna à direita
                 )
         ) {
 

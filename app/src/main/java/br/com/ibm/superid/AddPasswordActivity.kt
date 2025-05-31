@@ -77,6 +77,7 @@ fun AddPassword(modifier: Modifier = Modifier) {
     var passwordVisible by remember { mutableStateOf(false) }
     var confirmPasswordVisible by remember { mutableStateOf(false) }
 
+
     // Ao iniciar o composable, busca as categorias do usuário no Firestore
     LaunchedEffect(Unit) {
         fetchCategoriasUsuario(context)
@@ -91,7 +92,6 @@ fun AddPassword(modifier: Modifier = Modifier) {
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .padding(bottom = 100.dp)
-            .verticalScroll(scrollState)
     ) {
 
         // Cabeçalho visual personalizado do aplicativo
@@ -112,6 +112,18 @@ fun AddPassword(modifier: Modifier = Modifier) {
             )
         }
 
+        Box(
+            modifier = Modifier
+                .weight(1f) // ocupa o espaço restante abaixo do cabeçalho
+                .verticalScroll(scrollState) // permite rolar o conteúdo se ultrapassar a tela
+                .padding( // aplica margens internas
+
+                    //“lê” exatamente quanto espaço a barra de navegação está ocupando naquela tela. Depois,
+                    // somamos mais 16dp, garante uma folga extra para o usuário não sentir que o botão
+                    // “Cadastrar” ou outro item fica apertado junto à base do celular.
+                    bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 16.dp
+                )
+        ){
         // Coluna que organiza os campos do formulário centralizados e espaçados
         Column(
             modifier = Modifier
@@ -323,6 +335,7 @@ fun AddPassword(modifier: Modifier = Modifier) {
                 Text("SALVAR")
             }
         }
+    }
     }
 }
 
