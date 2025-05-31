@@ -16,7 +16,8 @@ O **SuperID** é um aplicativo Android nativo, desenvolvido em Kotlin, cujo obje
 
 - Cadastrar e armazenar senhas criptografadas, organizadas por categorias (Sites Web, Aplicativos, Dispositivos etc.).  
 - Recuperar sua “senha mestre” em caso de esquecimento, via e-mail.  
-- Realizar “login sem senha” em sites parceiros por meio da leitura de um QR Code.  
+- Realizar “login sem senha” em sites parceiros por meio da leitura de um QR Code.
+- O 
 
 Para demonstrar o fluxo de **login sem senha**, criamos um **site parceiro de demonstração** que gera o QR Code necessário e recebe o resultado da autenticação, facilitando testes e validação do processo.
 
@@ -69,11 +70,11 @@ Para demonstrar o fluxo de **login sem senha**, criamos um **site parceiro de de
 
 ## Site Parceiro para demonstração 
 
-1. Clone o primeiro repositório
-      ```bash
+1. Clone o primeiro repositório ( Site parceiro, onde é exibida uma tela de login, ondeo botão "logar com superId" quando clicado, gera um qrcode, que quando escaneado pela câmera do nosso app, exiber a mensagem "Login bem sucedido"  
+      ```bash.
    git@github.com:HenriqueMartins2502/Site-parceiro-PI.git
 
-2. Clone o segundo repositório
+3. Clone o segundo repositório (aqui é necessario consfigurar o firebase functions de acordo com o seu sistema operacional). Este é o repositório onde foram feitas as firebase functions, reposaveis por gerar o qrCode na base 64 e onde é feita a consulta no banco de dados quando escaneado o qrCode.
       ```bash
    git@github.com:HenriqueMartins2502/Firebase-functions-PI.git
       
