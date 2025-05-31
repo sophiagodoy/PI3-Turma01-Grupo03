@@ -1,13 +1,9 @@
 // TELA PARA O USUÁRIO ALTERAR UMA SENHA
 
-// Definição do pacote aplicativo
 package br.com.ibm.superid
 
-// Importações necessárias
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -43,11 +39,8 @@ import androidx.compose.ui.unit.sp
 import br.com.ibm.superid.ui.theme.SuperIDTheme
 import br.com.ibm.superid.ui.theme.core.util.CustomOutlinedTextField
 import br.com.ibm.superid.ui.theme.core.util.SuperIDHeader
-import br.com.ibm.superid.ui.theme.core.util.encryptpassword
 import br.com.ibm.superid.ui.theme.core.util.fetchCategoriasUsuario
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
+import br.com.ibm.superid.ui.theme.core.util.updatePassword
 
 // Declarando a Activity (ChangePasswordActivity)
 class ChangePasswordActivity : ComponentActivity() {
@@ -83,8 +76,6 @@ class ChangePasswordActivity : ComponentActivity() {
         }
     }
 }
-
-
 
 // Função Composable que apresenta o formulário de adicionar senha
 @OptIn(ExperimentalMaterial3Api::class)
@@ -282,59 +273,6 @@ fun ChangePassword(
         }
     }
 }
-
-fun updatePassword(
-    context: Context,
-    documentId: String,
-    newTitulo:  String,
-    newLogin:  String,
-    newPassword: String,
-    newCategory: String,
-    newDesc: String
-) {
-    val user = Firebase.auth.currentUser
-    if (user == null) {
-        Toast.makeText(context, "Usuário não autenticado!", Toast.LENGTH_SHORT).show()
-        return
-    }
-    if (newPassword.isBlank() || newTitulo.isBlank() || newCategory.isBlank()) {
-        Toast.makeText(context, "Título, senha e categoria são obrigatórios!", Toast.LENGTH_SHORT).show()
-        return
-    }
-
-    // Encripta a nova senha
-    val (encrypted, iv) = encryptpassword(newPassword)
-
-    // Prepara o map pra atualizar
-    val updates = mapOf(
-        "senha" to encrypted,
-        "iv" to iv,
-        "titulo" to newTitulo,
-        "login" to newLogin,
-        "categoria" to newCategory,
-        "descricao" to newDesc
-    )
-
-
-    if (newTitulo.isNotBlank() && newPassword.isNotBlank() && newCategory.isNotBlank()) {
-        // Executa o update no Firestore
-        Firebase.firestore
-            .collection("users")
-            .document(user.uid)
-            .collection("senhas")
-            .document(documentId)
-            .update(updates)
-            .addOnSuccessListener {
-                Toast.makeText(context, "Senha atualizada com sucesso!", Toast.LENGTH_SHORT).show()
-                context.startActivity(Intent(context, MainActivity::class.java))
-            }
-
-            .addOnFailureListener { e ->
-                Toast.makeText(context, "Erro ao atualizar: ${e.message}", Toast.LENGTH_LONG).show()
-            }
-    }
-}
-
 
 @Preview(showSystemUi = true, showBackground = true)
 @Composable

@@ -1,6 +1,5 @@
 // TELA PRINCIPAL DO APLICATIVO
 
-// TODO: Decidir se vai remover a categoria pelo X ou se, removendo todas as senhas da categoria, ela e removida tambem
 package br.com.ibm.superid
 
 import android.app.Activity

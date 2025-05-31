@@ -2,7 +2,6 @@
 
 package br.com.ibm.superid
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
@@ -38,15 +37,11 @@ import androidx.compose.ui.unit.sp
 import br.com.ibm.superid.ui.theme.SuperIDTheme
 import br.com.ibm.superid.ui.theme.core.util.CustomOutlinedTextField
 import br.com.ibm.superid.ui.theme.core.util.SuperIDHeader
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
-import br.com.ibm.superid.ui.theme.core.util.createacesstoken
-import br.com.ibm.superid.ui.theme.core.util.encryptpassword
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.ui.text.input.VisualTransformation
 import br.com.ibm.superid.ui.theme.core.util.addNewPassword
+import br.com.ibm.superid.ui.theme.core.util.fetchCategoriasUsuario
 
 // Declarando a Activity que exibe o formulário para adicionar uma nova senha
 class AddPasswordActivity : ComponentActivity() {
@@ -63,43 +58,6 @@ class AddPasswordActivity : ComponentActivity() {
 
 // Lista mutável que armazenará as categorias do usuário carregadas do Firestore
 val categoriasUsuario = mutableStateListOf<String>()
-
-// Função que busca as categorias salvas no Firestore para o usuário atual
-fun fetchCategoriasUsuario(context: Context) {
-
-    // Obtém o usuário atualmente autenticado
-    val user = Firebase.auth.currentUser
-
-    // Se não houver usuário logado, exibe mensagem e interrompe a função
-    if (user == null) {
-        Toast.makeText(context, "Usuário não autenticado", Toast.LENGTH_LONG).show()
-        return
-    }
-
-    // Pega o UID do usuário autenticado
-    val uid = user.uid
-
-    // Limpa a lista antes de buscar dados novos para evitar duplicação
-    categoriasUsuario.clear()
-
-    // Realiza a leitura da coleção "categorias" do usuário no Firestore
-    Firebase.firestore
-        .collection("users")
-        .document(uid)
-        .collection("categorias")
-        .get()
-        .addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                // Se a leitura for bem-sucedida, adiciona cada nome de categoria à lista
-                task.result?.documents?.forEach { doc ->
-                    doc.getString("nome")?.let { categoriasUsuario.add(it) }
-                }
-            } else {
-                // Em caso de falha, exibe mensagem com o motivo
-                Toast.makeText(context, "Erro ao ler categorias: ${task.exception?.message}", Toast.LENGTH_LONG).show()
-            }
-        }
-}
 
 // Composable que cria o formulário para adicionar uma nova senha
 @OptIn(ExperimentalMaterial3Api::class)
