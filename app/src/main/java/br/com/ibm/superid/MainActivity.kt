@@ -515,22 +515,17 @@ fun CategoryCard(
     onItemClick: (SenhaItem) -> Unit,
     onDeleteCategory: (String) -> Unit
 ) {
-    // Estado para mostrar o diálogo de confirmação de exclusão da categoria
     var showDeleteConfirmation by remember { mutableStateOf(false) }
-
-
     val context = LocalContext.current
 
-    // Diálogo de confirmação de exclusão que aparece se showDeleteConfirmation for true
+    // Diálogo de confirmação de exclusão da categoria
     if (showDeleteConfirmation) {
         ConfirmDeleteCategoryDialog(
             categoryName = title,
             onConfirm = {
-                // Só permite deletar se a categoria estiver vazia
                 if (items.isEmpty()) {
                     onDeleteCategory(title)
                 } else {
-                    // Mensagem de aviso caso tenha senhas na categoria
                     Toast.makeText(
                         context,
                         "Não é possível excluir categoria com senhas",
@@ -538,26 +533,23 @@ fun CategoryCard(
                     ).show()
                 }
             },
-            onDismiss = { showDeleteConfirmation = false } // fecha diálogo ao dispensar
+            onDismiss = { showDeleteConfirmation = false }
         )
     }
 
-    Spacer(modifier = Modifier.height(16.dp)) // Espaço antes do card
+    Spacer(modifier = Modifier.height(16.dp))
 
+    // --- CABEÇALHO DA CATEGORIA (fundo = primary, mesmo verde do botão) ---
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(5.dp),
         colors = CardDefaults.cardColors(
-            // Cor do card muda se estiver expandido para dar destaque visual
-            containerColor = if (expanded) {
-                MaterialTheme.colorScheme.surfaceVariant
-            } else {
-                MaterialTheme.colorScheme.outlineVariant
-            }
+            // Aqui usamos a cor primary do seu tema
+            containerColor = MaterialTheme.colorScheme.primary
         )
     ) {
         Column {
-            // Cabeçalho da categoria que é clicável para expandir/recolher
+            // Linha clicável do cabeçalho (título + ícone)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -566,67 +558,77 @@ fun CategoryCard(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                // Título da categoria em fonte grande e negrito
                 Text(
                     text = title,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
+                    // Texto em onPrimary para contrastar sobre primary
+                    color = MaterialTheme.colorScheme.onPrimary
                 )
                 Row {
-                    // Ícone para expandir/recolher a lista
-                    IconButton(
-                        onClick = { onExpandToggle() }
-                    ) {
+                    IconButton(onClick = { onExpandToggle() }) {
                         Icon(
-                            imageVector = if (expanded) Icons.Default.KeyboardArrowUp
-                            else Icons.Default.KeyboardArrowDown,
-                            contentDescription = null
+                            imageVector = if (expanded)
+                                Icons.Default.KeyboardArrowUp
+                            else
+                                Icons.Default.KeyboardArrowDown,
+                            contentDescription = if (expanded) "Recolher" else "Expandir",
+                            tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                     if (title != "Sites Web") {
                         IconButton(
                             onClick = { showDeleteConfirmation = true },
-                            // Desabilita exclusão para a categoria padrão "Sites Web"
                             enabled = title != "Sites Web",
                             modifier = Modifier.padding(start = 8.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.Delete,
                                 contentDescription = "Excluir Categoria",
-                                // Cor do ícone muda se estiver desabilitado para indicar visualmente
-                                tint = MaterialTheme.colorScheme.error
+                                tint = MaterialTheme.colorScheme.onPrimary
                             )
                         }
                     }
                 }
             }
 
-            // Se estiver expandido, lista as senhas da categoria como texto clicável
+            // --- LISTA DE SENHAS (quando expanded == true) ---
             if (expanded) {
-                items.forEach { item ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onItemClick(item) } // ao clicar abre detalhe da senha
-                            .padding(horizontal = 30.dp, vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = item.titulo,
-                            fontSize = 23.sp,
-                            modifier = Modifier.weight(1f) // ocupa o espaço restante
-                        )
-                        Icon(
-                            imageVector = Icons.Default.MoreVert,
-                            contentDescription = "Mais opções de senha"
-                        )
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        // Mantém o fundo claro (surfaceVariant) que você já gosta
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                ) {
+                    items.forEach { item ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { onItemClick(item) }
+                                .padding(horizontal = 30.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = item.titulo,
+                                fontSize = 23.sp,
+                                modifier = Modifier.weight(1f),
+                                // Texto em onSurfaceVariant para legibilidade sobre surfaceVariant
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Icon(
+                                imageVector = Icons.Default.MoreVert,
+                                contentDescription = "Mais opções de senha",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
             }
         }
     }
 }
+
+
 
 // Função que mostra um pop-up com todos os detalhes de uma senha que o usuário clicou na lista
 @Composable
