@@ -629,112 +629,111 @@ fun CategoryCard(
 }
 
 
-
-// Função que mostra um pop-up com todos os detalhes de uma senha que o usuário clicou na lista
 @Composable
-fun PasswordDetailDialog(item: SenhaItem, onDismiss: () -> Unit, onPasswordRemoved: () -> Unit) {
-    // Controlo o context da minha Activity
+fun PasswordDetailDialog(
+    item: SenhaItem,
+    onDismiss: () -> Unit,
+    onPasswordRemoved: () -> Unit
+) {
     val context = LocalContext.current
-
-    // Variável que controla se vai aparecer o diálogo interno de confirmação de remoção da senha
     var showRemovePopUp by remember { mutableStateOf(false) }
-
-    // Estado que controla se a senha está visível ou oculta
     var passwordVisible by remember { mutableStateOf(false) }
 
-    // Exibe o diálogo (pop-up)
     Dialog(onDismissRequest = onDismiss) {
-
         Surface(
             shape = RoundedCornerShape(16.dp),
             tonalElevation = 8.dp,
             color = MaterialTheme.colorScheme.background
         ) {
-
             Column(modifier = Modifier.fillMaxWidth()) {
-
-                // Seta de voltar
                 BackButtonBar(onBackClick = onDismiss)
 
                 Column(modifier = Modifier.padding(16.dp)) {
-
-                    // Exibo o título da senha
-                    Text(
-                        text = item.titulo,
-                        fontSize = 30.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
-
-                    // Exibo o Login
+                    // --- Campo de Login (mantido igual) ---
                     Text("Login:", fontWeight = FontWeight.Bold)
                     StandardBoxPopUp {
-                        Text(item.login)
+                        Text(
+                            text = item.login,
+                            fontSize = 16.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 12.dp, top = 8.dp, bottom = 8.dp)
+                        )
                     }
 
-                    // Exibo a senha
-                    // Text("Senha:", fontWeight = FontWeight.Bold)
-                    // StandardBoxPopUp {
-                    // Text(item.senha)
-                    // }
+                    Spacer(Modifier.height(12.dp))
 
-                    // Exibo a senha
+
                     Text("Senha:", fontWeight = FontWeight.Bold)
                     StandardBoxPopUp {
                         Row(
-                            verticalAlignment = Alignment.CenterVertically
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                // Padding vertical menor: 4.dp ao invés de 8.dp
+                                .padding(horizontal = 12.dp, vertical = 4.dp),
+                                    verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                // Se passwordVisible for true, mostra a senha real, senão mostra bullets (•)
                                 text = if (passwordVisible) item.senha else "•".repeat(item.senha.length),
-                                // Ocupa o espaço disponível na Row (exceto o espaço do ícone)
-                                modifier = Modifier.weight(1f)
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(start = 4.dp),
+                                fontSize = 16.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
-                            // Botão com ícone para alternar a visibilidade da senha
-                            IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                                // OBSERVAÇÃO: Há um IconButton duplicado aqui (erro que deve ser removido)
-                                IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                                    // Ícone que muda conforme o estado da senha
-                                    Icon(
-                                        // Escolhe o ícone baseado no passwordVisible
-                                        imageVector = if (passwordVisible) {
-                                            Icons.Default.Visibility // Ícone de "olho cortado" (senha visível)
-                                        } else {
-                                            Icons.Default.VisibilityOff // Ícone de "olho aberto" (senha oculta)
-                                        },
-                                        // Texto descritivo para acessibilidade
-                                        contentDescription = if (passwordVisible) {
-                                            "Ocultar senha"  // Descrição quando senha está visível
-                                        } else {
-                                            "Mostrar senha"  // Descrição quando senha está oculta
-                                        }
-                                    )
-                                }
+                            IconButton(
+                                onClick = { passwordVisible = !passwordVisible },
+                                modifier = Modifier.size(20.dp) // ícone um pouco menor
+                            ) {
+                                Icon(
+                                    imageVector = if (passwordVisible)
+                                        Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                                    contentDescription = if (passwordVisible) "Ocultar senha" else "Mostrar senha",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(16.dp)
+                                )
                             }
                         }
                     }
 
-                    // Exibo a descrição da senha
-                    Text("Descrição:", fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 8.dp))
+                    Spacer(Modifier.height(12.dp))
+
+
+                    Text("Descrição:", fontWeight = FontWeight.Bold)
                     StandardBoxPopUp {
-                        Text(item.descricao)
+                        Text(
+                            text = item.descricao,
+                            fontSize = 16.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 12.dp, top = 8.dp, bottom = 8.dp)
+                        )
                     }
 
-                    // Exibo a categoria da senha
-                    Text("Categoria:", fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 8.dp))
+                    Spacer(Modifier.height(12.dp))
+
+
+                    Text("Categoria:", fontWeight = FontWeight.Bold)
                     StandardBoxPopUp {
-                        Text(item.categoria)
+                        Text(
+                            text = item.categoria,
+                            fontSize = 16.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 12.dp, top = 8.dp, bottom = 8.dp)
+                        )
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(24.dp))
 
-                    // Crio um Rox (linha) com o botão alterar e remover
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-
-                        // Botão alterar que abre a ChangePasswordActivity com os dados da senha
                         Button(
                             onClick = {
                                 val intent = Intent(context, ChangePasswordActivity::class.java).apply {
@@ -754,7 +753,6 @@ fun PasswordDetailDialog(item: SenhaItem, onDismiss: () -> Unit, onPasswordRemov
                             Text("Alterar")
                         }
 
-                        // Botão remover que apenas ativa o diálogo de confirmação (se deseja ou não remover a senha)
                         Button(
                             onClick = { showRemovePopUp = true },
                             colors = ButtonDefaults.buttonColors(
@@ -765,22 +763,15 @@ fun PasswordDetailDialog(item: SenhaItem, onDismiss: () -> Unit, onPasswordRemov
                         }
                     }
 
-                    // Diálogo de confirmação de remoção de senha
-                    // Ativado quando showRemovePopUp = true
+                    // Diálogo interno de confirmação de remoção
                     if (showRemovePopUp) {
                         RemovePasswordDialog(
                             item = item,
-                            onDismiss = {
-                                showRemovePopUp = false
-                            },
+                            onDismiss = { showRemovePopUp = false },
                             onSuccess = {
-                                // 1) Fecha o diálogo interno de confirmação
                                 showRemovePopUp = false
-                                // 2) Fecha o diálogo de detalhes (através de onDismiss())
                                 onDismiss()
-                                // 3) Informa ao MainScreen (via Categories → onPasswordRemoved) para recarregar
                                 onPasswordRemoved()
-                                // 4) Exibe o toast de sucesso
                                 Toast.makeText(context, "Senha excluída com sucesso!", Toast.LENGTH_SHORT).show()
                             },
                             onError = { e ->
@@ -793,6 +784,9 @@ fun PasswordDetailDialog(item: SenhaItem, onDismiss: () -> Unit, onPasswordRemov
         }
     }
 }
+
+
+
 
 // Função que exibe um diálogo de confirmação para excluir definitivamente a senha do Firestore
 @Composable
