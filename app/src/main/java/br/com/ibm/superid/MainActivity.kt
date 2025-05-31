@@ -58,39 +58,32 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import br.com.ibm.superid.ui.theme.core.util.CustomOutlinedTextField
+
+import br.com.ibm.superid.ui.theme.core.util.deletePasswordById
 import br.com.ibm.superid.ui.theme.core.util.reauthenticateUser
 
-// Classe principal que define a Activity inicial do aplicativo
+// Declarando a Activity da página principal do aplicativo
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Ativa o modo de bordas estendidas
         enableEdgeToEdge()
-        // Define o conteúdo da tela com o tema do app
         setContent {
             SuperIDTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    PreviewMainScreen()
-                }
+                MainScreen()
             }
         }
     }
 }
 
-// função que representa a tela principal do app
+// Função responsável pela interface da tela principal do aplicativo
 @Composable
 fun MainScreen() {
 
-    // Pega o context da minha Activity
     val context = LocalContext.current
 
-    // Declarando variáveis
     var passwords by remember { mutableStateOf<List<SenhaItem>>(emptyList()) }
     var categoriesList by remember { mutableStateOf<List<String>>(emptyList()) }
 
-    // Variáveis que controlam a visibilidade de três diálogos (pop-up)
     var showAddPopUp by remember { mutableStateOf(false) }
     var showExitDialog by remember { mutableStateOf(false) }
     var showQRInstructionDialog by remember { mutableStateOf(false) }
@@ -171,6 +164,7 @@ fun MainScreen() {
         map
     }
 
+
     fun deleteCategory(categoria: String, onSuccess: () -> Unit, onError: (Exception) -> Unit) {
         val user = Firebase.auth.currentUser
         if (user != null) {
@@ -239,7 +233,12 @@ fun MainScreen() {
                             // Aqui podemos abrir diálogo para confirmar
                             deleteCategory(cat,
                                 onSuccess = {
-                                    Toast.makeText(context, "Categoria excluída", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(
+                                        context,
+                                        "Categoria excluída",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    loadDataFireBase()
                                 },
                                 onError = { e ->
                                     Toast.makeText(context, "Erro ao excluir categoria: ${e.message}", Toast.LENGTH_LONG).show()
@@ -248,6 +247,9 @@ fun MainScreen() {
                         } else {
                             Toast.makeText(context, "Não é possível excluir categoria com senhas", Toast.LENGTH_SHORT).show()
                         }
+                    },
+                    onPasswordRemoved = {
+                        loadDataFireBase()
                     }
                 )
             }
@@ -469,7 +471,8 @@ fun MainScreen() {
 fun Categories(
     title: String,
     items: List<SenhaItem>,
-    onDeleteCategory: (String) -> Unit
+    onDeleteCategory: (String) -> Unit,
+    onPasswordRemoved: () -> Unit
 ) {
     // Estado que controla se a lista da categoria está expandida ou recolhida
     var expanded by remember { mutableStateOf(false) }
@@ -491,7 +494,13 @@ fun Categories(
     selectedItem?.let {
         PasswordDetailDialog(
             item = it,
-            onDismiss = { selectedItem = null }    // fecha o diálogo ao dispensar
+            onDismiss = { selectedItem = null },   // fecha o diálogo ao dispensar
+                    onPasswordRemoved = {
+                // 1) fecha o diálogo de detalhes
+                selectedItem = null
+                // 2) avisa ao MainScreen para recarregar
+                onPasswordRemoved()
+            }
         )
     }
 }
@@ -621,7 +630,7 @@ fun CategoryCard(
 
 // Função que mostra um pop-up com todos os detalhes de uma senha que o usuário clicou na lista
 @Composable
-fun PasswordDetailDialog(item: SenhaItem, onDismiss: () -> Unit) {
+fun PasswordDetailDialog(item: SenhaItem, onDismiss: () -> Unit, onPasswordRemoved: () -> Unit) {
     // Controlo o context da minha Activity
     val context = LocalContext.current
 
@@ -759,11 +768,18 @@ fun PasswordDetailDialog(item: SenhaItem, onDismiss: () -> Unit) {
                     if (showRemovePopUp) {
                         RemovePasswordDialog(
                             item = item,
-                            onDismiss = { showRemovePopUp = false },
-                            onSuccess = {
-                                Toast.makeText(context, "Senha excluída com sucesso!", Toast.LENGTH_SHORT).show()
+                            onDismiss = {
                                 showRemovePopUp = false
+                            },
+                            onSuccess = {
+                                // 1) Fecha o diálogo interno de confirmação
+                                showRemovePopUp = false
+                                // 2) Fecha o diálogo de detalhes (através de onDismiss())
                                 onDismiss()
+                                // 3) Informa ao MainScreen (via Categories → onPasswordRemoved) para recarregar
+                                onPasswordRemoved()
+                                // 4) Exibe o toast de sucesso
+                                Toast.makeText(context, "Senha excluída com sucesso!", Toast.LENGTH_SHORT).show()
                             },
                             onError = { e ->
                                 Toast.makeText(context, "Erro ao excluir: ${e.message}", Toast.LENGTH_LONG).show()
@@ -822,6 +838,7 @@ fun RemovePasswordDialog(
                         Button(
                             onClick = {
                                 deletePasswordById(item.id)
+                                onSuccess()
                             },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.error
@@ -995,20 +1012,6 @@ data class SenhaItem(
     val descricao: String,
     val categoria: String
 )
-
-fun deletePasswordById(senhaId: String) {
-    val auth = FirebaseAuth.getInstance()
-    val user = auth.currentUser
-
-    if (user != null) {
-        val db = FirebaseFirestore.getInstance()
-        db.collection("users")
-            .document(user.uid)
-            .collection("senhas")
-            .document(senhaId)
-            .delete()
-    }
-}
 
 // Preview da tela principal
 @Preview(

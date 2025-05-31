@@ -7,14 +7,17 @@ import android.util.Log
 import android.widget.Toast
 import br.com.ibm.superid.EmailVerificationActivity
 import br.com.ibm.superid.MainActivity
+import br.com.ibm.superid.SenhaItem
 import br.com.ibm.superid.categoriasUsuario
 import br.com.ibm.superid.ui.theme.core.util.createDefaultCategorias
 import br.com.ibm.superid.ui.theme.core.util.saveUserToFirestore
 import com.google.firebase.Firebase
 import com.google.firebase.auth.EmailAuthProvider
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.auth
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
 import com.google.firebase.firestore.ktx.firestore
 
@@ -417,3 +420,19 @@ fun updatePassword(
             }
     }
 }
+
+fun deletePasswordById(senhaId: String) {
+    val auth = FirebaseAuth.getInstance()
+    val user = auth.currentUser
+
+    if (user != null) {
+        val db = FirebaseFirestore.getInstance()
+        db.collection("users")
+            .document(user.uid)
+            .collection("senhas")
+            .document(senhaId)
+            .delete()
+    }
+}
+
+
