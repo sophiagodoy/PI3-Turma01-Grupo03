@@ -1,6 +1,5 @@
 // TELA PARA O USUÁRIO SER INFORMADO SOBRE A VERIFICAÇÃO DO EMAIL E SUAS CONDIÇÕES
 
-
 package br.com.ibm.superid
 
 import android.content.Intent
@@ -12,13 +11,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -36,34 +30,33 @@ import br.com.ibm.superid.ui.theme.core.util.SuperIDHeader
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 
-// Declarando a Activity (EmailVerificationActivity)
+// Declarando a Activity para informar sobre verificação do email e suas condições
 class EmailVerificationActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             SuperIDTheme {
-                EmailVerificationPreview()
+                EmailVerification()
             }
         }
     }
 }
 
 // Função Composable que apresenta as informações sobre a confirmação do email
+@Preview
 @Composable
 fun EmailVerification(modifier: Modifier = Modifier) {
 
-    // Cria variável para poder trocar de tela e mostrar toast
     val context = LocalContext.current
-
 
     Column (modifier = Modifier
         .fillMaxSize()
         .background(MaterialTheme.colorScheme.background)) {
+
         // Cabeçalho visual personalizado
         SuperIDHeader()
 
-        // Layout em coluna que ocupa toda a tela e aplica padding de 16dp
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -72,7 +65,7 @@ fun EmailVerification(modifier: Modifier = Modifier) {
             horizontalAlignment = Alignment.CenterHorizontally
         )
         {
-            // Exibe um texto na tela sobre as informações do email
+
             Text(
                 text = "Verifique sua caixa de e-mail e confirme o endereço fornecido.\n\n" +
                         "Sem a confirmação, não será possível utilizar o login sem senha nem redefinir sua senha no aplicativo.\n\n" +
@@ -87,14 +80,16 @@ fun EmailVerification(modifier: Modifier = Modifier) {
             Spacer(modifier = Modifier.height(32.dp))
 
             // Botão para continuar para o login
-            Button(onClick = {
-                context.startActivity(Intent(context, SignInActivity::class.java))
-            },
+            Button(
+                onClick = {
+                    context.startActivity(
+                        Intent(context, SignInActivity::class.java)
+                    )
+                },
                 modifier = Modifier
-                    .height(60.dp)    // altura maior
+                    .height(60.dp)
                     .width(150.dp)
             ) {
-                // Define o texto que está dentro do botão
                 Text("Continuar")
             }
 
@@ -106,11 +101,18 @@ fun EmailVerification(modifier: Modifier = Modifier) {
                 color = MaterialTheme.colorScheme.tertiary,
                 fontSize = 16.sp,
                 style = TextStyle(
-                    textDecoration = TextDecoration.Underline),
+                    textDecoration = TextDecoration.Underline), // Aplica sublinado ao texto
+
                 modifier = Modifier
                     .padding(top = 8.dp)
+
+                    // Torna o texto clicável
                     .clickable {
+
+                        // Obtém o usuário logado
                         val user = Firebase.auth.currentUser
+
+                        // Verifica se realmente existe um usuário logado
                         if (user != null) {
                             user.sendEmailVerification()
                                 .addOnSuccessListener {
@@ -124,17 +126,6 @@ fun EmailVerification(modifier: Modifier = Modifier) {
                         }
                     }
             )
-
         }
     }
 }
-
-@Preview
-@Composable
-fun EmailVerificationPreview() {
-    SuperIDTheme {
-        EmailVerification()
-    }
-}
-
-
