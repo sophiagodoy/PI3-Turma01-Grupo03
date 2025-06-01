@@ -1,10 +1,7 @@
 // TELA PARA RECUPERAÇÃO DE SENHA DO USUÁRIO
 
-// Definição do pacote aplicativo
 package br.com.ibm.superid
 
-// Importações necessárias
-import android.annotation.SuppressLint
 import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Intent
@@ -23,7 +20,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -55,14 +51,14 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlin.jvm.java
 
-// Declarando a Activity (ForgotPasswordActivity)
+// Declarando a Activity para recuperação de senha do usuário
 class ForgotPasswordActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             SuperIDTheme {
-                PreviewForgorPasswordActivity()
+                ForgotPasswordScreen()
             }
         }
     }
@@ -122,7 +118,7 @@ fun sendEmail(email: String, context: Context ){
         }
 
 // Função que apresenta o formulário de recuperação de senha
-@SuppressLint("SuspiciousIndentation")
+@Preview
 @Composable
 fun ForgotPasswordScreen(modifier: Modifier = Modifier) {
 
@@ -192,7 +188,8 @@ fun ForgotPasswordScreen(modifier: Modifier = Modifier) {
             // Botão que ao ser clicado manda o link de redefinição de senha no email
             Button(
                 onClick = {
-                    if (email.isNotBlank() && email.contains("@")){
+                    // Verifica se o campo "email" não está em branco e não contém o caractere '@'
+                    if (email.isNotBlank() && '@' in email) {
                         checkEmailVerification(email, context){
                             val intent = Intent(context, EmailResetPasswordActivity::class.java)
                             context.startActivity(intent)
@@ -201,27 +198,15 @@ fun ForgotPasswordScreen(modifier: Modifier = Modifier) {
                         Toast.makeText(context, "Por favor, insira seu email", Toast.LENGTH_SHORT).show()
                     }
                 },
+
                 // Se o email estiver em branco, desabilita o botão
                 modifier = Modifier
                     .height(50.dp)
                     .width(250.dp),
-                enabled = email.isNotBlank()
+                enabled = email.isNotBlank() // Controla se o botão está ativo ou inativo
             ) {
                 Text("Enviar Link de Redefinição")
             }
-        }
-    }
-}
-
-@Composable
-@Preview
-fun PreviewForgorPasswordActivity(){
-    SuperIDTheme {
-        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            // Chama a função composable SignIn e aplica o padding interno do Scaffold
-            ForgotPasswordScreen(
-                modifier = Modifier.padding(innerPadding)
-            )
         }
     }
 }
