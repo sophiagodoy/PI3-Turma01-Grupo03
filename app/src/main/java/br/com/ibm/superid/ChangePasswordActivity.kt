@@ -43,7 +43,7 @@ import br.com.ibm.superid.ui.theme.core.util.SuperIDHeader
 import br.com.ibm.superid.ui.theme.core.util.fetchCategoriasUsuario
 import br.com.ibm.superid.ui.theme.core.util.updatePassword
 
-// Declarando a Activity (ChangePasswordActivity)
+// Declarando a Activity que exibe o formulário alterar a senha
 class ChangePasswordActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,7 +78,7 @@ class ChangePasswordActivity : ComponentActivity() {
     }
 }
 
-// Função Composable que apresenta o formulário de adicionar senha
+// Função que apresenta o formulário de adicionar senha
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChangePassword(

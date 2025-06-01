@@ -1,3 +1,5 @@
+// TELA QUE REPRESENTA A CONFIRMAÇÃO DE EMAIL ENVIADO PARA A RECUPERAÇÃO DE SENHA
+
 package br.com.ibm.superid
 
 import android.content.Intent
@@ -11,11 +13,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -33,34 +33,34 @@ import br.com.ibm.superid.ui.theme.core.util.SuperIDHeader
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 
-// Declarando a Activity (EmailVerificationActivity)
+// Declarando a Activity que exibe o formulário para adicionar uma nova senha
 class EmailResetPasswordActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             SuperIDTheme {
-                PasswordResetVerificationPreview()
+                PasswordResetVerification()
             }
         }
     }
 }
 
-// Função Composable que apresenta as informações sobre a confirmação do email
+// Função que apresenta as informações sobre a confirmação do email de recuperar senha
+@Preview
 @Composable
 fun PasswordResetVerification(modifier: Modifier = Modifier) {
 
-    // Cria variável para poder trocar de tela e mostrar toast
     val context = LocalContext.current
-
 
     Column (modifier = Modifier
         .fillMaxSize()
         .background(MaterialTheme.colorScheme.background)) {
-        // Cabeçalho visual personalizado
+
+        // Função que define o cabeçalho visual personalizado
         SuperIDHeader()
 
-        // Botão de voltar
+        // Seta de voltar para a ForgotPasswordActivity
         IconButton(
             onClick = {
                 val intent = Intent(context, ForgotPasswordActivity::class.java)
@@ -70,11 +70,10 @@ fun PasswordResetVerification(modifier: Modifier = Modifier) {
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Voltar"
+                contentDescription = "Voltar para a tela de esqueceu senha"
             )
         }
 
-        // Layout em coluna que ocupa toda a tela e aplica padding de 16dp
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -83,7 +82,6 @@ fun PasswordResetVerification(modifier: Modifier = Modifier) {
             horizontalAlignment = Alignment.CenterHorizontally
         )
         {
-            // Exibe um texto na tela sobre as informações do email
             Text(
                 text = "Verifique sua caixa de e-mail altere sua senha se ainda desejar!",
                 textAlign = TextAlign.Center,
@@ -100,12 +98,18 @@ fun PasswordResetVerification(modifier: Modifier = Modifier) {
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.tertiary,
                 fontSize = 16.sp,
-                style = TextStyle(
-                    textDecoration = TextDecoration.Underline),
+                style = TextStyle(textDecoration = TextDecoration.Underline), // Aplica sublinado ao texto
+
                 modifier = Modifier
                     .padding(top = 8.dp)
+
+                    // Torna o texto clicável
                     .clickable {
+                        
+                        // Obtém o usuário logado
                         val user = Firebase.auth.currentUser
+
+                        // Verifica se realmente existe um usuário logado
                         if (user != null) {
                             user.sendEmailVerification()
                                 .addOnSuccessListener {
@@ -119,15 +123,6 @@ fun PasswordResetVerification(modifier: Modifier = Modifier) {
                         }
                     }
             )
-
         }
-    }
-}
-
-@Preview
-@Composable
-fun PasswordResetVerificationPreview() {
-    SuperIDTheme {
-        PasswordResetVerification()
     }
 }

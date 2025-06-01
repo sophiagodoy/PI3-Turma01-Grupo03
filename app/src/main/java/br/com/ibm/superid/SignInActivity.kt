@@ -167,7 +167,7 @@ fun SignIn(modifier: Modifier = Modifier) {
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.tertiary,
                 fontSize = 16.sp,
-                style = TextStyle(textDecoration = TextDecoration.Underline),
+                style = TextStyle(textDecoration = TextDecoration.Underline), // Aplica sublinhado ao texto
                 modifier = Modifier
                     .padding(top = 8.dp)
 
