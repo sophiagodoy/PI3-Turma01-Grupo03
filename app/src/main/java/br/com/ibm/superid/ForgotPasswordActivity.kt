@@ -2,6 +2,7 @@
 
 package br.com.ibm.superid
 
+import android.app.Activity
 import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Intent
@@ -139,8 +140,11 @@ fun ForgotPasswordScreen(modifier: Modifier = Modifier) {
                     // Verifica se o campo "email" não está em branco e não contém o caractere '@'
                     if (email.isNotBlank() && '@' in email) {
                         checkEmailVerification(email, context){
-                            val intent = Intent(context, EmailResetPasswordActivity::class.java)
+                            val intent = Intent(context, EmailResetPasswordActivity::class.java).apply{
+                                putExtra("UserEmail", email)
+                            }
                             context.startActivity(intent)
+                            (context as? Activity)?.finish()
                         }
                     } else{
                         Toast.makeText(context, "Por favor, insira seu email", Toast.LENGTH_SHORT).show()

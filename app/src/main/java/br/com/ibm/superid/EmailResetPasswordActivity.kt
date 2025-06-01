@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import br.com.ibm.superid.ui.theme.SuperIDTheme
 import br.com.ibm.superid.ui.theme.core.util.SuperIDHeader
+import br.com.ibm.superid.ui.theme.core.util.sendPasswordResetEmailByEmail
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 
@@ -38,18 +39,20 @@ class EmailResetPasswordActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        // Extrai o dado que veio da ForgotPasswordActivity
+        val userEmail = intent.getStringExtra("UserEmail") ?: ""
         setContent {
             SuperIDTheme {
-                PasswordResetVerification()
+                //vou usar esse email na função para enviar o link de redefinição de senha
+                PasswordResetVerification(email = userEmail)
             }
         }
     }
 }
 
 // Função que apresenta as informações sobre a confirmação do email de recuperar senha
-@Preview
 @Composable
-fun PasswordResetVerification(modifier: Modifier = Modifier) {
+fun PasswordResetVerification(email: String, modifier: Modifier = Modifier) {
 
     val context = LocalContext.current
 
@@ -105,22 +108,7 @@ fun PasswordResetVerification(modifier: Modifier = Modifier) {
 
                     // Torna o texto clicável
                     .clickable {
-                        
-                        // Obtém o usuário logado
-                        val user = Firebase.auth.currentUser
-
-                        // Verifica se realmente existe um usuário logado
-                        if (user != null) {
-                            user.sendEmailVerification()
-                                .addOnSuccessListener {
-                                    Toast.makeText(context, "E-mail de verificação reenviado!", Toast.LENGTH_LONG).show()
-                                }
-                                .addOnFailureListener {
-                                    Toast.makeText(context, "Falha ao reenviar", Toast.LENGTH_LONG).show()
-                                }
-                        } else {
-                            Toast.makeText(context, "Usuário não autenticado!", Toast.LENGTH_LONG).show()
-                        }
+                        sendPasswordResetEmailByEmail(context, email)
                     }
             )
         }

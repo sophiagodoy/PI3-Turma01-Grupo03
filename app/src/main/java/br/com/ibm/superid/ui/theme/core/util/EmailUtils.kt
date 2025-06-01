@@ -6,6 +6,7 @@ import android.content.Intent
 import android.util.Log
 import android.widget.Toast
 import br.com.ibm.superid.EmailVerificationActivity
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -92,3 +93,23 @@ fun sendEmail(email: String, context: Context ){
 
         }
 }
+
+
+fun sendPasswordResetEmailByEmail(context: Context, email: String) {
+    if (email.isBlank()) {
+        Toast.makeText(context, "E-mail inválido", Toast.LENGTH_LONG).show()
+        return
+    }
+
+    // Usa FirebaseAuth para enviar o e-mail de redefinição
+    FirebaseAuth.getInstance()
+        .sendPasswordResetEmail(email)
+        .addOnSuccessListener {
+            Toast.makeText(context, "E-mail de redefinição enviado para $email", Toast.LENGTH_LONG).show()
+        }
+        .addOnFailureListener { e ->
+            // Pode ser erro de formato de e-mail ou usuário não cadastrado, etc.
+            Toast.makeText(context, "Falha ao reenviar: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
+        }
+}
+
