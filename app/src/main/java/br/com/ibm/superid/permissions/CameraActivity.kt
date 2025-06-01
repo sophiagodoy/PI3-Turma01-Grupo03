@@ -10,6 +10,7 @@ package br.com.ibm.superid.permissions
 
 
 import android.Manifest
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -110,7 +111,7 @@ fun BackCameraQrPreview(
     // Ele não lê QR, apenas reflete o vídeo para a tela.
 
     val previewUseCase = remember {
-        androidx.camera.core.Preview.Builder().build()
+        androidx.camera.core.Preview.Builder().build() // https://developer.android.com/training/camerax/preview
     }
 
     // 2) Análise de imagem (para QR Code)
@@ -120,7 +121,7 @@ fun BackCameraQrPreview(
 
     val imageAnalyzerUseCase = remember {
         ImageAnalysis.Builder()
-            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST) // https://developer.android.com/training/camerax/analyze#backpressure-strategies
             .build()
     }
 
@@ -138,15 +139,15 @@ fun BackCameraQrPreview(
     fun bindCamera() {
         cameraProvider.value?.let { provider ->
             val selector = androidx.camera.core.CameraSelector.Builder()
-                .requireLensFacing(androidx.camera.core.CameraSelector.LENS_FACING_BACK)
+                .requireLensFacing(androidx.camera.core.CameraSelector.LENS_FACING_BACK) // https://developer.android.com/training/camerax/extending#selector
                 .build()
 
             provider.unbindAll()
             provider.bindToLifecycle(
                 localContext as LifecycleOwner,
                 selector, // escolhe a câmera traseira
-                previewUseCase, // “espelho” que mostra o vídeo
-                imageAnalyzerUseCase // “lupa” que procura QR em cada frame
+                previewUseCase, // “espelho” que mostra o vídeo  // UseCase de preview – https://developer.android.com/training/camerax/preview
+                imageAnalyzerUseCase // “lupa” que procura QR em cada frame // UseCase de análise – https://developer.android.com/training/camerax/analyze
             )
         }
     }
@@ -156,7 +157,7 @@ fun BackCameraQrPreview(
     // ProcessCameraProvider.awaitInstance(localContext) até a cam estar disponivel para uso
 
     LaunchedEffect(Unit) {
-        cameraProvider.value = ProcessCameraProvider.awaitInstance(localContext)
+        cameraProvider.value = ProcessCameraProvider.awaitInstance(localContext) // https://developer.android.com/training/camerax/preview#kotlin_1
         // Quando a câmera está pronta, guarda o “controle” em cameraProvider.value
         // e chama bindCamera() para conectar tudo.
         bindCamera()
@@ -182,7 +183,7 @@ fun BackCameraQrPreview(
             // conectamos previewUseCase ao PreviewView. A câmera passa a “espelhar” tudo nessa janela, e você vê na
             // tela o que a câmera vê, em tempo real.
             PreviewView(ctx).also { previewView ->
-                previewUseCase.setSurfaceProvider(previewView.surfaceProvider)
+                previewUseCase.setSurfaceProvider(previewView.surfaceProvider) // https://developer.android.com/training/camerax/preview#kotlin_2
             }
         }
     )
@@ -227,10 +228,10 @@ private fun scanImageForQrCode(
         imageProxy.close()
     }
 }
-
+// so pode ser acessada aqui
 private fun updateLoginInFirestore(context: Context, qrText: String) {
     try {
-        val json = JSONObject(qrText)
+        val json = JSONObject(qrText) // Converte string JSON em objeto – https://developer.android.com/reference/org/json/JSONObject
         val loginTokenId = json.getString("loginToken")    // extrai a chave loginToken
 
         val currentUser = FirebaseAuth.getInstance().currentUser //Descobre quem está usando o app (FirebaseAuth)
@@ -253,6 +254,7 @@ private fun updateLoginInFirestore(context: Context, qrText: String) {
                 Log.i("SuperID", "Login atualizado em login/$loginTokenId.")
                 val intent = Intent(context, MainActivity::class.java)
                 context.startActivity(intent)
+                (context as? Activity)?.finish()
             }
             .addOnFailureListener { e ->
                 Log.e("SuperID", "Falha ao atualizar login: ${e.message}")
