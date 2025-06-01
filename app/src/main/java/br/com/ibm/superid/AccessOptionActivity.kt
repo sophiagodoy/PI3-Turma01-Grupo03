@@ -42,7 +42,6 @@ class AccessOptionActivity : ComponentActivity() {
     }
 }
 
-
 // Função responsável pela interface da tela de escolher opção de acesso
 @Preview
 @Composable

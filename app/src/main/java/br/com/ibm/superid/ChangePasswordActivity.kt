@@ -102,21 +102,19 @@ fun ChangePassword(
     var expanded by remember { mutableStateOf(false) }
     var passwordVisible by remember { mutableStateOf(false) }
 
-    // ScrollState para a área de formulário
+    // Rolagem de tela
     val scrollState = rememberScrollState()
-
-    // Seta que volta para AccessOptionActivity
-    // Baseado em: https://developer.android.com/develop/ui/compose/components/app-bars?hl=pt-br#top-app-bar
-    // Baseado em: https://alexzh.com/visual-guide-to-topappbar-variants-in-jetpack-compose/?utm_source=chatgpt.com
 
     Column (modifier = Modifier
         .fillMaxSize()
         .background(MaterialTheme.colorScheme.background)) {
-        // Cabeçalho visual personalizado
+
+        // Função que define o cabeçalho visual personalizado
         SuperIDHeader()
 
-
-        // Botão de voltar
+        // Seta de voltar para a MainActivity
+        // Baseado em: https://developer.android.com/develop/ui/compose/components/app-bars?hl=pt-br#top-app-bar
+        // Baseado em: https://alexzh.com/visual-guide-to-topappbar-variants-in-jetpack-compose/
         IconButton(
             onClick = {
                 val intent = Intent(context, MainActivity::class.java)
@@ -131,7 +129,6 @@ fun ChangePassword(
             )
         }
 
-
         Box(
             modifier = Modifier
                 .weight(1f) // ocupa o espaço restante abaixo do cabeçalho
@@ -144,7 +141,6 @@ fun ChangePassword(
                     bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 16.dp
                 )
         ) {
-            // Layout em coluna que ocupa toda a tela e aplica padding de 16dp
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -153,51 +149,60 @@ fun ChangePassword(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
-                // Define o título da tela em negrito e tamanho 30sp
+                // Título principal da tela com o titulo da senha que será alterada em letra maiúscula
                 Text(
                     text = "ALTERAR: ${initialTitulo.uppercase()}",
                     fontSize = 30.sp,
                     fontWeight = FontWeight.Bold
                 )
 
-                // Espaço de 24dp abaixo do título
                 Spacer(Modifier.height(24.dp))
 
+                // Campo de texto para o título
                 CustomOutlinedTextField(
                     value = titulo,
                     onValueChange = { titulo = it },
                     label = "Titulo"
                 )
 
+                // Campo de texto para o login
                 CustomOutlinedTextField(
                     value = login,
                     onValueChange = { login = it },
                     label = "Login (opcional)"
                 )
 
-                // Campo de entrada para a senha
+                // Campo de texto para senha
                 CustomOutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
                     label = "Senha",
-                    //define se o texto vai ser visivel ou oculto
+
+                    // Ocultação e exibição de senha
                     visualTransformation = if (passwordVisible) {
-                        VisualTransformation.None
+                        VisualTransformation.None // Exibe o texto normalmente
                     } else {
-                        PasswordVisualTransformation()
+                        PasswordVisualTransformation() // Substitui cada caracter por "."
                     },
-                    // Define o tipo de teclado (neste caso, teclado para senha)
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Password
+                    ),
+
+                    // Alterando a visibilidade da imagem
                     trailingIcon = {
-                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        IconButton(
+                            onClick = {
+                                passwordVisible = !passwordVisible
+                            }
+                        ) {
                             Icon(
-                                // Alterna entre o ícone de "visível" e "não visível"
                                 imageVector = if (passwordVisible) {
-                                    Icons.Default.Visibility
-                                } // Icone do "olho cortado"}
+                                    Icons.Default.Visibility // Olho aberto
+                                }
                                 else {
-                                    Icons.Default.VisibilityOff
-                                }, // Icone do olho
+                                    Icons.Default.VisibilityOff // Olho fechado
+                                },
                                 contentDescription = if (passwordVisible) {
                                     "Ocultar senha"
                                 } else {
@@ -207,52 +212,65 @@ fun ChangePassword(
                         }
                     }
                 )
+
+                // Dropdown de categorias
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 10.dp),
                     contentAlignment = Alignment.TopCenter
                 ) {
-                    ExposedDropdownMenuBox(
-                        expanded = expanded,
-                        onExpandedChange = {
 
+                    // Quando o usuário toca no campo categoria para abrir o dropdown
+                    ExposedDropdownMenuBox(
+                        expanded = expanded, // Controla se o menu está aberto ou fechado
+
+                        // Se o dropdown for aberto
+                        onExpandedChange = {
                             if (!expanded) {
-                                fetchCategoriasUsuario(context)
+                                fetchCategoriasUsuario(context) // Chama a função para atualizar as categorias do usuário
                             }
-                            expanded = !expanded
+                            expanded = !expanded // Trasnforma o dropdown em true (aberto)
                         },
-                        modifier = Modifier.wrapContentWidth()
+                        modifier = Modifier.wrapContentWidth() // Faz com que o dropdown ocupe exatamente o mesmo tamanho do CustomOutlinedTextField
                     ) {
 
+                        // Campo não editável para selecionar categoria em forma de Dropdown
                         CustomOutlinedTextField(
                             value = categoria,
                             onValueChange = { /* não edita */ },
                             label = "Categoria",
-                            readOnly = true,
+
+                            readOnly = true, // Não permite que o usuário digite no campo (campo apenas para leitura)
                             modifier = Modifier
-                                .menuAnchor(),
+                                .menuAnchor(), // Faz com que o ExposedDropdownMenu abra exatamente abaixo do CustomOutlinedTextField
+
+                            // Exibição do ícone de seta (para cima/baixo)
                             trailingIcon = {
                                 ExposedDropdownMenuDefaults.TrailingIcon(expanded)
                             }
                         )
 
+                        // Menu suspenso aparece com as opções
                         ExposedDropdownMenu(
-                            expanded = expanded,
-                            onDismissRequest = { expanded = false }
+                            expanded = expanded, // Controla se o menu está aberto ou fechado
+                            onDismissRequest = { expanded = false } // Caso o usuário faça qualquer ação fora do menu suspenso, ele será fechado
                         ) {
+
+                            // Verifica se não existe nenhuma categoria no banco de dados do usuário
                             if (categoriasUsuario.isEmpty()) {
                                 DropdownMenuItem(
                                     text = { Text("Nenhuma categoria") },
-                                    onClick = { expanded = false }
+                                    onClick = { expanded = false } // Quando clicado em "Nenhuma categoria" apenas fecha o menu
                                 )
                             } else {
-                                categoriasUsuario.forEach { cat ->
+                                // Caso exista categorias no banco de dados do usuário
+                                categoriasUsuario.forEach { cat -> // Para cada elemento dentro de categoriasUsuario, é criada uma variável chamada cat
                                     DropdownMenuItem(
-                                        text = { Text(cat) },
+                                        text = { Text(cat) }, // Exibe o texto da categoria
                                         onClick = {
-                                            categoria = cat
-                                            expanded = false
+                                            categoria = cat // Quando clicado na categoria, define a veriável com o valor selecionado
+                                            expanded = false // Fecha o menu (agora só aparece a categoria que foi selecionada)
                                         }
                                     )
                                 }
@@ -261,17 +279,16 @@ fun ChangePassword(
                     }
                 }
 
-                // Campo de texto para digitar a descrição da nova senha
+                // Campo de texto para a descrição
                 CustomOutlinedTextField(
                     value = descricao,
                     onValueChange = { descricao = it },
                     label = "Descrição (opcional)"
                 )
 
-                // Espaço de 24dp antes do botão
                 Spacer(Modifier.height(24.dp))
 
-                // Botão que quando clicado salva a nova senha no banco Firestore
+                // Botão que quando clicado salva a nova senha no banco de dados Firestore
                 Button(
                     onClick = {
                         // Chama nossa função de atualização
@@ -289,7 +306,6 @@ fun ChangePassword(
                         .height(60.dp)
                         .width(150.dp)
                 ) {
-                    // Define o texto que está dentro do botão
                     Text("Salvar")
                 }
             }

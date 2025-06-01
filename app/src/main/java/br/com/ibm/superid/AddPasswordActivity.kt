@@ -60,32 +60,31 @@ class AddPasswordActivity : ComponentActivity() {
 val categoriasUsuario = mutableStateListOf<String>()
 
 // Composable que cria o formulário para adicionar uma nova senha
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class) // Para ExposedDropdownMenuBox que ainda não foi estabilizado oficialmente na biblioteca Jetpack Compose (considerados APIs experimentais)
+@Preview
 @Composable
 fun AddPassword(modifier: Modifier = Modifier) {
+
     val context = LocalContext.current
 
-    // Estados que armazenam os valores dos campos do formulário
     var login by remember { mutableStateOf("") }
     var senha by remember { mutableStateOf("") }
     var confirmarSenha by remember { mutableStateOf("") }
     var categoria by remember { mutableStateOf("") }
     var descricao by remember { mutableStateOf("") }
     var titulo by remember { mutableStateOf("") }
-    var expanded by remember { mutableStateOf(false) }
-
+    var expanded by remember { mutableStateOf(false) } // Controla o Dropdown
     var passwordVisible by remember { mutableStateOf(false) }
     var confirmPasswordVisible by remember { mutableStateOf(false) }
 
 
-    // Ao iniciar o composable, busca as categorias do usuário no Firestore
+    // Ao iniciar o composable, busca as categorias do usuário no Firestore uma única vez (Unit)
     LaunchedEffect(Unit) {
         fetchCategoriasUsuario(context)
     }
 
-    // Container principal que define fundo e organiza os elementos verticalmente
-
-    val scrollState = rememberScrollState() //rolagem de tela
+    // Rolagem de tela
+    val scrollState = rememberScrollState()
 
     Column(
         modifier = Modifier
@@ -94,10 +93,10 @@ fun AddPassword(modifier: Modifier = Modifier) {
             .padding(bottom = 100.dp)
     ) {
 
-        // Cabeçalho visual personalizado do aplicativo
+        // Função que define o cabeçalho visual personalizado
         SuperIDHeader()
 
-        // Botão para voltar para a tela principal (MainActivity)
+        // Seta de voltar para a MainActivity
         IconButton(
             onClick = {
                 val intent = Intent(context, MainActivity::class.java)
@@ -144,21 +143,21 @@ fun AddPassword(modifier: Modifier = Modifier) {
             Spacer(Modifier.height(24.dp))
 
 
-            // Campo de texto para o título da senha
+            // Campo de texto para o título
             CustomOutlinedTextField(
                 value = titulo,
                 onValueChange = { titulo = it },
                 label = "Título"
             )
 
-            // Campo de texto para o login da senha
+            // Campo de texto para o login
             CustomOutlinedTextField(
                 value = login,
                 onValueChange = { login = it },
                 label = "Login (opcional)"
             )
 
-            // Campo de entrada para a senha
+            // Campo de texto para a senha
             CustomOutlinedTextField(
                 value = senha,
                 onValueChange = { senha = it },
@@ -198,7 +197,7 @@ fun AddPassword(modifier: Modifier = Modifier) {
                 }
             )
 
-            // Campo para digitar a confirmação de senha
+            // Campo de texto para confirmação de senha
             CustomOutlinedTextField(
                 value = confirmarSenha,
                 onValueChange = { confirmarSenha = it },
@@ -238,51 +237,67 @@ fun AddPassword(modifier: Modifier = Modifier) {
                 }
             )
 
+            // Dropdown de categorias
+            // Baseado na documentação: https://developer.android.com/develop/ui/compose/components/menu?hl=pt-br
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 10.dp),
                 contentAlignment = Alignment.TopCenter
             ) {
-                ExposedDropdownMenuBox(
-                    expanded = expanded,
-                    onExpandedChange = {
 
+                // Quando o usuário toca no campo categoria para abrir o dropdown
+                ExposedDropdownMenuBox(
+                    expanded = expanded, // Controla se o menu está aberto ou fechado
+
+                    // Se o dropdown for aberto
+                    onExpandedChange = {
                         if (!expanded) {
-                            fetchCategoriasUsuario(context)
+                            fetchCategoriasUsuario(context) // Chama a função para atualizar as categorias do usuário
                         }
-                        expanded = !expanded },
-                    modifier = Modifier.wrapContentWidth()
+                        expanded = !expanded // Trasnforma o dropdown em true (aberto)
+                    },
+                    modifier = Modifier.wrapContentWidth() // Faz com que o dropdown ocupe exatamente o mesmo tamanho do CustomOutlinedTextField
                 ) {
 
+                    // Campo não editável para selecionar categoria em forma de Dropdown
                     CustomOutlinedTextField(
                         value = categoria,
                         onValueChange = { /* não edita */ },
                         label = "Categoria",
-                        readOnly = true,
+
+                        readOnly = true, // Não permite que o usuário digite no campo (campo apenas para leitura)
                         modifier = Modifier
-                            .menuAnchor(),
+                            .menuAnchor(), // Faz com que o ExposedDropdownMenu abra exatamente abaixo do CustomOutlinedTextField
+
+                        // Exibição do ícone de seta (para cima/baixo)
                         trailingIcon = {
                             ExposedDropdownMenuDefaults.TrailingIcon(expanded)
                         }
                     )
 
+                    // Menu suspenso aparece com as opções
                     ExposedDropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
+                        expanded = expanded, // Controla se o menu está aberto ou fechado
+                        onDismissRequest = { expanded = false } // Caso o usuário faça qualquer ação fora do menu suspenso, ele será fechado
                     ) {
+
+                        // Verifica se não existe nenhuma categoria no banco de dados do usuário
                         if (categoriasUsuario.isEmpty()) {
                             DropdownMenuItem(
                                 text = { Text("Nenhuma categoria") },
-                                onClick = { expanded = false }
+                                onClick = {
+                                    expanded = false // Quando clicado em "Nenhuma categoria" apenas fecha o menu
+                                }
                             )
                         } else {
-                            categoriasUsuario.forEach { cat ->
+                            // Caso exista categorias no banco de dados do usuário
+                            categoriasUsuario.forEach { cat -> // Para cada elemento dentro de categoriasUsuario, é criada uma variável chamada cat
                                 DropdownMenuItem(
-                                    text = { Text(cat) },
+                                    text = { Text(cat) }, // Exibe o texto da categoria
                                     onClick = {
-                                        categoria = cat
-                                        expanded = false
+                                        categoria = cat // Quando clicado na categoria, define a veriável com o valor selecionado
+                                        expanded = false // Fecha o menu (agora só aparece a categoria que foi selecionada)
                                     }
                                 )
                             }
@@ -291,7 +306,7 @@ fun AddPassword(modifier: Modifier = Modifier) {
                 }
             }
 
-            // Campo para digitar a descrição
+            // Campo de texto para descrição
             CustomOutlinedTextField(
                 value = descricao,
                 onValueChange = { descricao = it },
@@ -300,7 +315,7 @@ fun AddPassword(modifier: Modifier = Modifier) {
 
             Spacer(Modifier.height(24.dp))
 
-            // Botão para salvar a nova senha no banco
+            // Botão para salvar a nova senha no banco de dados Firestore
             Button(
                 onClick = {
                     when {
@@ -315,10 +330,6 @@ fun AddPassword(modifier: Modifier = Modifier) {
                         // Verifica se o título tem mais de 30 caracteres
                         titulo.length > 30 ->
                             Toast.makeText(context, "Título não pode ter mais de 30 caracteres!", Toast.LENGTH_SHORT).show()
-
-                        // Verifica se a senha tem menos de 4 caracteres
-                        senha.length < 4 ->
-                            Toast.makeText(context, "Senha deve ter pelo menos 4 caracteres!", Toast.LENGTH_SHORT).show()
 
                         else -> {
                             addNewPassword(context, senha, categoria, descricao, titulo, login)
@@ -338,12 +349,3 @@ fun AddPassword(modifier: Modifier = Modifier) {
     }
     }
 }
-
-@Composable
-@Preview
-fun PreviewAddPassword(){
-    SuperIDTheme {
-        AddPassword()
-    }
-}
-

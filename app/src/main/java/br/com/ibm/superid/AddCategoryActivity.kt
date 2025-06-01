@@ -88,7 +88,7 @@ fun AddCat(modifier: Modifier = Modifier) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            // Titulo da tela
+            // Título principal da tela
             Text(
                 text = "ADICIONAR CATEGORIA",
                 fontWeight = FontWeight.Bold,
