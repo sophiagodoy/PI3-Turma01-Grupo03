@@ -10,9 +10,11 @@ package br.com.ibm.superid.permissions
 
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import androidx.compose.ui.platform.LocalContext
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -87,11 +89,13 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun QrScannerScreen() {
+    val context = LocalContext.current
     Box(modifier = Modifier.fillMaxSize()) {
         BackCameraQrPreview(
             modifier = Modifier.fillMaxSize(),
             onQrCodeScanned = { qrText ->
-                updateLoginInFirestore(qrText)
+                updateLoginInFirestore(context, qrText)
+
             }
         )
     }
@@ -102,15 +106,17 @@ fun BackCameraQrPreview(
     modifier: Modifier = Modifier,
     onQrCodeScanned: (String) -> Unit
 ) {
-    // 1) Preview da câmera
-    //reflete tudo o que a camêra está vendo
+    // 1) previewUseCase será o “espelho” que mostra o que a câmera vê.
+    // Ele não lê QR, apenas reflete o vídeo para a tela.
 
     val previewUseCase = remember {
         androidx.camera.core.Preview.Builder().build()
     }
 
     // 2) Análise de imagem (para QR Code)
-    //“verifica quadro a quadro” se há um código escondido naquele pedaço de tela.
+    // “verifica quadro a quadro” se há um código escondido naquele pedaço do vídeo
+    // procurando um QR Code. Se demorar, ela ignora frames antigos
+    // (STRATEGY_KEEP_ONLY_LATEST) para acompanhar rápido.
 
     val imageAnalyzerUseCase = remember {
         ImageAnalysis.Builder()
@@ -138,9 +144,9 @@ fun BackCameraQrPreview(
             provider.unbindAll()
             provider.bindToLifecycle(
                 localContext as LifecycleOwner,
-                selector,
-                previewUseCase,
-                imageAnalyzerUseCase
+                selector, // escolhe a câmera traseira
+                previewUseCase, // “espelho” que mostra o vídeo
+                imageAnalyzerUseCase // “lupa” que procura QR em cada frame
             )
         }
     }
@@ -206,6 +212,7 @@ private fun scanImageForQrCode(
                     if (barcode.format == Barcode.FORMAT_QR_CODE) {
                         barcode.rawValue?.let { text ->
                             onQrCodeScanned(text)
+
                         }
                     }
                 }
@@ -221,7 +228,7 @@ private fun scanImageForQrCode(
     }
 }
 
-private fun updateLoginInFirestore(qrText: String) {
+private fun updateLoginInFirestore(context: Context, qrText: String) {
     try {
         val json = JSONObject(qrText)
         val loginTokenId = json.getString("loginToken")    // extrai a chave loginToken
@@ -238,12 +245,14 @@ private fun updateLoginInFirestore(qrText: String) {
 
         val updates = mapOf(
             "user" to uid, // Quem fez o login, ou seja, o uid do usuário logado
-            "loginTime" to FieldValue.serverTimestamp() // Quando foi
+            "loginTime" to FieldValue.serverTimestamp() // Quando foi feito
         )
 
         docRef.update(updates)
             .addOnSuccessListener {
                 Log.i("SuperID", "Login atualizado em login/$loginTokenId.")
+                val intent = Intent(context, MainActivity::class.java)
+                context.startActivity(intent)
             }
             .addOnFailureListener { e ->
                 Log.e("SuperID", "Falha ao atualizar login: ${e.message}")
