@@ -34,7 +34,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import br.com.ibm.superid.ui.theme.core.util.addNewCategory
 
-// Declaração da Activity que permite que o usuário adicionar uma nova categoria
+// Declaração da Activity que permite que o usuário adicione uma nova categoria
 class AddCategoryActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,8 +48,9 @@ class AddCategoryActivity : ComponentActivity() {
 }
 
 // Função responsável pela interface da tela de adicionar categoria
+@Preview
 @Composable
-fun AddCat() {
+fun AddCat(modifier: Modifier = Modifier) {
 
     val context = LocalContext.current
 
@@ -61,10 +62,10 @@ fun AddCat() {
             .background(MaterialTheme.colorScheme.background)
     ) {
 
-        // Cabeçalho visual personalizado
+        // Função que define o cabeçalho visual personalizado
         SuperIDHeader()
 
-        // Seta de voltar
+        // Seta de voltar para a MainActivity
         IconButton(
             onClick = {
                 val intent = Intent(context, MainActivity::class.java)
@@ -74,7 +75,7 @@ fun AddCat() {
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Voltar",
+                contentDescription = "Voltar para a tela principal do aplicativo",
                 modifier = Modifier.size(35.dp)
             )
         }
@@ -132,13 +133,5 @@ fun AddCat() {
                 Text(text = "Salvar")
             }
         }
-    }
-}
-
-@Preview
-@Composable
-fun PreviewAddCat() {
-    SuperIDTheme {
-        AddCat()
     }
 }

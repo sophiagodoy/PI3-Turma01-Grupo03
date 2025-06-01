@@ -55,8 +55,8 @@ import kotlin.jvm.java
 class SignInActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
+        enableEdgeToEdge() // Conteúdo ocupa a tela toda
+        setContent { // Tudo o que estiver aqui é a UI da Activity
             SuperIDTheme {
                 SignIn()
             }
@@ -77,8 +77,7 @@ fun SignIn(modifier: Modifier = Modifier) {
     Column (
         modifier = Modifier
         .fillMaxSize()
-        .background(MaterialTheme.colorScheme.background
-        )
+        .background(MaterialTheme.colorScheme.background)
     ) {
 
         // Cabeçalho visual personalizado
@@ -96,7 +95,7 @@ fun SignIn(modifier: Modifier = Modifier) {
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Voltar"
+                contentDescription = "Voltar para escolher login ou cadastro"
             )
         }
 
@@ -112,7 +111,7 @@ fun SignIn(modifier: Modifier = Modifier) {
             Text(
                 text = "LOGIN",
                 fontSize = 30.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold // Negrito
             )
 
             // Campo para digitar o email

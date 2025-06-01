@@ -1,4 +1,4 @@
-// TELA QUE O USUÁRIO ESCOLHE QUAL ACESSO DESEJA (LOGIN, CADASTRO)
+// TELA QUE O USUÁRIO ESCOLHE QUAL ACESSO DESEJA (LOGIN OU CADASTRO)
 
 package br.com.ibm.superid
 
@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -36,12 +35,16 @@ class AccessOptionActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            PreviewAcessOption()
+            SuperIDTheme {
+                AccessOptions()
+            }
         }
     }
 }
 
+
 // Função responsável pela interface da tela de escolher opção de acesso
+@Preview
 @Composable
 fun AccessOptions(modifier: Modifier = Modifier) {
 
@@ -52,7 +55,7 @@ fun AccessOptions(modifier: Modifier = Modifier) {
         .background(MaterialTheme.colorScheme.background)
     ) {
 
-        // Cabeçalho visual personalizado
+        // Função que define o cabeçalho visual personalizado
         SuperIDHeaderImage()
 
         Column(
@@ -105,19 +108,3 @@ fun AccessOptions(modifier: Modifier = Modifier) {
         }
     }
 }
-
-
-@Composable
-@Preview
-fun PreviewAcessOption(){
-    SuperIDTheme {
-        // Scaffold provê a estrutura básica da tela, garantindo consistência de layout
-        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            // Chama a função composable AccessOptions e aplica o padding interno do Scaffold
-            AccessOptions(
-                modifier = Modifier.padding(innerPadding)
-            )
-        }
-    }
-}
-
