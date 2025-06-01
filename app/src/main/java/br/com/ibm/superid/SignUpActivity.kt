@@ -309,11 +309,7 @@ fun SignUp() {
                         when {
                             // Verifica se algum campo está em branco (se está vazio ou apenas com espaços)
                             name.isBlank() || email.isBlank() || password.isBlank() || confirmPassword.isBlank() -> {
-                                Toast.makeText(
-                                    context,
-                                    "Preencha todos os campos!",
-                                    Toast.LENGTH_LONG
-                                ).show()
+                                Toast.makeText(context, "Preencha todos os campos!", Toast.LENGTH_LONG).show()
                             }
 
                             // Verifica se o email contém "@"
@@ -323,11 +319,7 @@ fun SignUp() {
 
                             // Verifica se as senhas coincidem
                             password != confirmPassword -> {
-                                Toast.makeText(
-                                    context,
-                                    "As senhas não coincidem!",
-                                    Toast.LENGTH_LONG
-                                ).show()
+                                Toast.makeText(context, "As senhas não coincidem!", Toast.LENGTH_LONG).show()
                             }
 
                             // Verifica se a senha atende a todos os critérios
@@ -336,11 +328,7 @@ fun SignUp() {
                                     !passwordCriteria.hasLowercase ||
                                     !passwordCriteria.hasDigit ||
                                     !passwordCriteria.hasSpecialChar -> {
-                                Toast.makeText(
-                                    context,
-                                    "A senha não atende aos requisitos mínimos!",
-                                    Toast.LENGTH_LONG
-                                ).show()
+                                Toast.makeText(context, "A senha não atende aos requisitos mínimos!", Toast.LENGTH_LONG).show()
                             }
 
                             else -> {
