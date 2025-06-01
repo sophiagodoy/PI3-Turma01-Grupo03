@@ -2,8 +2,10 @@
 
 package br.com.ibm.superid
 
+// Importações essenciais para a Activity e Compose UI
 import android.os.Bundle
 import android.content.Intent
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -30,41 +32,68 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import br.com.ibm.superid.ui.theme.SuperIDTheme
 import br.com.ibm.superid.ui.theme.core.util.SuperIDHeaderImage
+import androidx.core.content.edit
 
-// Declaração da Activity que exibe a tela de boas-vindas e termos de uso
+// Declaração da Activity responsável pela tela de boas-vindas e termos de uso
 class WelcomeActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Obtem SharedPreferences para verificar se o usuário já viu a tela de boas-vindas
+        // Baseado em: https://developer.android.com/training/data-storage/shared-preferences
+        val sharedPref = getSharedPreferences("superid_prefs", MODE_PRIVATE)
+        val jaViuWelcome = sharedPref.getBoolean("welcome_exibido", false)
+
+        // Se já viu a tela, abre a próxima Activity diretamente e finaliza esta
+        if (jaViuWelcome) {
+            startActivity(Intent(this, AccessOptionActivity::class.java))
+            finish()
+            return
+        }
+
+        // Ativa a interface Edge-to-Edge para melhor uso da tela
         enableEdgeToEdge()
+
+        // Define o conteúdo Compose da tela
         setContent {
             SuperIDTheme {
-                Welcome()
+                WelcomeScreen(
+                    onContinue = {
+                        // Marca no SharedPreferences que o usuário já viu a tela
+                        sharedPref.edit {
+                            putBoolean("welcome_exibido", true)
+                        }.apply{}
+
+                        // Navega para a tela AccessOptionActivity e finaliza a atual
+                        startActivity(Intent(this@WelcomeActivity, AccessOptionActivity::class.java))
+                        finish()
+                    }
+                )
             }
         }
     }
 }
 
-// Função Composable que monta toda a interface da tela de boas-vindas
+// Função Composable que monta a interface da tela de boas-vindas
 @Composable
-fun Welcome(modifier: Modifier = Modifier) {
-
-    val context = LocalContext.current
-
-    var termosAceitos by remember { mutableStateOf(false) }
-    var mostrarDialogo by remember { mutableStateOf(false) }
-    var imagemSelecionada: Int? by remember { mutableStateOf(null) } //controla a ampliação das imagens de tour
-
+fun WelcomeScreen(
+    onContinue: () -> Unit,  // Callback acionado ao continuar
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current  // Contexto atual para mostrar Toast
+    var termosAceitos by remember { mutableStateOf(false) }  // Estado que indica se os termos foram aceitos
+    var mostrarDialogo by remember { mutableStateOf(false) } // Estado para controlar exibição do diálogo dos termos
+    var imagemSelecionada: Int? by remember { mutableStateOf(null) } // Estado para armazenar imagem do tour selecionada
 
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .fillMaxSize()  // Ocupa toda a tela
+            .background(MaterialTheme.colorScheme.background)  // Fundo padrão do tema
     ) {
-
-        // Chamo a função SuperIDHeaderImage() que está em utilities.kt
+        // Exibe o cabeçalho personalizado da aplicação
         SuperIDHeaderImage()
 
-        // Coluna interna para alinhar o conteúdo abaixo do cabeçalho
+        // Coluna que contém o conteúdo principal abaixo do cabeçalho
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -72,7 +101,7 @@ fun Welcome(modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
+            // Título "Descrição" alinhado à esquerda
             Text(
                 text = "Descrição",
                 modifier = Modifier
@@ -81,19 +110,19 @@ fun Welcome(modifier: Modifier = Modifier) {
                     .align(Alignment.Start)
             )
 
-            //box da descrição
+            // Caixa que contém o texto explicativo e as imagens do tour
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp)
                     .padding(horizontal = 16.dp)
-                    .verticalScroll(rememberScrollState())
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .verticalScroll(rememberScrollState())  // Permite scroll vertical do conteúdo
+                    .clip(RoundedCornerShape(16.dp))  // Bordas arredondadas
+                    .background(MaterialTheme.colorScheme.surfaceVariant)  // Fundo de cor variante da superfície
                     .padding(16.dp)
             ) {
                 Column {
-                    // Descrição breve do app
+                    // Texto explicativo sobre o SuperID e suas funcionalidades
                     Text(
                         text = "Bem-vindo(a) ao SuperID!\n" +
                                 "Organize suas senhas com segurança e praticidade. Aqui você pode:\n" +
@@ -104,26 +133,26 @@ fun Welcome(modifier: Modifier = Modifier) {
                                 "\n" +
                                 "Faça o breve tour abaixo, por meio de imagens, para conhecer um pouco mais do SuperID!",
                         style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.Justify //expande o texto
+                        textAlign = TextAlign.Justify
                     )
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(16.dp)) // Espaçamento vertical
 
+                    // Título para a seção de imagens
                     Text(
                         text = "Veja como funciona:",
                         style = MaterialTheme.typography.titleSmall
                     )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(8.dp)) // Espaçamento vertical
 
-                    // Linha horizontal com miniaturas clicáveis
+                    // Linha horizontal com imagens do tour, que podem ser clicadas para ampliar
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .horizontalScroll(rememberScrollState()) //permite arrastar para os lados
+                            .horizontalScroll(rememberScrollState())  // Scroll horizontal para as imagens
                     ) {
-
-                        // Lista de imagens
+                        // Lista de IDs das imagens para o tour
                         val imagensTour = listOf(
                             R.drawable.accessoption_description,
                             R.drawable.signup_description,
@@ -131,26 +160,26 @@ fun Welcome(modifier: Modifier = Modifier) {
                             R.drawable.main_description
                         )
 
-                        //deixa cada imagem no padrão para aparecer em miniatura
+                        // Itera pelas imagens para criar cada componente Image clicável
                         imagensTour.forEach { imagemRes ->
                             Image(
                                 painter = painterResource(id = imagemRes),
                                 contentDescription = "Imagem do tour",
                                 modifier = Modifier
-                                    .size(100.dp)
-                                    .clickable { imagemSelecionada = imagemRes } // Quando clica, ativa o pop-up
+                                    .size(100.dp)  // Tamanho quadrado para as miniaturas
+                                    .clickable { imagemSelecionada = imagemRes }  // Define a imagem selecionada ao clicar
                             )
                         }
                     }
                 }
             }
 
-            // Dialogo para exibir imagem selecionada em tela cheia (um pop-up com a imagem em tamanho real)
+            // Caso uma imagem do tour esteja selecionada, exibe um AlertDialog com a imagem em tamanho maior
             if (imagemSelecionada != null) {
                 AlertDialog(
-                    onDismissRequest = { imagemSelecionada = null },
+                    onDismissRequest = { imagemSelecionada = null }, // Fecha ao tocar fora ou voltar
                     confirmButton = {
-                        TextButton(onClick = { imagemSelecionada = null }) {
+                        TextButton(onClick = { imagemSelecionada = null }) {  // Botão para fechar o diálogo
                             Text("Fechar")
                         }
                     },
@@ -160,23 +189,20 @@ fun Welcome(modifier: Modifier = Modifier) {
                             contentDescription = "Imagem em tela cheia",
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .heightIn(max = 500.dp)
+                                .heightIn(max = 500.dp)  // Altura máxima para não ocupar toda a tela
                         )
                     }
                 )
             }
 
-
-            // Linha que agrupa checkbox + texto
+            // Linha contendo o Checkbox para aceitar os termos e o texto explicativo
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(bottom = 8.dp)
             ) {
-
-                // Definindo o Checkbox
                 Checkbox(
-                    checked = termosAceitos,
-                    onCheckedChange = { termosAceitos = it } // Controla o estado do chechbox
+                    checked = termosAceitos,  // Estado de aceitação
+                    onCheckedChange = { termosAceitos = it }  // Atualiza estado ao clicar
                 )
                 Text(
                     text = "Aceito os termos de uso",
@@ -184,7 +210,7 @@ fun Welcome(modifier: Modifier = Modifier) {
                 )
             }
 
-            // Texto "Ler mais" comportando-se como link
+            // Texto "Ler mais" com estilo sublinhado que abre o diálogo dos termos quando clicado
             Text(
                 text = "Ler mais",
                 color = MaterialTheme.colorScheme.tertiary,
@@ -192,33 +218,27 @@ fun Welcome(modifier: Modifier = Modifier) {
                 style = TextStyle(textDecoration = TextDecoration.Underline),
                 modifier = Modifier
                     .padding(bottom = 16.dp)
-                    .clickable { mostrarDialogo = true } // Define mostrarDialogo como ativo
+                    .clickable { mostrarDialogo = true }  // Abre o diálogo dos termos
             )
 
-            // Se mostrarDialogo == true, exibe o diálogo com termos
+            // Dialogo com os termos de uso completo, exibido quando mostrarDialogo == true
             if (mostrarDialogo) {
-
-                // Exibe uma caixa de diálogo (pop-up)
                 AlertDialog(
-                    onDismissRequest = { mostrarDialogo = false }, // Fecha o pop-up ao tocar fora da tela
-
-                    // Definindo o título do diálogo
+                    onDismissRequest = { mostrarDialogo = false },  // Fecha ao clicar fora ou voltar
                     title = {
                         Text(text = "Termos de Uso")
                     },
-
-                    // Corpo do diálogo com todas as seções e rolagem interna
                     text = {
+                        // Conteúdo longo dos termos com scroll vertical
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .heightIn(max = 400.dp)
-                                .verticalScroll(rememberScrollState()) // Permite rolagem
+                                .heightIn(max = 400.dp)  // Altura máxima para scroll
+                                .verticalScroll(rememberScrollState())  // Scroll vertical para texto longo
                                 .padding(16.dp),
                             horizontalAlignment = Alignment.Start
                         ) {
-
-                            // Subtítulo centralizado
+                            // Título principal dos termos
                             Text(
                                 text = "Termos e Condições de Uso – SuperID",
                                 style = MaterialTheme.typography.titleMedium,
@@ -228,7 +248,7 @@ fun Welcome(modifier: Modifier = Modifier) {
 
                             Spacer(Modifier.height(4.dp))
 
-                            // Definindo versão/data centralizado
+                            // Versão e data dos termos
                             Text(
                                 text = "Versão 1.0 – Abril de 2025",
                                 style = MaterialTheme.typography.bodySmall,
@@ -238,12 +258,11 @@ fun Welcome(modifier: Modifier = Modifier) {
 
                             Spacer(Modifier.height(12.dp))
 
-                            // Definindo parágrafo introdutório
+                            // Parágrafo introdutório explicando a natureza educacional do app
                             Text(
                                 text = "Bem-vindo ao SuperID, um aplicativo criado para fins educacionais. " +
                                         "Ao usar, você concorda com estes termos.",
                                 style = MaterialTheme.typography.bodyMedium,
-                                // Baseado em: https://developer.android.com/reference/kotlin/androidx/compose/ui/text/style/TextAlign
                                 textAlign = TextAlign.Justify
                             )
 
@@ -314,7 +333,6 @@ fun Welcome(modifier: Modifier = Modifier) {
                                 text = "5. Autenticação em Sites Parceiros",
                                 style = MaterialTheme.typography.titleSmall
                             )
-
                             Text(
                                 text = "Você poderá autenticar-se em sites parceiros via leitura de QR Codes. " +
                                         "O processo ocorre da seguinte forma:\n" +
@@ -387,66 +405,61 @@ fun Welcome(modifier: Modifier = Modifier) {
 
                             Spacer(Modifier.height(12.dp))
 
-                            // Seção 10: Modificações nos Termos
+                            // Seção 10: Alterações nos Termos
                             Text(
-                                text = "10. Modificações nos Termos",
+                                text = "10. Alterações nos Termos",
                                 style = MaterialTheme.typography.titleSmall
                             )
                             Text(
-                                text = "Estes termos podem ser atualizados a qualquer momento pela equipe desenvolvedora, especialmente em caso de atualizações ou correções no projeto.",
+                                text = "Reservamo-nos o direito de alterar estes termos a qualquer momento, notificando os usuários em atualizações do aplicativo.",
                                 style = MaterialTheme.typography.bodyMedium,
                                 textAlign = TextAlign.Justify
                             )
+
+                            Spacer(Modifier.height(16.dp))
+
+                            // Assinatura final
+                            Text(
+                                text = "Equipe SuperID",
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.Center
+                            )
                         }
                     },
-
-                    // Botão de confirmação (fecha o pop-up quando clicado)
                     confirmButton = {
-                        TextButton(
-                            onClick = {
-                                mostrarDialogo = false // Define mostrarDialogo como inativo
-                            }
-                        ) {
-                            Text(
-                                text = "Fechar",
-                                fontSize = 18.sp,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
+                        TextButton(onClick = { mostrarDialogo = false }) {
+                            Text("Fechar")
                         }
                     }
                 )
             }
 
-
-            // Define um botão que só é possível clicar se termosAceitos = true
+            // Botão "Continuar" que só está habilitado se os termos foram aceitos
             Button(
                 onClick = {
-                    if (termosAceitos) {
-                        val intent = Intent(context, AccessOptionActivity::class.java)
-                        context.startActivity(intent)
+                    if (!termosAceitos) {
+                        Toast.makeText(context, "Por favor, aceite os termos de uso para continuar.", Toast.LENGTH_SHORT).show()
+                    } else {
+                        onContinue()  // Chama o callback para avançar
                     }
                 },
-
-
                 modifier = Modifier
-                    .height(60.dp)
-                    .width(150.dp),
-                enabled = termosAceitos // Controla se o botão está ativo ou não
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                enabled = termosAceitos  // Habilita o botão apenas se o usuário aceitou os termos
             ) {
-
-                Text(
-                    text = "Continuar",
-                    style = MaterialTheme.typography.titleMedium
-                )
+                Text("Continuar")
             }
         }
     }
 }
 
-@Preview
+// Preview para visualização no Android Studio
+@Preview(showBackground = true)
 @Composable
-fun PreviewWelcome() {
+fun WelcomeScreenPreview() {
     SuperIDTheme {
-        Welcome()
+        WelcomeScreen(onContinue = {})
     }
 }

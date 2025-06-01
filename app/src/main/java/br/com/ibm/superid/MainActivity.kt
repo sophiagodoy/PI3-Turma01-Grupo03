@@ -164,7 +164,6 @@ fun MainScreen() {
         map
     }
 
-
     fun deleteCategory(categoria: String, onSuccess: () -> Unit, onError: (Exception) -> Unit) {
         val user = Firebase.auth.currentUser
         if (user != null) {
@@ -892,8 +891,6 @@ fun resendVerificationEmail(context: Context) {
     }
 }
 
-
-
 fun checkEmailVerified(
     uid: String,
     onResult: (Boolean) -> Unit
@@ -911,8 +908,6 @@ fun checkEmailVerified(
             onResult(false) // em caso de erro
         }
 }
-
-
 
 @Composable
 fun ConfirmPasswordDialog(
