@@ -73,7 +73,7 @@ Para demonstrar o fluxo de **login sem senha**, criamos um **site parceiro de de
       ```bash
    git@github.com:HenriqueMartins2502/Site-parceiro-PI.git
 
-3. Clone o segundo repositório (aqui é necessario consfigurar o firebase functions de acordo com o seu sistema operacional). Este é o repositório onde foram feitas as firebase functions, reposaveis por gerar o qrCode na base 64 e onde é feita a consulta no banco de dados quando escaneado o qrCode.
+3. Clone o segundo repositório (aqui é necessario consfigurar o firebase functions de acordo com o seu sistema operacional). Este é o repositório onde foram feitas as firebase functions, reposaveis por gerar o qrCode na base 64 e onde é feita a consulta no banco de dados quando escaneado o qrCode. Rode os dois comandos no terminal - npm install firebase-admin firebase-functions qrcode e nom instal --save-dev@types/qrcode
       ```bash
    git@github.com:HenriqueMartins2502/Firebase-functions-PI.git
       
