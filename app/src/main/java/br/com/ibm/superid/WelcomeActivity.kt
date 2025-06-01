@@ -74,7 +74,6 @@ class WelcomeActivity : ComponentActivity() {
 }
 
 // Função Composable que monta a interface da tela de boas-vindas
-@Preview
 @Composable
 fun WelcomeScreen(
     onContinue: () -> Unit,  // Callback acionado ao continuar

@@ -15,4 +15,5 @@
     <string name="title_activity_camera_activity.kt">CameraActivity.kt</string>
     <string name="title_activity_email_reset_password_activity.kt">EmailResetPasswordActivity.kt
     </string>
+    <string name="title_activity_main_utilities">MainActivityUtilities</string>
 </resources>

@@ -57,13 +57,16 @@ import androidx.compose.material3.IconButton
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import br.com.ibm.superid.ui.theme.core.util.ConfirmDeleteCategoryDialog
+import br.com.ibm.superid.ui.theme.core.util.ConfirmPasswordDialog
 import br.com.ibm.superid.ui.theme.core.util.CustomOutlinedTextField
+import br.com.ibm.superid.ui.theme.core.util.PasswordDetailDialog
+import br.com.ibm.superid.ui.theme.core.util.RemovePasswordDialog
 
 import br.com.ibm.superid.ui.theme.core.util.deletePasswordById
 import br.com.ibm.superid.ui.theme.core.util.reauthenticateUser
 import br.com.ibm.superid.ui.theme.core.util.resendVerificationEmail
 import br.com.ibm.superid.ui.theme.core.util.checkEmailVerified
-
 
 // Declarando a Activity da página principal do aplicativo
 class MainActivity : ComponentActivity() {
@@ -86,7 +89,6 @@ fun MainScreen() {
 
     var passwords by remember { mutableStateOf<List<SenhaItem>>(emptyList()) }
     var categoriesList by remember { mutableStateOf<List<String>>(emptyList()) }
-
     var showAddPopUp by remember { mutableStateOf(false) }
     var showExitDialog by remember { mutableStateOf(false) }
     var showQRInstructionDialog by remember { mutableStateOf(false) }
@@ -94,7 +96,9 @@ fun MainScreen() {
 
     // Carrega as senhas do Firestore assim que a tela iniciar
     fun loadDataFireBase() {
+
         val user = Firebase.auth.currentUser
+
         if (user != null) {
             val db = Firebase.firestore
 
@@ -151,6 +155,7 @@ fun MainScreen() {
         loadDataFireBase()
     }
     val categoriasMap = remember(passwords, categoriesList) {
+
         // Começa com um mapa de todas as categorias, incluindo as que podem estar vazias
         val map = categoriesList.associateWith { mutableListOf<SenhaItem>() }.toMutableMap()
 
@@ -197,18 +202,23 @@ fun MainScreen() {
         }
     }
 
+    // Rolagem de tela
     val scrollState = rememberScrollState()
 
-    // Estrutura do layout principal
     Box(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(scrollState)
             .background(MaterialTheme.colorScheme.background)
     ) {
+
+        // Cabeçalho visual personalizado
         SuperIDHeader()
+
         IconButton(
-            onClick = { showExitDialog = true },
+            onClick = {
+                showExitDialog = true // exibe o dialogo de sair do aplicativo
+            },
             modifier = Modifier
                 .align(Alignment.TopStart)
                 .padding(start = 10.dp, top = 95.dp)
@@ -235,11 +245,7 @@ fun MainScreen() {
                             // Aqui podemos abrir diálogo para confirmar
                             deleteCategory(cat,
                                 onSuccess = {
-                                    Toast.makeText(
-                                        context,
-                                        "Categoria excluída",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
+                                    Toast.makeText(context, "Categoria excluída", Toast.LENGTH_SHORT).show()
                                     loadDataFireBase()
                                 },
                                 onError = { e ->
@@ -255,17 +261,18 @@ fun MainScreen() {
                     }
                 )
             }
-            // Adiciona espaçamento no fim para o botão de QR Code não sobrepor
             Spacer(modifier = Modifier.height(110.dp))
         }
 
         // Botão flutuante de adicionar senha e categoria
         FloatingActionButton(
-            onClick = { showAddPopUp = true }, // showAddPopUp é ativada
+            onClick = {
+                showAddPopUp = true // pop-up de adicionar senha e categoria é ativado
+            },
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .padding(top = 90.dp, end = 15.dp)
-                .size(70.dp), // aumenta o tamanho do botão
+                .size(70.dp),
             shape = CircleShape,
             containerColor = MaterialTheme.colorScheme.primary
         ) {
@@ -278,7 +285,7 @@ fun MainScreen() {
         // Botão flutuante do QR Code
         FloatingActionButton(
             onClick = {
-                showConfirmPasswordDialog = true
+                showConfirmPasswordDialog = true // pop-up do QR é ativado
             },
             modifier = Modifier
                 .size(120.dp)
@@ -295,8 +302,7 @@ fun MainScreen() {
         }
 
         // Pop-up de adicionar senha e categoria
-        // Se showAddPopUp = true abre o pop-up
-        if (showAddPopUp) {
+        if (showAddPopUp) { // Se showAddPopUp = true abre o pop-up
 
             // Exibe uma caixa de diálogo (pop-up)
             Dialog(
@@ -304,8 +310,6 @@ fun MainScreen() {
                     showAddPopUp = false // Fecha o pop-up ao tocar fora da tela
                 }
             ) {
-
-                // Aplicando cor de fundo, forma e elevação
                 Surface(
                     shape = RoundedCornerShape(16.dp),
                     tonalElevation = 8.dp,
@@ -316,7 +320,7 @@ fun MainScreen() {
                             .fillMaxWidth()
                     ) {
 
-                        // Exibe um ícone de voltar e facha o pop-up (false)
+                        // Exibe um ícone de voltar e fecha o pop-up (false)
                         BackButtonBar(
                             onBackClick = {
                                 showAddPopUp = false
@@ -328,7 +332,6 @@ fun MainScreen() {
                                 .padding(16.dp)
                         ) {
 
-                            // Criando os botões em forma de coluna
                             Column(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -336,9 +339,8 @@ fun MainScreen() {
 
                                 // Botão de adicionar categoria
                                 Button(
-                                    // Fecha o botão ao clicar e vai para a AddCategoryActivity
                                     onClick = {
-                                        showAddPopUp = false
+                                        showAddPopUp = false // fecha o pop-up
                                         context.startActivity(Intent(context, AddCategoryActivity::class.java))
                                     },
                                     modifier = Modifier
@@ -507,7 +509,6 @@ fun Categories(
     }
 }
 
-
 @Composable
 fun CategoryCard(
     title: String,
@@ -631,346 +632,7 @@ fun CategoryCard(
 }
 
 
-@Composable
-fun PasswordDetailDialog(
-    item: SenhaItem,
-    onDismiss: () -> Unit,
-    onPasswordRemoved: () -> Unit
-) {
-    val context = LocalContext.current
-    var showRemovePopUp by remember { mutableStateOf(false) }
-    var passwordVisible by remember { mutableStateOf(false) }
 
-    Dialog(onDismissRequest = onDismiss) {
-        Surface(
-            shape = RoundedCornerShape(16.dp),
-            tonalElevation = 8.dp,
-            color = MaterialTheme.colorScheme.background
-        ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                BackButtonBar(onBackClick = onDismiss)
-
-                Column(modifier = Modifier.padding(16.dp)) {
-                    // --- Campo de Login (mantido igual) ---
-                    Text("Login:", fontWeight = FontWeight.Bold)
-                    StandardBoxPopUp {
-                        Text(
-                            text = item.login,
-                            fontSize = 16.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(start = 12.dp, top = 8.dp, bottom = 8.dp)
-                        )
-                    }
-
-                    Spacer(Modifier.height(12.dp))
-
-
-                    Text("Senha:", fontWeight = FontWeight.Bold)
-                    StandardBoxPopUp {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                // Padding vertical menor: 4.dp ao invés de 8.dp
-                                .padding(horizontal = 12.dp, vertical = 4.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = if (passwordVisible) item.senha else "•".repeat(item.senha.length),
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .padding(start = 4.dp),
-                                fontSize = 16.sp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            IconButton(
-                                onClick = { passwordVisible = !passwordVisible },
-                                modifier = Modifier.size(20.dp) // ícone um pouco menor
-                            ) {
-                                Icon(
-                                    imageVector = if (passwordVisible)
-                                        Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                                    contentDescription = if (passwordVisible) "Ocultar senha" else "Mostrar senha",
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                            }
-                        }
-                    }
-
-                    Spacer(Modifier.height(12.dp))
-
-
-                    Text("Descrição:", fontWeight = FontWeight.Bold)
-                    StandardBoxPopUp {
-                        Text(
-                            text = item.descricao,
-                            fontSize = 16.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(start = 12.dp, top = 8.dp, bottom = 8.dp)
-                        )
-                    }
-
-                    Spacer(Modifier.height(12.dp))
-
-
-                    Text("Categoria:", fontWeight = FontWeight.Bold)
-                    StandardBoxPopUp {
-                        Text(
-                            text = item.categoria,
-                            fontSize = 16.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(start = 12.dp, top = 8.dp, bottom = 8.dp)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Button(
-                            onClick = {
-                                val intent = Intent(context, ChangePasswordActivity::class.java).apply {
-                                    putExtra("PASSWORD_ID", item.id)
-                                    putExtra("PASSWORD_TITLE", item.titulo)
-                                    putExtra("PASSWORD_VALUE", item.senha)
-                                    putExtra("PASSWORD_DESCRIPTION", item.descricao)
-                                    putExtra("PASSWORD_CATEGORY", item.categoria)
-                                    putExtra("PASSWORD_LOGIN", item.login)
-                                }
-                                context.startActivity(intent)
-                            },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.secondary
-                            )
-                        ) {
-                            Text("Alterar")
-                        }
-
-                        Button(
-                            onClick = { showRemovePopUp = true },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.secondary
-                            )
-                        ) {
-                            Text("Remover")
-                        }
-                    }
-
-                    // Diálogo interno de confirmação de remoção
-                    if (showRemovePopUp) {
-                        RemovePasswordDialog(
-                            item = item,
-                            onDismiss = { showRemovePopUp = false },
-                            onSuccess = {
-                                showRemovePopUp = false
-                                onDismiss()
-                                onPasswordRemoved()
-                                Toast.makeText(context, "Senha excluída com sucesso!", Toast.LENGTH_SHORT).show()
-                            },
-                            onError = { e ->
-                                Toast.makeText(context, "Erro ao excluir: ${e.message}", Toast.LENGTH_LONG).show()
-                            }
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-
-
-
-// Função que exibe um diálogo de confirmação para excluir definitivamente a senha do Firestore
-@Composable
-fun RemovePasswordDialog(
-    item: SenhaItem,
-    onDismiss: () -> Unit,
-    onSuccess: () -> Unit,
-    onError: (Exception) -> Unit
-) {
-    Dialog(onDismissRequest = onDismiss) {
-        Surface(
-            shape = RoundedCornerShape(16.dp),
-            tonalElevation = 8.dp,
-            color = MaterialTheme.colorScheme.background
-        ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-
-                // Seta de voltar
-                BackButtonBar(onBackClick = onDismiss)
-
-                Column(modifier = Modifier.padding(16.dp)) {
-
-                    // Mensagem de confirmação
-                    Text(
-                        text = "Certeza que deseja remover a senha?",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
-
-                    // Crio um Row (linha) com botão cancelar e remover
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceEvenly
-                    ) {
-
-                        // Botão cancelar (apenas fecha o diálogo)
-                        Button(
-                            onClick = onDismiss
-                        ) {
-                            Text("Cancelar")
-                        }
-
-                        // Botão remover (executa a exclusão no Firestore)
-                        Button(
-                            onClick = {
-                                deletePasswordById(item.id)
-                                onSuccess()
-                            },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.error
-                            )
-                        ) {
-                            Text("Remover")
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-
-
-@Composable
-fun ConfirmDeleteCategoryDialog(
-    categoryName: String,
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit
-) {
-    // Diálogo de alerta para confirmar a exclusão de uma categoria
-    AlertDialog(
-        onDismissRequest = onDismiss, // Ação ao clicar fora do diálogo ou botão voltar
-        title = { Text("Confirmar exclusão") }, // Título do diálogo
-        text = { Text("Tem certeza que deseja excluir a categoria '$categoryName'?") }, // Mensagem de confirmação com o nome da categoria
-        confirmButton = {
-            // Botão para confirmar a exclusão
-            TextButton(
-                onClick = {
-                    onConfirm()  // Executa ação de confirmação (excluir categoria)
-                    onDismiss()  // Fecha o diálogo após confirmar
-                },
-                colors = ButtonDefaults.textButtonColors(
-                    contentColor = MaterialTheme.colorScheme.error // Cor vermelha para destacar ação perigosa
-                )
-            ) {
-                Text("Excluir") // Texto do botão
-            }
-        },
-        dismissButton = {
-            // Botão para cancelar e fechar o diálogo
-            TextButton(onClick = onDismiss) {
-                Text("Cancelar")
-            }
-        }
-    )
-}
-
-@Composable
-fun ConfirmPasswordDialog(
-    onDismiss: () -> Unit,
-    onConfirmed: () -> Unit
-) {
-    val context = LocalContext.current
-    var senha by remember { mutableStateOf("") }
-    var passwordVisible by remember { mutableStateOf(false) }
-
-    // Obtém o email do usuário logado
-    val email = Firebase.auth.currentUser?.email ?: "Email não disponível"
-
-    // Caixa de diálogo com campos personalizados
-    AlertDialog(
-        onDismissRequest = { onDismiss() },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    val uid = Firebase.auth.currentUser?.uid
-                    if (uid != null) {
-                        checkEmailVerified(uid) { isVerified -> // passo uma lambda para onResult de checkEmailVerified
-                            if (isVerified) { reauthenticateUser(senha, context, onSuccess = {
-                                onConfirmed() // <- ativa o popup do QR Code
-                                onDismiss()  // <- fecha o popup atual
-                                    }, onFailure = {
-                                        senha = ""// limpa o campo de senha
-                                    })
-                            } else {
-
-                                resendVerificationEmail(context)
-
-                                Toast
-                                    .makeText(
-                                        context, "E-mail não confirmado. Verifique sua caixa de entrada.",
-                                        Toast.LENGTH_SHORT).show()
-                            }
-                        }
-                    }
-                }
-            ) {
-
-                Text("Confirmar")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = { onDismiss() }) {
-                Text("Cancelar")
-            }
-        },
-        title = { Text("Confirmação de senha") },
-        text = {
-            Column(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                // Campo de exibição do email (desabilitado apenas para mostrar o valor)
-                CustomOutlinedTextField(
-                    value = email,
-                    onValueChange = {},
-                    label = "Email",
-                    enabled = false // campo somente leitura
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                // Campo de entrada de senha com ícone de visibilidade
-                CustomOutlinedTextField(
-                    value = senha,
-                    onValueChange = { senha = it },
-                    label = "Senha",
-                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    trailingIcon = {
-                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                            Icon(
-                                imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                                contentDescription = if (passwordVisible) "Ocultar senha" else "Mostrar senha"
-                            )
-                        }
-                    }
-                )
-            }
-        }
-    )
-}
 
 // Modelo de dados para representar uma senha
 data class SenhaItem(
