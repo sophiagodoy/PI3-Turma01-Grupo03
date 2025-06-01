@@ -94,7 +94,7 @@ fun PasswordResetVerification(modifier: Modifier = Modifier) {
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "Reenviar e-mail de verificação",
+                text = "Reenviar e-mail de redefinição",
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.tertiary,
                 fontSize = 16.sp,

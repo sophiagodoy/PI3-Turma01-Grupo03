@@ -61,6 +61,9 @@ import br.com.ibm.superid.ui.theme.core.util.CustomOutlinedTextField
 
 import br.com.ibm.superid.ui.theme.core.util.deletePasswordById
 import br.com.ibm.superid.ui.theme.core.util.reauthenticateUser
+import br.com.ibm.superid.ui.theme.core.util.resendVerificationEmail
+import br.com.ibm.superid.ui.theme.core.util.checkEmailVerified
+
 
 // Declarando a Activity da página principal do aplicativo
 class MainActivity : ComponentActivity() {
@@ -882,31 +885,6 @@ fun ConfirmDeleteCategoryDialog(
             }
         }
     )
-}
-
-fun resendVerificationEmail(context: Context) {
-    val user = Firebase.auth.currentUser
-    if (user != null && !user.isEmailVerified) {
-        user.sendEmailVerification()
-    }
-}
-
-fun checkEmailVerified(
-    uid: String,
-    onResult: (Boolean) -> Unit
-) {
-    //  faz a consulta no Firestore
-    Firebase.firestore
-        .collection("users")
-        .document(uid)
-        .get()
-        .addOnSuccessListener { doc ->
-            val verified = doc?.getBoolean("emailVerified") == true
-            onResult(verified) // callback passa true ou false
-        }
-        .addOnFailureListener {
-            onResult(false) // em caso de erro
-        }
 }
 
 @Composable

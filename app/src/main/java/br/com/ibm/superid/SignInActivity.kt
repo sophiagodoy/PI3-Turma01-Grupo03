@@ -58,7 +58,7 @@ class SignInActivity : ComponentActivity() {
         enableEdgeToEdge() // Conteúdo ocupa a tela toda
         setContent { // Tudo o que estiver aqui é a UI da Activity
             SuperIDTheme {
-                SignIn()
+                br.com.ibm.superid.SignInPreview()
             }
         }
     }
