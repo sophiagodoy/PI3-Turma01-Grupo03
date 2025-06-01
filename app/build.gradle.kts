@@ -72,7 +72,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    implementation("androidx.compose.material:material-icons-extended")
+    implementation(libs.material.icons.extended)
 
     //dependencias de camera
     implementation(libs.androidx.camera.core)
@@ -80,4 +80,8 @@ dependencies {
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
     implementation(libs.androidx.camera.extensions)
+
+    // ML Kit: Barcode Scanning (para ler QR Codes e outros códigos de barras)
+    implementation(libs.barcode.scanning)
+
 }
