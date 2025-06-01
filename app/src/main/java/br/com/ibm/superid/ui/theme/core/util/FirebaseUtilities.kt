@@ -412,12 +412,13 @@ fun updatePassword(
     }
 }
 
+// Função que deleta uma senha no banco de dados Firestore
 fun deletePasswordById(senhaId: String) {
-    val auth = FirebaseAuth.getInstance()
-    val user = auth.currentUser
+
+    val user = Firebase.auth.currentUser
 
     if (user != null) {
-        val db = FirebaseFirestore.getInstance()
+        val db = Firebase.firestore
         db.collection("users")
             .document(user.uid)
             .collection("senhas")
@@ -425,6 +426,3 @@ fun deletePasswordById(senhaId: String) {
             .delete()
     }
 }
-
-
-
