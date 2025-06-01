@@ -1,4 +1,4 @@
-// TELA PARA RECUPERAÇÃO DE SENHA
+// TELA PARA RECUPERAÇÃO DE SENHA DO USUÁRIO
 
 // Definição do pacote aplicativo
 package br.com.ibm.superid
@@ -121,22 +121,23 @@ fun sendEmail(email: String, context: Context ){
         }
         }
 
-// Função Composable que apresenta o formulário de recuperação de senha
+// Função que apresenta o formulário de recuperação de senha
 @SuppressLint("SuspiciousIndentation")
 @Composable
 fun ForgotPasswordScreen(modifier: Modifier = Modifier) {
-    // Cria variável para poder trocar de tela
+
     val context = LocalContext.current
-    // Variável que armazena o email digitado pelo usuário
+
     var email by remember { mutableStateOf("") }
 
     Column (modifier = Modifier
         .fillMaxSize()
         .background(MaterialTheme.colorScheme.background)) {
+
         // Cabeçalho visual personalizado
         SuperIDHeader()
 
-        // Botão de voltar
+        // Seta de voltar para o login
         IconButton(
             onClick = {
                 val intent = Intent(context, SignInActivity::class.java)
@@ -146,11 +147,10 @@ fun ForgotPasswordScreen(modifier: Modifier = Modifier) {
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Voltar"
+                contentDescription = "Voltar para o login"
             )
         }
 
-        // Layout em coluna que ocupa toda a tela e aplica padding de 16dp
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -158,29 +158,27 @@ fun ForgotPasswordScreen(modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Define o título da tela em negrito e tamanho 30sp
+
+            // Define o título da tela
             Text(
-                text = "Recuperar Senha",
+                text = "RECUPERAR SENHA",
                 fontSize = 30.sp,
                 fontWeight = FontWeight.Bold
             )
 
             Spacer(Modifier.height(24.dp))
 
-            // Texto explicativo para o usuário
             Text(
-                text = "Digite seu email cadastrado para realizar a redefinição de senha",
+                text = "Digite seu email cadastrado para realizar a redefinição de senha!",
                 fontSize = 16.sp,
                 modifier = Modifier
                     .fillMaxWidth() //
-                    // Aplica padding horizontal
                     .padding(horizontal = 16.dp)
-                    // Centraliza o conteúdo horizontalmente no centro
                     .wrapContentWidth(Alignment.CenterHorizontally),
-                // Alinha o texto ao centro
                 textAlign = TextAlign.Center
             )
-            // Campo de texto para digitar o email do usuário
+
+            // Campo para digitar o email
             CustomOutlinedTextField(
                 modifier = Modifier.padding(10.dp),
                 value = email,
@@ -191,24 +189,15 @@ fun ForgotPasswordScreen(modifier: Modifier = Modifier) {
 
             Spacer(Modifier.height(16.dp))
 
-            // Botão que será clicado para enviar o link de redefinição
+            // Botão que ao ser clicado manda o link de redefinição de senha no email
             Button(
                 onClick = {
-                    // Ao clicar no botão, chama a função para enviar o link de redefinição
-
-
                     if (email.isNotBlank() && email.contains("@")){
-
                         checkEmailVerification(email, context){
-                            // Essa parte só executa se o email estiver verificado
                             val intent = Intent(context, EmailResetPasswordActivity::class.java)
                             context.startActivity(intent)
                         }
-
-
-
                     } else{
-                        // Mostra uma mensagem de erro ou feedback visual
                         Toast.makeText(context, "Por favor, insira seu email", Toast.LENGTH_SHORT).show()
                     }
                 },
@@ -218,7 +207,6 @@ fun ForgotPasswordScreen(modifier: Modifier = Modifier) {
                     .width(250.dp),
                 enabled = email.isNotBlank()
             ) {
-                // Texto exibido no botão
                 Text("Enviar Link de Redefinição")
             }
         }
