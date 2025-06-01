@@ -7,16 +7,12 @@ import android.util.Log
 import android.widget.Toast
 import br.com.ibm.superid.EmailVerificationActivity
 import br.com.ibm.superid.MainActivity
-import br.com.ibm.superid.SenhaItem
 import br.com.ibm.superid.categoriasUsuario
-import br.com.ibm.superid.ui.theme.core.util.createDefaultCategorias
-import br.com.ibm.superid.ui.theme.core.util.saveUserToFirestore
 import com.google.firebase.Firebase
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.auth
-import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
 import com.google.firebase.firestore.ktx.firestore
@@ -54,6 +50,7 @@ fun signInWithFirebaseAuth(email: String, password: String, context: Context) {
 
             // Verifica se o login foi bem-sucedido
             if (task.isSuccessful) {
+
                 // Guardo o usário autenticado
                 val user = task.result.user
                 Log.i("AUTH", "Login realizado com sucesso. UID: ${user?.uid}")
@@ -62,27 +59,22 @@ fun signInWithFirebaseAuth(email: String, password: String, context: Context) {
 
             } else {
                 Log.i("AUTH", "Falha ao fazer login.", task.exception)
-                // Baseado na documentação oficial do Android: https://developer.android.com/guide/topics/ui/notifiers/toasts?hl=pt-br
+
+                // Baseado na documentação: https://developer.android.com/guide/topics/ui/notifiers/toasts?hl=pt-br
                 Toast.makeText(context, "Email ou senha incorreta!", Toast.LENGTH_LONG).show()
             }
         }
 }
 
-
 // Criando a conta do usuário no Firebase Authentication
 fun saveUserToAuth(email: String, password: String, name: String, context: Context) {
 
-    // Obtemos a instância do Firebase Authentication
     val auth = Firebase.auth
 
-    // Tentando criar o usuário com email e senha
     auth.createUserWithEmailAndPassword(email, password)
         .addOnCompleteListener { task ->
 
-            // Verifica se o login foi bem-sucedido
             if (task.isSuccessful) {
-
-                // Retorna o usuário que está autenticado
                 val user = auth.currentUser
 
                 if (user != null) {
@@ -101,7 +93,6 @@ fun saveUserToAuth(email: String, password: String, name: String, context: Conte
                                 Log.i("AUTH", "Erro ao enviar e-mail de verificação.", verifyTask.exception)
                             }
                         }
-
                     saveUserToFirestore(uid, name, email, context)
                 }
 
@@ -337,10 +328,8 @@ fun addNewPassword(context: Context, senha: String, categoria: String, descricao
 // Função que busca as categorias salvas no Firestore para o usuário atual
 fun fetchCategoriasUsuario(context: Context) {
 
-    // Obtém o usuário atualmente autenticado
     val user = Firebase.auth.currentUser
 
-    // Se não houver usuário logado, exibe mensagem e interrompe a função
     if (user == null) {
         Toast.makeText(context, "Usuário não autenticado", Toast.LENGTH_LONG).show()
         return
@@ -369,6 +358,7 @@ fun fetchCategoriasUsuario(context: Context) {
         }
 }
 
+// Função para alterar a senha do usuário
 fun updatePassword(
     context: Context,
     documentId: String,
@@ -378,20 +368,23 @@ fun updatePassword(
     newCategory: String,
     newDesc: String
 ) {
+
     val user = Firebase.auth.currentUser
+
     if (user == null) {
         Toast.makeText(context, "Usuário não autenticado!", Toast.LENGTH_SHORT).show()
         return
     }
+
     if (newPassword.isBlank() || newTitulo.isBlank() || newCategory.isBlank()) {
         Toast.makeText(context, "Título, senha e categoria são obrigatórios!", Toast.LENGTH_SHORT).show()
         return
     }
 
-    // Encripta a nova senha
+    // Chama a função que vai criptografar a nova senha
     val (encrypted, iv) = encryptpassword(newPassword)
 
-    // Prepara o map pra atualizar
+    // Prepara o mapa que irá atualizar as modificações
     val updates = mapOf(
         "senha" to encrypted,
         "iv" to iv,
@@ -401,9 +394,7 @@ fun updatePassword(
         "descricao" to newDesc
     )
 
-
     if (newTitulo.isNotBlank() && newPassword.isNotBlank() && newCategory.isNotBlank()) {
-        // Executa o update no Firestore
         Firebase.firestore
             .collection("users")
             .document(user.uid)

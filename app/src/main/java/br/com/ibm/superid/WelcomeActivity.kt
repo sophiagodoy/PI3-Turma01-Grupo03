@@ -2,7 +2,6 @@
 
 package br.com.ibm.superid
 
-// Importações essenciais para a Activity e Compose UI
 import android.os.Bundle
 import android.content.Intent
 import android.widget.Toast
@@ -80,20 +79,20 @@ fun WelcomeScreen(
     onContinue: () -> Unit,  // Callback acionado ao continuar
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current  // Contexto atual para mostrar Toast
-    var termosAceitos by remember { mutableStateOf(false) }  // Estado que indica se os termos foram aceitos
-    var mostrarDialogo by remember { mutableStateOf(false) } // Estado para controlar exibição do diálogo dos termos
-    var imagemSelecionada: Int? by remember { mutableStateOf(null) } // Estado para armazenar imagem do tour selecionada
+    val context = LocalContext.current
+    var termosAceitos by remember { mutableStateOf(false) }
+    var mostrarDialogo by remember { mutableStateOf(false) }
+    var imagemSelecionada: Int? by remember { mutableStateOf(null) }
 
     Column(
         modifier = Modifier
-            .fillMaxSize()  // Ocupa toda a tela
-            .background(MaterialTheme.colorScheme.background)  // Fundo padrão do tema
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
     ) {
-        // Exibe o cabeçalho personalizado da aplicação
+
+        // Cabeçalho visual personalizado
         SuperIDHeaderImage()
 
-        // Coluna que contém o conteúdo principal abaixo do cabeçalho
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -136,7 +135,7 @@ fun WelcomeScreen(
                         textAlign = TextAlign.Justify
                     )
 
-                    Spacer(modifier = Modifier.height(16.dp)) // Espaçamento vertical
+                    Spacer(modifier = Modifier.height(16.dp))
 
                     // Título para a seção de imagens
                     Text(
@@ -144,7 +143,7 @@ fun WelcomeScreen(
                         style = MaterialTheme.typography.titleSmall
                     )
 
-                    Spacer(modifier = Modifier.height(8.dp)) // Espaçamento vertical
+                    Spacer(modifier = Modifier.height(8.dp))
 
                     // Linha horizontal com imagens do tour, que podem ser clicadas para ampliar
                     Row(
@@ -210,7 +209,6 @@ fun WelcomeScreen(
                 )
             }
 
-            // Texto "Ler mais" com estilo sublinhado que abre o diálogo dos termos quando clicado
             Text(
                 text = "Ler mais",
                 color = MaterialTheme.colorScheme.tertiary,
@@ -229,6 +227,7 @@ fun WelcomeScreen(
                         Text(text = "Termos de Uso")
                     },
                     text = {
+
                         // Conteúdo longo dos termos com scroll vertical
                         Column(
                             modifier = Modifier
@@ -238,6 +237,7 @@ fun WelcomeScreen(
                                 .padding(16.dp),
                             horizontalAlignment = Alignment.Start
                         ) {
+
                             // Título principal dos termos
                             Text(
                                 text = "Termos e Condições de Uso – SuperID",
@@ -435,13 +435,13 @@ fun WelcomeScreen(
                 )
             }
 
-            // Botão "Continuar" que só está habilitado se os termos foram aceitos
+            // Botão que só é habilitado se os termos de uso forem aceitos
             Button(
                 onClick = {
                     if (!termosAceitos) {
                         Toast.makeText(context, "Por favor, aceite os termos de uso para continuar.", Toast.LENGTH_SHORT).show()
                     } else {
-                        onContinue()  // Chama o callback para avançar
+                        onContinue()  // Se os termos já estiverem aceitos, chama o callback para avançar
                     }
                 },
                 modifier = Modifier
