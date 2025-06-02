@@ -167,21 +167,18 @@ fun ConfirmPasswordDialog(
                 onClick = {
                     val uid = Firebase.auth.currentUser?.uid
                     if (uid != null) {
-                        checkEmailVerified(uid) { isVerified -> // passo uma lambda para onResult de checkEmailVerified
+                        checkEmailVerified(uid) { isVerified ->
                             if (isVerified) { reauthenticateUser(senha, context, onSuccess = {
-                                onConfirmed() // <- ativa o popup do QR Code
-                                onDismiss()  // <- fecha o popup atual
+                                onConfirmed()
+                                onDismiss()
                             }, onFailure = {
-                                senha = ""// limpa o campo de senha
+                                senha = ""
                             })
                             } else {
 
                                 resendVerificationEmail(context)
 
-                                Toast
-                                    .makeText(
-                                        context, "E-mail não confirmado. Verifique sua caixa de entrada.",
-                                        Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "E-mail não confirmado. Verifique sua caixa de entrada.",Toast.LENGTH_SHORT).show()
                             }
                         }
                     }
@@ -201,12 +198,11 @@ fun ConfirmPasswordDialog(
             Column(
                 modifier = Modifier.fillMaxWidth()
             ) {
-                // Campo de exibição do email (desabilitado apenas para mostrar o valor)
                 CustomOutlinedTextField(
                     value = email,
                     onValueChange = {},
                     label = "Email",
-                    enabled = false // campo somente leitura
+                    enabled = false
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -232,7 +228,7 @@ fun ConfirmPasswordDialog(
     )
 }
 
-
+// Função que exibe um pop-up com todas as informações sobre a senha
 @Composable
 fun PasswordDetailDialog(
     item: SenhaItem,
@@ -240,9 +236,11 @@ fun PasswordDetailDialog(
     onPasswordRemoved: () -> Unit
 ) {
     val context = LocalContext.current
+
     var showRemovePopUp by remember { mutableStateOf(false) }
     var passwordVisible by remember { mutableStateOf(false) }
 
+    // Abre o pop-up com detalhes da senha
     Dialog(onDismissRequest = onDismiss) {
         Surface(
             shape = RoundedCornerShape(16.dp),
@@ -250,10 +248,12 @@ fun PasswordDetailDialog(
             color = MaterialTheme.colorScheme.background
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
+
+                // Botão de voltar
                 BackButtonBar(onBackClick = onDismiss)
 
+                // Campo do login
                 Column(modifier = Modifier.padding(16.dp)) {
-                    // --- Campo de Login (mantido igual) ---
                     Text("Login:", fontWeight = FontWeight.Bold)
                     StandardBoxPopUp {
                         Text(
@@ -268,32 +268,45 @@ fun PasswordDetailDialog(
 
                     Spacer(Modifier.height(12.dp))
 
-
+                    // Campo da senha
                     Text("Senha:", fontWeight = FontWeight.Bold)
                     StandardBoxPopUp {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                // Padding vertical menor: 4.dp ao invés de 8.dp
                                 .padding(horizontal = 12.dp, vertical = 4.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
+
+                            // Ocultação e exibição de senha
                             Text(
-                                text = if (passwordVisible) item.senha else "•".repeat(item.senha.length),
+
+                                // Se passwordVisible == true, mostre a senha real; caso contrário, mostre tantos “•” quantos caracteres tiver a senha
+                                text = if (passwordVisible)
+                                    item.senha
+                                else
+                                    "•".repeat(item.senha.length),
                                 modifier = Modifier
                                     .weight(1f)
                                     .padding(start = 4.dp),
                                 fontSize = 16.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
+
+                            // Ícone de olho que alterna entre mostrar e ocultar a senha
                             IconButton(
                                 onClick = { passwordVisible = !passwordVisible },
-                                modifier = Modifier.size(20.dp) // ícone um pouco menor
+                                modifier = Modifier.size(20.dp)
                             ) {
                                 Icon(
                                     imageVector = if (passwordVisible)
-                                        Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                                    contentDescription = if (passwordVisible) "Ocultar senha" else "Mostrar senha",
+                                        Icons.Default.Visibility // Senha visível
+                                    else
+                                        Icons.Default.VisibilityOff, // Senha não é visível
+                                    contentDescription = if (passwordVisible)
+                                        "Ocultar senha"
+                                    else
+                                        "Mostrar senha",
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.size(16.dp)
                                 )
@@ -303,7 +316,7 @@ fun PasswordDetailDialog(
 
                     Spacer(Modifier.height(12.dp))
 
-
+                    // Campo da descrição
                     Text("Descrição:", fontWeight = FontWeight.Bold)
                     StandardBoxPopUp {
                         Text(
@@ -318,7 +331,7 @@ fun PasswordDetailDialog(
 
                     Spacer(Modifier.height(12.dp))
 
-
+                    // Campo da categoria
                     Text("Categoria:", fontWeight = FontWeight.Bold)
                     StandardBoxPopUp {
                         Text(
@@ -333,11 +346,12 @@ fun PasswordDetailDialog(
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
+
+                        // Botão para alterar a senha
                         Button(
                             onClick = {
                                 val intent = Intent(context, ChangePasswordActivity::class.java).apply {
@@ -357,6 +371,7 @@ fun PasswordDetailDialog(
                             Text("Alterar")
                         }
 
+                        // Botão para remover a senha
                         Button(
                             onClick = { showRemovePopUp = true },
                             colors = ButtonDefaults.buttonColors(
@@ -367,11 +382,13 @@ fun PasswordDetailDialog(
                         }
                     }
 
-                    // Diálogo interno de confirmação de remoção
+                    // Diálogo de confirmação de remoção
                     if (showRemovePopUp) {
                         RemovePasswordDialog(
                             item = item,
-                            onDismiss = { showRemovePopUp = false },
+                            onDismiss = {
+                                showRemovePopUp = false
+                            },
                             onSuccess = {
                                 showRemovePopUp = false
                                 onDismiss()
@@ -388,4 +405,3 @@ fun PasswordDetailDialog(
         }
     }
 }
-
