@@ -434,7 +434,6 @@ fun WelcomeScreen(
                     }
                 )
             }
-
             // Botão que só é habilitado se os termos de uso forem aceitos
             Button(
                 onClick = {
