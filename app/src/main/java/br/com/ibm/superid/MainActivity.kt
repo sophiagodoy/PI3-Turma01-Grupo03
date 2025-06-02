@@ -542,17 +542,20 @@ fun CategoryCard(
 
     Spacer(modifier = Modifier.height(16.dp))
 
-    // --- CABEÇALHO DA CATEGORIA (fundo = primary, mesmo verde do botão) ---
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(5.dp),
         colors = CardDefaults.cardColors(
-            // Aqui usamos a cor primary do seu tema
-            containerColor = MaterialTheme.colorScheme.primary
+            // Cor do card muda se estiver expandido para dar destaque visual
+            containerColor = if (expanded) {
+                MaterialTheme.colorScheme.surfaceVariant
+            } else {
+                MaterialTheme.colorScheme.outlineVariant
+            }
         )
     ) {
         Column {
-            // Linha clicável do cabeçalho (título + ícone)
+            // Cabeçalho da categoria que é clicável para expandir/recolher
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -561,78 +564,65 @@ fun CategoryCard(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
+                // Título da categoria em fonte grande e negrito
                 Text(
                     text = title,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    // Texto em onPrimary para contrastar sobre primary
-                    color = MaterialTheme.colorScheme.onPrimary
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Row {
+                    // Ícone para expandir/recolher a lista
                     IconButton(onClick = { onExpandToggle() }) {
                         Icon(
-                            imageVector = if (expanded)
-                                Icons.Default.KeyboardArrowUp
-                            else
-                                Icons.Default.KeyboardArrowDown,
-                            contentDescription = if (expanded) "Recolher" else "Expandir",
-                            tint = MaterialTheme.colorScheme.onPrimary
+                            imageVector = if (expanded) Icons.Default.KeyboardArrowUp
+                            else Icons.Default.KeyboardArrowDown,
+                            contentDescription = null
                         )
                     }
                     if (title != "Sites Web") {
                         IconButton(
                             onClick = { showDeleteConfirmation = true },
+                            // Desabilita exclusão para a categoria padrão "Sites Web"
                             enabled = title != "Sites Web",
                             modifier = Modifier.padding(start = 8.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.Delete,
                                 contentDescription = "Excluir Categoria",
-                                tint = MaterialTheme.colorScheme.onPrimary
+                                // Cor fixa de erro para o ícone de excluir
+                                tint = MaterialTheme.colorScheme.error
                             )
                         }
                     }
                 }
             }
 
-            // --- LISTA DE SENHAS (quando expanded == true) ---
+            // Se estiver expandido, lista as senhas da categoria como texto clicável
             if (expanded) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        // Mantém o fundo claro (surfaceVariant) que você já gosta
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
-                ) {
-                    items.forEach { item ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { onItemClick(item) }
-                                .padding(horizontal = 30.dp, vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = item.titulo,
-                                fontSize = 23.sp,
-                                modifier = Modifier.weight(1f),
-                                // Texto em onSurfaceVariant para legibilidade sobre surfaceVariant
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Icon(
-                                imageVector = Icons.Default.MoreVert,
-                                contentDescription = "Mais opções de senha",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
+                items.forEach { item ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onItemClick(item) } // ao clicar abre detalhe da senha
+                            .padding(horizontal = 30.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = item.titulo,
+                            fontSize = 23.sp,
+                            modifier = Modifier.weight(1f) // ocupa o espaço restante
+                        )
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = "Mais opções de senha"
+                        )
                     }
                 }
             }
         }
     }
 }
-
-
-
 
 // Modelo de dados para representar uma senha
 data class SenhaItem(
